@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
@@ -15,13 +16,13 @@ public class Bola {
     private static final String LIST_COMMAND = "list";
     private static final String MARK_COMMAND = "mark";
     private static final String UNMARK_COMMAND = "unmark";
+    private static final String DELETE_COMMAND = "delete";
     private static final String TODO_COMMAND = "todo";
     private static final String DEADLINE_COMMAND = "deadline";
     private static final String EVENT_COMMAND = "event";
     private static final String BY_SEPARATOR = " /by";
     private static final String FROM_SEPARATOR = " /from";
     private static final String TO_SEPARATOR = " /to";
-    private static final int MAX_TASKS = 100;
 
     /**
      * Displays Bola's greeting and responds to commands until the user enters {@code bye}.
@@ -42,8 +43,7 @@ public class Bola {
         System.out.println(RESPONSE_DIVIDER);
 
         Scanner scanner = new Scanner(System.in);
-        Task[] tasks = new Task[MAX_TASKS];
-        int taskCount = 0;
+        ArrayList<Task> tasks = new ArrayList<>();
 
         while (scanner.hasNextLine()) {
             String command = scanner.nextLine().strip();
@@ -57,27 +57,30 @@ public class Bola {
             try {
                 if (command.equals(LIST_COMMAND)) {
                     System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS + "Here's your list ~");
-                    for (int i = 0; i < taskCount; i++) {
-                        System.out.println(RESPONSE_INDENT + "    " + (i + 1) + ". " + tasks[i]);
+                    for (int i = 0; i < tasks.size(); i++) {
+                        System.out.println(RESPONSE_INDENT + "    " + (i + 1) + ". " + tasks.get(i));
                     }
                 } else if (isCommand(command, MARK_COMMAND)) {
-                    int taskIndex = getTaskIndex(command, MARK_COMMAND, taskCount);
-                    tasks[taskIndex].markAsDone();
+                    int taskIndex = getTaskIndex(command, MARK_COMMAND, tasks.size());
+                    tasks.get(taskIndex).markAsDone();
                     System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
                             + "Nice! I've marked this task as done.");
-                    System.out.println(RESPONSE_INDENT + "    " + tasks[taskIndex]);
+                    System.out.println(RESPONSE_INDENT + "    " + tasks.get(taskIndex));
                 } else if (isCommand(command, UNMARK_COMMAND)) {
-                    int taskIndex = getTaskIndex(command, UNMARK_COMMAND, taskCount);
-                    tasks[taskIndex].markAsNotDone();
+                    int taskIndex = getTaskIndex(command, UNMARK_COMMAND, tasks.size());
+                    tasks.get(taskIndex).markAsNotDone();
                     System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
                             + "Okay, I've marked this task as not done.");
-                    System.out.println(RESPONSE_INDENT + "    " + tasks[taskIndex]);
+                    System.out.println(RESPONSE_INDENT + "    " + tasks.get(taskIndex));
+                } else if (isCommand(command, DELETE_COMMAND)) {
+                    int taskIndex = getTaskIndex(command, DELETE_COMMAND, tasks.size());
+                    Task removedTask = tasks.remove(taskIndex);
+                    printTaskDeleted(removedTask, tasks.size());
                 } else if (isCommand(command, TODO_COMMAND)) {
                     String description = getDescription(command, TODO_COMMAND, "ToDo");
-                    ensureTaskCanBeAdded(taskCount);
-                    tasks[taskCount] = new Todo(description);
-                    taskCount++;
-                    printTaskAdded(tasks[taskCount - 1], taskCount);
+                    Task task = new Todo(description);
+                    tasks.add(task);
+                    printTaskAdded(task, tasks.size());
                 } else if (isCommand(command, DEADLINE_COMMAND)) {
                     String taskDetails = command.substring(DEADLINE_COMMAND.length()).strip();
                     if (taskDetails.isEmpty() || taskDetails.startsWith("/by")) {
@@ -97,10 +100,9 @@ public class Bola {
                         throw new BolaException(
                                 "When's your deadline for this task? (Please indicate with /by)");
                     }
-                    ensureTaskCanBeAdded(taskCount);
-                    tasks[taskCount] = new Deadline(description, by);
-                    taskCount++;
-                    printTaskAdded(tasks[taskCount - 1], taskCount);
+                    Task task = new Deadline(description, by);
+                    tasks.add(task);
+                    printTaskAdded(task, tasks.size());
                 } else if (isCommand(command, EVENT_COMMAND)) {
                     String taskDetails = command.substring(EVENT_COMMAND.length()).strip();
                     if (taskDetails.isEmpty() || taskDetails.startsWith("/from")) {
@@ -124,10 +126,9 @@ public class Bola {
                         throw new BolaException(
                                 "When's this event happening? (Please indicate with /from and /to)");
                     }
-                    ensureTaskCanBeAdded(taskCount);
-                    tasks[taskCount] = new Event(description, from, to);
-                    taskCount++;
-                    printTaskAdded(tasks[taskCount - 1], taskCount);
+                    Task task = new Event(description, from, to);
+                    tasks.add(task);
+                    printTaskAdded(task, tasks.size());
                 } else {
                     throw new BolaException("Hmm?");
                 }
@@ -168,12 +169,12 @@ public class Bola {
     }
 
     /**
-     * Extracts and validates the one-based task number in a mark or unmark command.
+     * Extracts and validates the one-based task number in a command that targets a task.
      *
      * @param input complete user input
-     * @param command mark or unmark command keyword
+     * @param command command keyword, such as {@code mark}, {@code unmark}, or {@code delete}
      * @param taskCount number of tasks currently stored
-     * @return the corresponding zero-based array index
+     * @return the corresponding zero-based list index
      * @throws BolaException if the task number is missing, non-numeric, or out of range
      */
     private static int getTaskIndex(String input, String command, int taskCount)
@@ -195,18 +196,6 @@ public class Bola {
     }
 
     /**
-     * Ensures the fixed-size task list still has room for another task.
-     *
-     * @param taskCount number of tasks currently stored
-     * @throws BolaException if the task list has reached its capacity
-     */
-    private static void ensureTaskCanBeAdded(int taskCount) throws BolaException {
-        if (taskCount >= MAX_TASKS) {
-            throw new BolaException("Your task list is full, so I can't add another task.");
-        }
-    }
-
-    /**
      * Prints a confirmation after a task has been added.
      *
      * @param task task that was added
@@ -215,6 +204,31 @@ public class Bola {
     private static void printTaskAdded(Task task, int taskCount) {
         System.out.println(RESPONSE_INDENT + "Bola added:");
         System.out.println(RESPONSE_INDENT + "    " + task);
-        System.out.println(RESPONSE_INDENT + "There are now " + taskCount + " tasks in your list!");
+        printTaskCount(taskCount);
+    }
+
+    /**
+     * Prints the removed task and the grammatically correct number of remaining tasks.
+     *
+     * @param task task that was removed
+     * @param taskCount number of tasks remaining
+     */
+    private static void printTaskDeleted(Task task, int taskCount) {
+        System.out.println(RESPONSE_INDENT + "Bola removed:");
+        System.out.println(RESPONSE_INDENT + "    " + task);
+        printTaskCount(taskCount);
+    }
+
+    /**
+     * Prints the task count using singular wording only when exactly one task remains.
+     *
+     * @param taskCount number of tasks currently stored
+     */
+    private static void printTaskCount(int taskCount) {
+        if (taskCount == 1) {
+            System.out.println(RESPONSE_INDENT + "There is now 1 task in your list!");
+        } else {
+            System.out.println(RESPONSE_INDENT + "There are now " + taskCount + " tasks in your list!");
+        }
     }
 }
