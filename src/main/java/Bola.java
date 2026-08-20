@@ -1,7 +1,7 @@
 import java.util.Scanner;
 
 /**
- * Greets the user, echoes commands, and says goodbye when the user exits.
+ * Stores tasks entered by the user, lists them on request, and says goodbye on exit.
  */
 public class Bola {
     private static final String ORANGE_TEXT = "\u001B[38;2;217;72;0m";
@@ -11,6 +11,8 @@ public class Bola {
     private static final String RESPONSE_INDENT = "     ";
     private static final String RESPONSE_ADDRESS = "Bola: ";
     private static final String EXIT_COMMAND = "bye";
+    private static final String LIST_COMMAND = "list";
+    private static final int MAX_TASKS = 100;
 
     /**
      * Displays Bola's greeting and responds to commands until the user enters {@code bye}.
@@ -31,6 +33,9 @@ public class Bola {
         System.out.println(RESPONSE_DIVIDER);
 
         Scanner scanner = new Scanner(System.in);
+        String[] tasks = new String[MAX_TASKS];
+        int taskCount = 0;
+
         while (scanner.hasNextLine()) {
             String command = scanner.nextLine();
 
@@ -41,7 +46,16 @@ public class Bola {
                 break;
             }
 
-            System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS + command);
+            if (command.equals(LIST_COMMAND)) {
+                System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS);
+                for (int i = 0; i < taskCount; i++) {
+                    System.out.println(RESPONSE_INDENT + "    " + (i + 1) + ". " + tasks[i]);
+                }
+            } else {
+                tasks[taskCount] = command;
+                taskCount++;
+                System.out.println(RESPONSE_INDENT + "Bola added: " + command);
+            }
             System.out.println(RESPONSE_DIVIDER);
         }
     }
