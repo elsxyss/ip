@@ -10,16 +10,17 @@ public class Bola {
     private static final String RESPONSE_DIVIDER = "    ____________________________________________________________";
     private static final String RESPONSE_INDENT = "     ";
     private static final String RESPONSE_ADDRESS = "Bola: ";
+    private static final String ERROR_ADDRESS = "Bola doesn't understand: ";
     private static final String EXIT_COMMAND = "bye";
     private static final String LIST_COMMAND = "list";
-    private static final String MARK_COMMAND = "mark ";
-    private static final String UNMARK_COMMAND = "unmark ";
-    private static final String TODO_COMMAND = "todo ";
-    private static final String DEADLINE_COMMAND = "deadline ";
-    private static final String EVENT_COMMAND = "event ";
-    private static final String BY_SEPARATOR = " /by ";
-    private static final String FROM_SEPARATOR = " /from ";
-    private static final String TO_SEPARATOR = " /to ";
+    private static final String MARK_COMMAND = "mark";
+    private static final String UNMARK_COMMAND = "unmark";
+    private static final String TODO_COMMAND = "todo";
+    private static final String DEADLINE_COMMAND = "deadline";
+    private static final String EVENT_COMMAND = "event";
+    private static final String BY_SEPARATOR = " /by";
+    private static final String FROM_SEPARATOR = " /from";
+    private static final String TO_SEPARATOR = " /to";
     private static final int MAX_TASKS = 100;
 
     /**
@@ -45,55 +46,163 @@ public class Bola {
         int taskCount = 0;
 
         while (scanner.hasNextLine()) {
-            String command = scanner.nextLine();
+            String command = scanner.nextLine().strip();
 
-            System.out.println(RESPONSE_DIVIDER);
             if (command.equals(EXIT_COMMAND)) {
                 System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS + "See you again soon! Bye ~");
                 System.out.println(OUTER_DIVIDER);
                 break;
             }
 
-            if (command.equals(LIST_COMMAND)) {
-                System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS + "Here's your list ~");
-                for (int i = 0; i < taskCount; i++) {
-                    System.out.println(RESPONSE_INDENT + "    " + (i + 1) + ". " + tasks[i]);
+            try {
+                if (command.equals(LIST_COMMAND)) {
+                    System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS + "Here's your list ~");
+                    for (int i = 0; i < taskCount; i++) {
+                        System.out.println(RESPONSE_INDENT + "    " + (i + 1) + ". " + tasks[i]);
+                    }
+                } else if (isCommand(command, MARK_COMMAND)) {
+                    int taskIndex = getTaskIndex(command, MARK_COMMAND, taskCount);
+                    tasks[taskIndex].markAsDone();
+                    System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
+                            + "Nice! I've marked this task as done.");
+                    System.out.println(RESPONSE_INDENT + "    " + tasks[taskIndex]);
+                } else if (isCommand(command, UNMARK_COMMAND)) {
+                    int taskIndex = getTaskIndex(command, UNMARK_COMMAND, taskCount);
+                    tasks[taskIndex].markAsNotDone();
+                    System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
+                            + "Okay, I've marked this task as not done.");
+                    System.out.println(RESPONSE_INDENT + "    " + tasks[taskIndex]);
+                } else if (isCommand(command, TODO_COMMAND)) {
+                    String description = getDescription(command, TODO_COMMAND, "ToDo");
+                    ensureTaskCanBeAdded(taskCount);
+                    tasks[taskCount] = new Todo(description);
+                    taskCount++;
+                    printTaskAdded(tasks[taskCount - 1], taskCount);
+                } else if (isCommand(command, DEADLINE_COMMAND)) {
+                    String taskDetails = command.substring(DEADLINE_COMMAND.length()).strip();
+                    if (taskDetails.isEmpty() || taskDetails.startsWith("/by")) {
+                        throw new BolaException("What shall I add as your Deadline task?");
+                    }
+                    int bySeparatorIndex = taskDetails.indexOf(BY_SEPARATOR);
+                    if (bySeparatorIndex < 0) {
+                        throw new BolaException(
+                                "When's your deadline for this task? (Please indicate with /by)");
+                    }
+                    String description = taskDetails.substring(0, bySeparatorIndex).strip();
+                    String by = taskDetails.substring(bySeparatorIndex + BY_SEPARATOR.length()).strip();
+                    if (description.isEmpty()) {
+                        throw new BolaException("What shall I add as your Deadline task?");
+                    }
+                    if (by.isEmpty()) {
+                        throw new BolaException(
+                                "When's your deadline for this task? (Please indicate with /by)");
+                    }
+                    ensureTaskCanBeAdded(taskCount);
+                    tasks[taskCount] = new Deadline(description, by);
+                    taskCount++;
+                    printTaskAdded(tasks[taskCount - 1], taskCount);
+                } else if (isCommand(command, EVENT_COMMAND)) {
+                    String taskDetails = command.substring(EVENT_COMMAND.length()).strip();
+                    if (taskDetails.isEmpty() || taskDetails.startsWith("/from")) {
+                        throw new BolaException("What shall I add as your Event task?");
+                    }
+                    int fromSeparatorIndex = taskDetails.indexOf(FROM_SEPARATOR);
+                    int toSeparatorIndex = taskDetails.indexOf(TO_SEPARATOR,
+                            Math.max(0, fromSeparatorIndex + FROM_SEPARATOR.length()));
+                    if (fromSeparatorIndex < 0 || toSeparatorIndex < 0) {
+                        throw new BolaException(
+                                "When's this event happening? (Please indicate with /from and /to)");
+                    }
+                    String description = taskDetails.substring(0, fromSeparatorIndex).strip();
+                    String from = taskDetails.substring(
+                            fromSeparatorIndex + FROM_SEPARATOR.length(), toSeparatorIndex).strip();
+                    String to = taskDetails.substring(toSeparatorIndex + TO_SEPARATOR.length()).strip();
+                    if (description.isEmpty()) {
+                        throw new BolaException("What shall I add as your Event task?");
+                    }
+                    if (from.isEmpty() || to.isEmpty()) {
+                        throw new BolaException(
+                                "When's this event happening? (Please indicate with /from and /to)");
+                    }
+                    ensureTaskCanBeAdded(taskCount);
+                    tasks[taskCount] = new Event(description, from, to);
+                    taskCount++;
+                    printTaskAdded(tasks[taskCount - 1], taskCount);
+                } else {
+                    throw new BolaException("Hmm?");
                 }
-            } else if (command.startsWith(MARK_COMMAND)) {
-                int taskIndex = Integer.parseInt(command.substring(MARK_COMMAND.length())) - 1;
-                tasks[taskIndex].markAsDone();
-                System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
-                        + "Nice! I've marked this task as done.");
-                System.out.println(RESPONSE_INDENT + "    " + tasks[taskIndex]);
-            } else if (command.startsWith(UNMARK_COMMAND)) {
-                int taskIndex = Integer.parseInt(command.substring(UNMARK_COMMAND.length())) - 1;
-                tasks[taskIndex].markAsNotDone();
-                System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
-                        + "Okay, I've marked this task as not done.");
-                System.out.println(RESPONSE_INDENT + "    " + tasks[taskIndex]);
-            } else if (command.startsWith(TODO_COMMAND)) {
-                String description = command.substring(TODO_COMMAND.length());
-                tasks[taskCount] = new Todo(description);
-                taskCount++;
-                printTaskAdded(tasks[taskCount - 1], taskCount);
-            } else if (command.startsWith(DEADLINE_COMMAND)) {
-                int bySeparatorIndex = command.indexOf(BY_SEPARATOR);
-                String description = command.substring(DEADLINE_COMMAND.length(), bySeparatorIndex);
-                String by = command.substring(bySeparatorIndex + BY_SEPARATOR.length());
-                tasks[taskCount] = new Deadline(description, by);
-                taskCount++;
-                printTaskAdded(tasks[taskCount - 1], taskCount);
-            } else if (command.startsWith(EVENT_COMMAND)) {
-                int fromSeparatorIndex = command.indexOf(FROM_SEPARATOR);
-                int toSeparatorIndex = command.indexOf(TO_SEPARATOR, fromSeparatorIndex + FROM_SEPARATOR.length());
-                String description = command.substring(EVENT_COMMAND.length(), fromSeparatorIndex);
-                String from = command.substring(fromSeparatorIndex + FROM_SEPARATOR.length(), toSeparatorIndex);
-                String to = command.substring(toSeparatorIndex + TO_SEPARATOR.length());
-                tasks[taskCount] = new Event(description, from, to);
-                taskCount++;
-                printTaskAdded(tasks[taskCount - 1], taskCount);
+            } catch (BolaException exception) {
+                System.out.println(RESPONSE_INDENT + ERROR_ADDRESS + exception.getMessage());
             }
             System.out.println(RESPONSE_DIVIDER);
+        }
+    }
+
+    /**
+     * Returns whether the input is a command keyword, optionally followed by arguments.
+     *
+     * @param input complete user input
+     * @param command command keyword to match
+     * @return true if the input invokes the command
+     */
+    private static boolean isCommand(String input, String command) {
+        return input.equals(command) || input.startsWith(command + " ");
+    }
+
+    /**
+     * Extracts a required task description from a task command.
+     *
+     * @param input complete user input
+     * @param command task command keyword
+     * @param taskType task type used in the error message
+     * @return the non-empty task description
+     * @throws BolaException if no description was supplied
+     */
+    private static String getDescription(String input, String command, String taskType)
+            throws BolaException {
+        String description = input.substring(command.length()).strip();
+        if (description.isEmpty()) {
+            throw new BolaException("What shall I add as your " + taskType + " task?");
+        }
+        return description;
+    }
+
+    /**
+     * Extracts and validates the one-based task number in a mark or unmark command.
+     *
+     * @param input complete user input
+     * @param command mark or unmark command keyword
+     * @param taskCount number of tasks currently stored
+     * @return the corresponding zero-based array index
+     * @throws BolaException if the task number is missing, non-numeric, or out of range
+     */
+    private static int getTaskIndex(String input, String command, int taskCount)
+            throws BolaException {
+        String taskNumber = input.substring(command.length()).strip();
+        if (taskNumber.isEmpty()) {
+            throw new BolaException("Which task number shall I " + command + "?");
+        }
+
+        try {
+            int taskIndex = Integer.parseInt(taskNumber) - 1;
+            if (taskIndex < 0 || taskIndex >= taskCount) {
+                throw new BolaException("There is no task numbered " + taskNumber + ".");
+            }
+            return taskIndex;
+        } catch (NumberFormatException exception) {
+            throw new BolaException("Please enter a valid task number to " + command + ".");
+        }
+    }
+
+    /**
+     * Ensures the fixed-size task list still has room for another task.
+     *
+     * @param taskCount number of tasks currently stored
+     * @throws BolaException if the task list has reached its capacity
+     */
+    private static void ensureTaskCanBeAdded(int taskCount) throws BolaException {
+        if (taskCount >= MAX_TASKS) {
+            throw new BolaException("Your task list is full, so I can't add another task.");
         }
     }
 
