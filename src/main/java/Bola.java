@@ -14,6 +14,12 @@ public class Bola {
     private static final String LIST_COMMAND = "list";
     private static final String MARK_COMMAND = "mark ";
     private static final String UNMARK_COMMAND = "unmark ";
+    private static final String TODO_COMMAND = "todo ";
+    private static final String DEADLINE_COMMAND = "deadline ";
+    private static final String EVENT_COMMAND = "event ";
+    private static final String BY_SEPARATOR = " /by ";
+    private static final String FROM_SEPARATOR = " /from ";
+    private static final String TO_SEPARATOR = " /to ";
     private static final int MAX_TASKS = 100;
 
     /**
@@ -65,12 +71,41 @@ public class Bola {
                 System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
                         + "Okay, I've marked this task as not done.");
                 System.out.println(RESPONSE_INDENT + "    " + tasks[taskIndex]);
-            } else {
-                tasks[taskCount] = new Task(command);
+            } else if (command.startsWith(TODO_COMMAND)) {
+                String description = command.substring(TODO_COMMAND.length());
+                tasks[taskCount] = new Todo(description);
                 taskCount++;
-                System.out.println(RESPONSE_INDENT + "Bola added: " + command);
+                printTaskAdded(tasks[taskCount - 1], taskCount);
+            } else if (command.startsWith(DEADLINE_COMMAND)) {
+                int bySeparatorIndex = command.indexOf(BY_SEPARATOR);
+                String description = command.substring(DEADLINE_COMMAND.length(), bySeparatorIndex);
+                String by = command.substring(bySeparatorIndex + BY_SEPARATOR.length());
+                tasks[taskCount] = new Deadline(description, by);
+                taskCount++;
+                printTaskAdded(tasks[taskCount - 1], taskCount);
+            } else if (command.startsWith(EVENT_COMMAND)) {
+                int fromSeparatorIndex = command.indexOf(FROM_SEPARATOR);
+                int toSeparatorIndex = command.indexOf(TO_SEPARATOR, fromSeparatorIndex + FROM_SEPARATOR.length());
+                String description = command.substring(EVENT_COMMAND.length(), fromSeparatorIndex);
+                String from = command.substring(fromSeparatorIndex + FROM_SEPARATOR.length(), toSeparatorIndex);
+                String to = command.substring(toSeparatorIndex + TO_SEPARATOR.length());
+                tasks[taskCount] = new Event(description, from, to);
+                taskCount++;
+                printTaskAdded(tasks[taskCount - 1], taskCount);
             }
             System.out.println(RESPONSE_DIVIDER);
         }
+    }
+
+    /**
+     * Prints a confirmation after a task has been added.
+     *
+     * @param task task that was added
+     * @param taskCount number of tasks currently stored
+     */
+    private static void printTaskAdded(Task task, int taskCount) {
+        System.out.println(RESPONSE_INDENT + "Bola added:");
+        System.out.println(RESPONSE_INDENT + "    " + task);
+        System.out.println(RESPONSE_INDENT + "There are now " + taskCount + " tasks in your list!");
     }
 }
