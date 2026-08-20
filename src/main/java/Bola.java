@@ -12,6 +12,8 @@ public class Bola {
     private static final String RESPONSE_ADDRESS = "Bola: ";
     private static final String EXIT_COMMAND = "bye";
     private static final String LIST_COMMAND = "list";
+    private static final String MARK_COMMAND = "mark ";
+    private static final String UNMARK_COMMAND = "unmark ";
     private static final int MAX_TASKS = 100;
 
     /**
@@ -33,7 +35,7 @@ public class Bola {
         System.out.println(RESPONSE_DIVIDER);
 
         Scanner scanner = new Scanner(System.in);
-        String[] tasks = new String[MAX_TASKS];
+        Task[] tasks = new Task[MAX_TASKS];
         int taskCount = 0;
 
         while (scanner.hasNextLine()) {
@@ -47,12 +49,24 @@ public class Bola {
             }
 
             if (command.equals(LIST_COMMAND)) {
-                System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS);
+                System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS + "Here's your list ~");
                 for (int i = 0; i < taskCount; i++) {
                     System.out.println(RESPONSE_INDENT + "    " + (i + 1) + ". " + tasks[i]);
                 }
+            } else if (command.startsWith(MARK_COMMAND)) {
+                int taskIndex = Integer.parseInt(command.substring(MARK_COMMAND.length())) - 1;
+                tasks[taskIndex].markAsDone();
+                System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
+                        + "Nice! I've marked this task as done.");
+                System.out.println(RESPONSE_INDENT + "    " + tasks[taskIndex]);
+            } else if (command.startsWith(UNMARK_COMMAND)) {
+                int taskIndex = Integer.parseInt(command.substring(UNMARK_COMMAND.length())) - 1;
+                tasks[taskIndex].markAsNotDone();
+                System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
+                        + "Okay, I've marked this task as not done.");
+                System.out.println(RESPONSE_INDENT + "    " + tasks[taskIndex]);
             } else {
-                tasks[taskCount] = command;
+                tasks[taskCount] = new Task(command);
                 taskCount++;
                 System.out.println(RESPONSE_INDENT + "Bola added: " + command);
             }
