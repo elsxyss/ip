@@ -12,14 +12,6 @@ public class Bola {
     private static final String RESPONSE_INDENT = "     ";
     private static final String RESPONSE_ADDRESS = "Bola: ";
     private static final String ERROR_ADDRESS = "Bola doesn't understand: ";
-    private static final String EXIT_COMMAND = "bye";
-    private static final String LIST_COMMAND = "list";
-    private static final String MARK_COMMAND = "mark";
-    private static final String UNMARK_COMMAND = "unmark";
-    private static final String DELETE_COMMAND = "delete";
-    private static final String TODO_COMMAND = "todo";
-    private static final String DEADLINE_COMMAND = "deadline";
-    private static final String EVENT_COMMAND = "event";
     private static final String BY_SEPARATOR = " /by";
     private static final String FROM_SEPARATOR = " /from";
     private static final String TO_SEPARATOR = " /to";
@@ -48,89 +40,55 @@ public class Bola {
         while (scanner.hasNextLine()) {
             String command = scanner.nextLine().strip();
 
-            if (command.equals(EXIT_COMMAND)) {
-                System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS + "See you again soon! Bye ~");
-                System.out.println(OUTER_DIVIDER);
-                break;
-            }
-
             try {
-                if (command.equals(LIST_COMMAND)) {
+                CommandType commandType = CommandType.fromInput(command)
+                        .orElseThrow(() -> new BolaException("Hmm?"));
+
+                switch (commandType) {
+                case BYE:
+                    System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
+                            + "See you again soon! Bye ~");
+                    System.out.println(OUTER_DIVIDER);
+                    return;
+                case LIST:
                     System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS + "Here's your list ~");
                     for (int i = 0; i < tasks.size(); i++) {
                         System.out.println(RESPONSE_INDENT + "    " + (i + 1) + ". " + tasks.get(i));
                     }
-                } else if (isCommand(command, MARK_COMMAND)) {
-                    int taskIndex = getTaskIndex(command, MARK_COMMAND, tasks.size());
-                    tasks.get(taskIndex).markAsDone();
+                    break;
+                case MARK:
+                    int taskIndexToMark = getTaskIndex(command, commandType, tasks.size());
+                    tasks.get(taskIndexToMark).markAsDone();
                     System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
                             + "Nice! I've marked this task as done.");
-                    System.out.println(RESPONSE_INDENT + "    " + tasks.get(taskIndex));
-                } else if (isCommand(command, UNMARK_COMMAND)) {
-                    int taskIndex = getTaskIndex(command, UNMARK_COMMAND, tasks.size());
-                    tasks.get(taskIndex).markAsNotDone();
+                    System.out.println(RESPONSE_INDENT + "    " + tasks.get(taskIndexToMark));
+                    break;
+                case UNMARK:
+                    int taskIndexToUnmark = getTaskIndex(command, commandType, tasks.size());
+                    tasks.get(taskIndexToUnmark).markAsNotDone();
                     System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
                             + "Okay, I've marked this task as not done.");
-                    System.out.println(RESPONSE_INDENT + "    " + tasks.get(taskIndex));
-                } else if (isCommand(command, DELETE_COMMAND)) {
-                    int taskIndex = getTaskIndex(command, DELETE_COMMAND, tasks.size());
-                    Task removedTask = tasks.remove(taskIndex);
+                    System.out.println(RESPONSE_INDENT + "    " + tasks.get(taskIndexToUnmark));
+                    break;
+                case DELETE:
+                    int taskIndexToDelete = getTaskIndex(command, commandType, tasks.size());
+                    Task removedTask = tasks.remove(taskIndexToDelete);
                     printTaskDeleted(removedTask, tasks.size());
-                } else if (isCommand(command, TODO_COMMAND)) {
-                    String description = getDescription(command, TODO_COMMAND, "ToDo");
-                    Task task = new Todo(description);
-                    tasks.add(task);
-                    printTaskAdded(task, tasks.size());
-                } else if (isCommand(command, DEADLINE_COMMAND)) {
-                    String taskDetails = command.substring(DEADLINE_COMMAND.length()).strip();
-                    if (taskDetails.isEmpty() || taskDetails.startsWith("/by")) {
-                        throw new BolaException("What shall I add as your Deadline task?");
-                    }
-                    int bySeparatorIndex = taskDetails.indexOf(BY_SEPARATOR);
-                    if (bySeparatorIndex < 0) {
-                        throw new BolaException(
-                                "When's your deadline for this task? (Please indicate with /by)");
-                    }
-                    String description = taskDetails.substring(0, bySeparatorIndex).strip();
-                    String by = taskDetails.substring(bySeparatorIndex + BY_SEPARATOR.length()).strip();
-                    if (description.isEmpty()) {
-                        throw new BolaException("What shall I add as your Deadline task?");
-                    }
-                    if (by.isEmpty()) {
-                        throw new BolaException(
-                                "When's your deadline for this task? (Please indicate with /by)");
-                    }
-                    Task task = new Deadline(description, by);
-                    tasks.add(task);
-                    printTaskAdded(task, tasks.size());
-                } else if (isCommand(command, EVENT_COMMAND)) {
-                    String taskDetails = command.substring(EVENT_COMMAND.length()).strip();
-                    if (taskDetails.isEmpty() || taskDetails.startsWith("/from")) {
-                        throw new BolaException("What shall I add as your Event task?");
-                    }
-                    int fromSeparatorIndex = taskDetails.indexOf(FROM_SEPARATOR);
-                    int toSeparatorIndex = taskDetails.indexOf(TO_SEPARATOR,
-                            Math.max(0, fromSeparatorIndex + FROM_SEPARATOR.length()));
-                    if (fromSeparatorIndex < 0 || toSeparatorIndex < 0) {
-                        throw new BolaException(
-                                "When's this event happening? (Please indicate with /from and /to)");
-                    }
-                    String description = taskDetails.substring(0, fromSeparatorIndex).strip();
-                    String from = taskDetails.substring(
-                            fromSeparatorIndex + FROM_SEPARATOR.length(), toSeparatorIndex).strip();
-                    String to = taskDetails.substring(toSeparatorIndex + TO_SEPARATOR.length()).strip();
-                    if (description.isEmpty()) {
-                        throw new BolaException("What shall I add as your Event task?");
-                    }
-                    if (from.isEmpty() || to.isEmpty()) {
-                        throw new BolaException(
-                                "When's this event happening? (Please indicate with /from and /to)");
-                    }
-                    Task task = new Event(description, from, to);
-                    tasks.add(task);
-                    printTaskAdded(task, tasks.size());
-                } else {
-                    throw new BolaException("Hmm?");
+                    break;
+                case TODO:
+                    String description = getDescription(command, commandType, "ToDo");
+                    Task todo = new Todo(description);
+                    tasks.add(todo);
+                    printTaskAdded(todo, tasks.size());
+                    break;
+                case DEADLINE:
+                    addDeadline(command, commandType, tasks);
+                    break;
+                case EVENT:
+                    addEvent(command, commandType, tasks);
+                    break;
+                default:
+                    throw new AssertionError("Unhandled command type: " + commandType);
                 }
             } catch (BolaException exception) {
                 System.out.println(RESPONSE_INDENT + ERROR_ADDRESS + exception.getMessage());
@@ -140,27 +98,17 @@ public class Bola {
     }
 
     /**
-     * Returns whether the input is a command keyword, optionally followed by arguments.
-     *
-     * @param input complete user input
-     * @param command command keyword to match
-     * @return true if the input invokes the command
-     */
-    private static boolean isCommand(String input, String command) {
-        return input.equals(command) || input.startsWith(command + " ");
-    }
-
-    /**
      * Extracts a required task description from a task command.
      *
      * @param input complete user input
-     * @param command task command keyword
+     * @param commandType type of task command
      * @param taskType task type used in the error message
      * @return the non-empty task description
      * @throws BolaException if no description was supplied
      */
-    private static String getDescription(String input, String command, String taskType)
+    private static String getDescription(String input, CommandType commandType, String taskType)
             throws BolaException {
+        String command = commandType.getKeyword();
         String description = input.substring(command.length()).strip();
         if (description.isEmpty()) {
             throw new BolaException("What shall I add as your " + taskType + " task?");
@@ -172,13 +120,14 @@ public class Bola {
      * Extracts and validates the one-based task number in a command that targets a task.
      *
      * @param input complete user input
-     * @param command command keyword, such as {@code mark}, {@code unmark}, or {@code delete}
+     * @param commandType command type, such as {@link CommandType#MARK}
      * @param taskCount number of tasks currently stored
      * @return the corresponding zero-based list index
      * @throws BolaException if the task number is missing, non-numeric, or out of range
      */
-    private static int getTaskIndex(String input, String command, int taskCount)
+    private static int getTaskIndex(String input, CommandType commandType, int taskCount)
             throws BolaException {
+        String command = commandType.getKeyword();
         String taskNumber = input.substring(command.length()).strip();
         if (taskNumber.isEmpty()) {
             throw new BolaException("Which task number shall I " + command + "?");
@@ -193,6 +142,82 @@ public class Bola {
         } catch (NumberFormatException exception) {
             throw new BolaException("Please enter a valid task number to " + command + ".");
         }
+    }
+
+    /**
+     * Parses and adds a deadline task from a deadline command.
+     *
+     * @param input complete user input
+     * @param commandType deadline command type
+     * @param tasks list to which the new deadline is added
+     * @throws BolaException if the description or deadline is missing
+     */
+    private static void addDeadline(String input, CommandType commandType, ArrayList<Task> tasks)
+            throws BolaException {
+        String taskDetails = input.substring(commandType.getKeyword().length()).strip();
+        if (taskDetails.isEmpty() || taskDetails.startsWith("/by")) {
+            throw new BolaException("What shall I add as your Deadline task?");
+        }
+
+        int bySeparatorIndex = taskDetails.indexOf(BY_SEPARATOR);
+        if (bySeparatorIndex < 0) {
+            throw new BolaException(
+                    "When's your deadline for this task? (Please indicate with /by)");
+        }
+
+        String description = taskDetails.substring(0, bySeparatorIndex).strip();
+        String by = taskDetails.substring(bySeparatorIndex + BY_SEPARATOR.length()).strip();
+        if (description.isEmpty()) {
+            throw new BolaException("What shall I add as your Deadline task?");
+        }
+        if (by.isEmpty()) {
+            throw new BolaException(
+                    "When's your deadline for this task? (Please indicate with /by)");
+        }
+
+        Task deadline = new Deadline(description, by);
+        tasks.add(deadline);
+        printTaskAdded(deadline, tasks.size());
+    }
+
+    /**
+     * Parses and adds an event task from an event command.
+     *
+     * @param input complete user input
+     * @param commandType event command type
+     * @param tasks list to which the new event is added
+     * @throws BolaException if the description or time range is missing
+     */
+    private static void addEvent(String input, CommandType commandType, ArrayList<Task> tasks)
+            throws BolaException {
+        String taskDetails = input.substring(commandType.getKeyword().length()).strip();
+        if (taskDetails.isEmpty() || taskDetails.startsWith("/from")) {
+            throw new BolaException("What shall I add as your Event task?");
+        }
+
+        int fromSeparatorIndex = taskDetails.indexOf(FROM_SEPARATOR);
+        int toSeparatorIndex = taskDetails.indexOf(TO_SEPARATOR,
+                Math.max(0, fromSeparatorIndex + FROM_SEPARATOR.length()));
+        if (fromSeparatorIndex < 0 || toSeparatorIndex < 0) {
+            throw new BolaException(
+                    "When's this event happening? (Please indicate with /from and /to)");
+        }
+
+        String description = taskDetails.substring(0, fromSeparatorIndex).strip();
+        String from = taskDetails.substring(
+                fromSeparatorIndex + FROM_SEPARATOR.length(), toSeparatorIndex).strip();
+        String to = taskDetails.substring(toSeparatorIndex + TO_SEPARATOR.length()).strip();
+        if (description.isEmpty()) {
+            throw new BolaException("What shall I add as your Event task?");
+        }
+        if (from.isEmpty() || to.isEmpty()) {
+            throw new BolaException(
+                    "When's this event happening? (Please indicate with /from and /to)");
+        }
+
+        Task event = new Event(description, from, to);
+        tasks.add(event);
+        printTaskAdded(event, tasks.size());
     }
 
     /**
