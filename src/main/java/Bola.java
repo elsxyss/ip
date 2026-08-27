@@ -23,6 +23,15 @@ public class Bola {
      * @param args command-line arguments; not used
      */
     public static void main(String[] args) {
+        Storage storage = new Storage();
+        ArrayList<Task> tasks = new ArrayList<>();
+        boolean taskLoadingFailed = false;
+        try {
+            tasks = storage.load();
+        } catch (IOException exception) {
+            taskLoadingFailed = true;
+        }
+
         String banner = "    ____        __     \n"
                 + "   / __ )____  / /___ _\n"
                 + "  / __  / __ \\/ / __ `/\n"
@@ -33,11 +42,12 @@ public class Bola {
         System.out.println(ORANGE_TEXT + banner + RESET_TEXT_COLOUR);
         System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS + "Yo! I'm Bola.");
         System.out.println(RESPONSE_INDENT + "What are we working on today?");
+        if (taskLoadingFailed) {
+            System.out.println(RESPONSE_INDENT + ERROR_ADDRESS + "I couldn't load your tasks.");
+        }
         System.out.println(RESPONSE_DIVIDER);
 
         Scanner scanner = new Scanner(System.in);
-        ArrayList<Task> tasks = new ArrayList<>();
-        Storage storage = new Storage();
 
         while (scanner.hasNextLine()) {
             String command = scanner.nextLine().strip();

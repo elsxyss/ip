@@ -3,7 +3,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 /**
- * Checks the happy path for saving tasks to a data file.
+ * Checks the happy paths for saving tasks to and loading tasks from a data file.
  */
 public class StorageTest {
     /**
@@ -17,6 +17,8 @@ public class StorageTest {
         Path dataFile = testDirectory.resolve("missing-directory").resolve("tasks.txt");
         Storage storage = new Storage(dataFile);
 
+        assert storage.load().isEmpty();
+
         Todo todo = new Todo("read book");
         todo.markAsDone();
         Deadline deadline = new Deadline("return book", "June 6th");
@@ -29,5 +31,8 @@ public class StorageTest {
                 "T | 1 | read book",
                 "D | 0 | return book | June 6th",
                 "E | 0 | project meeting | Aug 6th 2pm | Aug 6th 4pm"));
+
+        List<String> loadedTasks = storage.load().stream().map(Task::toDataString).toList();
+        assert loadedTasks.equals(savedLines);
     }
 }
