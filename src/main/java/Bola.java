@@ -1,5 +1,10 @@
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -74,6 +79,9 @@ public class Bola {
                     for (int i = 0; i < tasks.size(); i++) {
                         System.out.println(RESPONSE_INDENT + "    " + (i + 1) + ". " + tasks.get(i));
                     }
+                    break;
+                case UPCOMING:
+                    printUpcomingTasks(command, commandType, tasks);
                     break;
                 case MARK:
                     int taskIndexToMark = getTaskIndex(command, commandType, tasks.size());
@@ -178,6 +186,96 @@ public class Bola {
     }
 
     /**
+     * Prints dated tasks from today through the requested number of days ahead.
+     *
+     * @param input complete user input
+     * @param commandType upcoming command type
+     * @param tasks complete task list
+     * @throws BolaException if the number of days is missing or invalid
+     */
+    private static void printUpcomingTasks(String input, CommandType commandType,
+            List<Task> tasks) throws BolaException {
+        int days = getUpcomingDays(input, commandType);
+        List<Task> upcomingTasks = findUpcomingTasks(tasks, LocalDate.now(), days);
+        String dayWord = days == 1 ? "day" : "days";
+
+        System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
+                + "Here are your tasks for the next " + days + " " + dayWord + " ~");
+        if (upcomingTasks.isEmpty()) {
+            System.out.println(RESPONSE_INDENT + "    No dated tasks are coming up.");
+            return;
+        }
+
+        for (Task task : upcomingTasks) {
+            int originalTaskNumber = tasks.indexOf(task) + 1;
+            System.out.println(RESPONSE_INDENT + "    " + originalTaskNumber + ". " + task);
+        }
+    }
+
+    /**
+     * Extracts the positive number of days supplied to the upcoming command.
+     *
+     * @param input complete user input
+     * @param commandType upcoming command type
+     * @return requested number of days
+     * @throws BolaException if the value is missing, non-numeric, or not positive
+     */
+    private static int getUpcomingDays(String input, CommandType commandType)
+            throws BolaException {
+        String daysText = input.substring(commandType.getKeyword().length()).strip();
+        if (daysText.isEmpty()) {
+            throw new BolaException("How many days ahead shall I check? (e.g., upcoming 7)");
+        }
+
+        try {
+            int days = Integer.parseInt(daysText);
+            if (days <= 0) {
+                throw new BolaException("Please enter a positive number of days.");
+            }
+            return days;
+        } catch (NumberFormatException exception) {
+            throw new BolaException("Please enter a whole number of days (e.g., upcoming 7).");
+        }
+    }
+
+    /**
+     * Finds deadlines due and events starting within an inclusive date range.
+     *
+     * <p>The returned list is sorted chronologically without changing the original task list.</p>
+     *
+     * @param tasks tasks to search
+     * @param today first date to include
+     * @param days number of days ahead to include
+     * @return matching dated tasks in chronological order
+     */
+    static List<Task> findUpcomingTasks(List<Task> tasks, LocalDate today, int days) {
+        LocalDate lastDate = today.plusDays(days);
+        ArrayList<Task> upcomingTasks = new ArrayList<>();
+
+        for (Task task : tasks) {
+            LocalDate taskDate = getTaskDateTime(task).toLocalDate();
+            if (!taskDate.isBefore(today) && !taskDate.isAfter(lastDate)) {
+                upcomingTasks.add(task);
+            }
+        }
+        upcomingTasks.sort(Comparator.comparing(Bola::getTaskDateTime));
+        return upcomingTasks;
+    }
+
+    /**
+     * Returns the date used to order a dated task, or the latest possible date for a to-do.
+     */
+    private static LocalDateTime getTaskDateTime(Task task) {
+        if (task instanceof Deadline deadline) {
+            return deadline.getBy();
+        }
+        if (task instanceof Event event) {
+            return event.getFrom();
+        }
+        return LocalDateTime.MAX;
+    }
+
+    /**
      * Parses and adds a deadline task from a deadline command.
      *
      * @param input complete user input
@@ -199,15 +297,16 @@ public class Bola {
         }
 
         String description = taskDetails.substring(0, bySeparatorIndex).strip();
-        String by = taskDetails.substring(bySeparatorIndex + BY_SEPARATOR.length()).strip();
+        String byText = taskDetails.substring(bySeparatorIndex + BY_SEPARATOR.length()).strip();
         if (description.isEmpty()) {
             throw new BolaException("What shall I add as your Deadline task?");
         }
-        if (by.isEmpty()) {
+        if (byText.isEmpty()) {
             throw new BolaException(
                     "When's your deadline for this task? (Please indicate with /by)");
         }
 
+        LocalDateTime by = parseTaskDateTime(byText);
         Task deadline = new Deadline(description, by);
         tasks.add(deadline);
         printTaskAdded(deadline, tasks.size());
@@ -237,20 +336,38 @@ public class Bola {
         }
 
         String description = taskDetails.substring(0, fromSeparatorIndex).strip();
-        String from = taskDetails.substring(
+        String fromText = taskDetails.substring(
                 fromSeparatorIndex + FROM_SEPARATOR.length(), toSeparatorIndex).strip();
-        String to = taskDetails.substring(toSeparatorIndex + TO_SEPARATOR.length()).strip();
+        String toText = taskDetails.substring(toSeparatorIndex + TO_SEPARATOR.length()).strip();
         if (description.isEmpty()) {
             throw new BolaException("What shall I add as your Event task?");
         }
-        if (from.isEmpty() || to.isEmpty()) {
+        if (fromText.isEmpty() || toText.isEmpty()) {
             throw new BolaException(
                     "When's this event happening? (Please indicate with /from and /to)");
         }
 
+        LocalDateTime from = parseTaskDateTime(fromText);
+        LocalDateTime to = parseTaskDateTime(toText);
         Task event = new Event(description, from, to);
         tasks.add(event);
         printTaskAdded(event, tasks.size());
+    }
+
+    /**
+     * Parses a task date and converts parsing failures into a helpful chatbot response.
+     *
+     * @param dateTimeText date and optional time entered by the user
+     * @return parsed date and time
+     * @throws BolaException if the date is invalid or uses an unsupported format
+     */
+    private static LocalDateTime parseTaskDateTime(String dateTimeText) throws BolaException {
+        try {
+            return TaskDateTime.parse(dateTimeText);
+        } catch (DateTimeParseException exception) {
+            throw new BolaException("Please enter dates as yyyy-MM-dd, or include a time as "
+                    + "d/M/yyyy HHmm (e.g., 2/12/2019 1800).");
+        }
     }
 
     /**

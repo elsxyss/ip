@@ -3,6 +3,7 @@ import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -111,24 +112,28 @@ public class Storage {
         requireNonBlank(fields.get(2), "description", lineNumber);
 
         Task task;
-        switch (fields.get(0)) {
-        case "T":
-            requireFieldCount(fields, 3, 3, lineNumber);
-            task = new Todo(fields.get(2));
-            break;
-        case "D":
-            requireFieldCount(fields, 4, 4, lineNumber);
-            requireNonBlank(fields.get(3), "deadline", lineNumber);
-            task = new Deadline(fields.get(2), fields.get(3));
-            break;
-        case "E":
-            requireFieldCount(fields, 5, 5, lineNumber);
-            requireNonBlank(fields.get(3), "start time", lineNumber);
-            requireNonBlank(fields.get(4), "end time", lineNumber);
-            task = new Event(fields.get(2), fields.get(3), fields.get(4));
-            break;
-        default:
-            throw invalidData(lineNumber, "unknown task type '" + fields.get(0) + "'");
+        try {
+            switch (fields.get(0)) {
+            case "T":
+                requireFieldCount(fields, 3, 3, lineNumber);
+                task = new Todo(fields.get(2));
+                break;
+            case "D":
+                requireFieldCount(fields, 4, 4, lineNumber);
+                requireNonBlank(fields.get(3), "deadline", lineNumber);
+                task = new Deadline(fields.get(2), fields.get(3));
+                break;
+            case "E":
+                requireFieldCount(fields, 5, 5, lineNumber);
+                requireNonBlank(fields.get(3), "start time", lineNumber);
+                requireNonBlank(fields.get(4), "end time", lineNumber);
+                task = new Event(fields.get(2), fields.get(3), fields.get(4));
+                break;
+            default:
+                throw invalidData(lineNumber, "unknown task type '" + fields.get(0) + "'");
+            }
+        } catch (DateTimeParseException exception) {
+            throw invalidData(lineNumber, "date must use yyyy-MM-dd or d/M/yyyy HHmm format");
         }
 
         if (fields.get(1).equals("1")) {

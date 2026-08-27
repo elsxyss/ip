@@ -35,16 +35,16 @@ public class StorageTest {
 
         Todo todo = new Todo("read book");
         todo.markAsDone();
-        Deadline deadline = new Deadline("return book", "June 6th");
-        Event event = new Event("project meeting", "Aug 6th 2pm", "Aug 6th 4pm");
+        Deadline deadline = new Deadline("return book", "2019-06-06");
+        Event event = new Event("project meeting", "6/8/2019 1400", "6/8/2019 1600");
 
         storage.save(List.of(todo, deadline, event));
 
         List<String> savedLines = Files.readAllLines(dataFile);
         assert savedLines.equals(List.of(
                 "T | 1 | read book",
-                "D | 0 | return book | June 6th",
-                "E | 0 | project meeting | Aug 6th 2pm | Aug 6th 4pm"));
+                "D | 0 | return book | 2019-06-06",
+                "E | 0 | project meeting | 2019-08-06 1400 | 2019-08-06 1600"));
 
         List<String> loadedTasks = storage.load().stream().map(Task::toDataString).toList();
         assert loadedTasks.equals(savedLines);
@@ -64,8 +64,8 @@ public class StorageTest {
         Storage storage = new Storage(dataFile);
         List<Task> tasks = List.of(
                 new Todo("compare A | B"),
-                new Deadline("open C:\\notes", "Friday | 5pm"),
-                new Event("plan \\ review", "room A | 1pm", "room B | 2pm"));
+                new Deadline("open C:\\notes", "2019-01-04"),
+                new Event("plan \\ review", "2019-01-04 1300", "2019-01-04 1400"));
 
         storage.save(tasks);
 
@@ -73,7 +73,7 @@ public class StorageTest {
         List<String> loadedLines = storage.load().stream().map(Task::toDataString).toList();
         assert loadedLines.equals(expectedLines);
         assert expectedLines.get(0).equals("T | 0 | compare A \\| B");
-        assert expectedLines.get(1).equals("D | 0 | open C:\\\\notes | Friday \\| 5pm");
+        assert expectedLines.get(1).equals("D | 0 | open C:\\\\notes | 2019-01-04");
     }
 
     /**
@@ -105,6 +105,8 @@ public class StorageTest {
         assertLoadFails(dataFile, "T | 0 | task | extra field");
         assertLoadFails(dataFile, "D | 0 | deadline | ");
         assertLoadFails(dataFile, "E | 0 | event | start | ");
+        assertLoadFails(dataFile, "D | 0 | deadline | 2019-02-29");
+        assertLoadFails(dataFile, "E | 0 | event | 2019-01-01 | tomorrow");
 
         Files.write(dataFile, List.of("T | 0 | valid", "X | 0 | invalid"));
         try {
