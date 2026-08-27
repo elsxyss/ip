@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -12,6 +13,7 @@ public class Bola {
     private static final String RESPONSE_INDENT = "     ";
     private static final String RESPONSE_ADDRESS = "Bola: ";
     private static final String ERROR_ADDRESS = "Bola doesn't understand: ";
+    private static final String STORAGE_ERROR_ADDRESS = "Bola couldn't access storage: ";
     private static final String BY_SEPARATOR = " /by";
     private static final String FROM_SEPARATOR = " /from";
     private static final String TO_SEPARATOR = " /to";
@@ -22,6 +24,17 @@ public class Bola {
      * @param args command-line arguments; not used
      */
     public static void main(String[] args) {
+        Storage storage = new Storage();
+        ArrayList<Task> tasks = new ArrayList<>();
+        boolean storageAvailable = true;
+        String loadingFailureReason = "";
+        try {
+            tasks = storage.load();
+        } catch (IOException exception) {
+            storageAvailable = false;
+            loadingFailureReason = exception.getMessage();
+        }
+
         String banner = "    ____        __     \n"
                 + "   / __ )____  / /___ _\n"
                 + "  / __  / __ \\/ / __ `/\n"
@@ -32,13 +45,19 @@ public class Bola {
         System.out.println(ORANGE_TEXT + banner + RESET_TEXT_COLOUR);
         System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS + "Yo! I'm Bola.");
         System.out.println(RESPONSE_INDENT + "What are we working on today?");
+        if (!storageAvailable) {
+            System.out.println(RESPONSE_INDENT + STORAGE_ERROR_ADDRESS
+                    + "I couldn't load your tasks. " + loadingFailureReason);
+            System.out.println(RESPONSE_INDENT
+                    + "The data file won't be overwritten during this session.");
+        }
         System.out.println(RESPONSE_DIVIDER);
 
         Scanner scanner = new Scanner(System.in);
-        ArrayList<Task> tasks = new ArrayList<>();
 
         while (scanner.hasNextLine()) {
             String command = scanner.nextLine().strip();
+            boolean taskListChanged = false;
 
             try {
                 CommandType commandType = CommandType.fromInput(command)
@@ -59,6 +78,7 @@ public class Bola {
                 case MARK:
                     int taskIndexToMark = getTaskIndex(command, commandType, tasks.size());
                     tasks.get(taskIndexToMark).markAsDone();
+                    taskListChanged = true;
                     System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
                             + "Nice! I've marked this task as done.");
                     System.out.println(RESPONSE_INDENT + "    " + tasks.get(taskIndexToMark));
@@ -66,6 +86,7 @@ public class Bola {
                 case UNMARK:
                     int taskIndexToUnmark = getTaskIndex(command, commandType, tasks.size());
                     tasks.get(taskIndexToUnmark).markAsNotDone();
+                    taskListChanged = true;
                     System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
                             + "Okay, I've marked this task as not done.");
                     System.out.println(RESPONSE_INDENT + "    " + tasks.get(taskIndexToUnmark));
@@ -73,25 +94,37 @@ public class Bola {
                 case DELETE:
                     int taskIndexToDelete = getTaskIndex(command, commandType, tasks.size());
                     Task removedTask = tasks.remove(taskIndexToDelete);
+                    taskListChanged = true;
                     printTaskDeleted(removedTask, tasks.size());
                     break;
                 case TODO:
                     String description = getDescription(command, commandType, "ToDo");
                     Task todo = new Todo(description);
                     tasks.add(todo);
+                    taskListChanged = true;
                     printTaskAdded(todo, tasks.size());
                     break;
                 case DEADLINE:
                     addDeadline(command, commandType, tasks);
+                    taskListChanged = true;
                     break;
                 case EVENT:
                     addEvent(command, commandType, tasks);
+                    taskListChanged = true;
                     break;
                 default:
                     throw new AssertionError("Unhandled command type: " + commandType);
                 }
+                if (taskListChanged && storageAvailable) {
+                    storage.save(tasks);
+                }
             } catch (BolaException exception) {
                 System.out.println(RESPONSE_INDENT + ERROR_ADDRESS + exception.getMessage());
+            } catch (IOException exception) {
+                storageAvailable = false;
+                System.out.println(RESPONSE_INDENT + STORAGE_ERROR_ADDRESS
+                        + "I couldn't save your tasks. Further changes won't be saved "
+                        + "during this session.");
             }
             System.out.println(RESPONSE_DIVIDER);
         }
