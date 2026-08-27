@@ -39,6 +39,24 @@ public class Task {
     }
 
     /**
+     * Returns whether this task has been completed as a value suitable for the data file.
+     *
+     * @return {@code 1} if done, or {@code 0} otherwise
+     */
+    protected String getDataStatus() {
+        return isDone ? "1" : "0";
+    }
+
+    /**
+     * Returns this task in the format used for saving it to the hard disk.
+     *
+     * @return serialized task data
+     */
+    public String toDataString() {
+        return "T | " + getDataStatus() + " | " + description;
+    }
+
+    /**
      * Returns the task in the format used by Bola's responses.
      *
      * @return the status icon followed by the task description

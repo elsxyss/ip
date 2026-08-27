@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -36,9 +37,11 @@ public class Bola {
 
         Scanner scanner = new Scanner(System.in);
         ArrayList<Task> tasks = new ArrayList<>();
+        Storage storage = new Storage();
 
         while (scanner.hasNextLine()) {
             String command = scanner.nextLine().strip();
+            boolean taskListChanged = false;
 
             try {
                 CommandType commandType = CommandType.fromInput(command)
@@ -59,6 +62,7 @@ public class Bola {
                 case MARK:
                     int taskIndexToMark = getTaskIndex(command, commandType, tasks.size());
                     tasks.get(taskIndexToMark).markAsDone();
+                    taskListChanged = true;
                     System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
                             + "Nice! I've marked this task as done.");
                     System.out.println(RESPONSE_INDENT + "    " + tasks.get(taskIndexToMark));
@@ -66,6 +70,7 @@ public class Bola {
                 case UNMARK:
                     int taskIndexToUnmark = getTaskIndex(command, commandType, tasks.size());
                     tasks.get(taskIndexToUnmark).markAsNotDone();
+                    taskListChanged = true;
                     System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
                             + "Okay, I've marked this task as not done.");
                     System.out.println(RESPONSE_INDENT + "    " + tasks.get(taskIndexToUnmark));
@@ -73,25 +78,34 @@ public class Bola {
                 case DELETE:
                     int taskIndexToDelete = getTaskIndex(command, commandType, tasks.size());
                     Task removedTask = tasks.remove(taskIndexToDelete);
+                    taskListChanged = true;
                     printTaskDeleted(removedTask, tasks.size());
                     break;
                 case TODO:
                     String description = getDescription(command, commandType, "ToDo");
                     Task todo = new Todo(description);
                     tasks.add(todo);
+                    taskListChanged = true;
                     printTaskAdded(todo, tasks.size());
                     break;
                 case DEADLINE:
                     addDeadline(command, commandType, tasks);
+                    taskListChanged = true;
                     break;
                 case EVENT:
                     addEvent(command, commandType, tasks);
+                    taskListChanged = true;
                     break;
                 default:
                     throw new AssertionError("Unhandled command type: " + commandType);
                 }
+                if (taskListChanged) {
+                    storage.save(tasks);
+                }
             } catch (BolaException exception) {
                 System.out.println(RESPONSE_INDENT + ERROR_ADDRESS + exception.getMessage());
+            } catch (IOException exception) {
+                System.out.println(RESPONSE_INDENT + ERROR_ADDRESS + "I couldn't save your tasks.");
             }
             System.out.println(RESPONSE_DIVIDER);
         }

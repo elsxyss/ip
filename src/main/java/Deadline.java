@@ -16,6 +16,16 @@ public class Deadline extends Task {
     }
 
     /**
+     * Returns this deadline in the format used for saving it to the hard disk.
+     *
+     * @return serialized deadline data
+     */
+    @Override
+    public String toDataString() {
+        return "D | " + getDataStatus() + " | " + description + " | " + by;
+    }
+
+    /**
      * Returns the deadline in Bola's display format.
      *
      * @return the task prefixed with its type marker and followed by its deadline

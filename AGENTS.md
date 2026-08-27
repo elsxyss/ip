@@ -24,6 +24,12 @@ Unless the user says otherwise, assume that you are assisting a student working 
 
 # Project-specific requirements
 
+## Java coding standards
+
+All generated or modified Java code must follow, at minimum, the
+[SE-EDU Java coding standard](https://se-education.org/guides/conventions/java/index.html).
+If this repository defines a stricter convention, follow the stricter convention.
+
 ## Java version:
 
 Ensure that Java 25 is used when running the application or build tasks. On macOS, use `sdk use java 25.0.3.fx-zulu` to switch to Java 25 if needed.

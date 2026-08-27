@@ -19,6 +19,16 @@ public class Event extends Task {
     }
 
     /**
+     * Returns this event in the format used for saving it to the hard disk.
+     *
+     * @return serialized event data
+     */
+    @Override
+    public String toDataString() {
+        return "E | " + getDataStatus() + " | " + description + " | " + from + " | " + to;
+    }
+
+    /**
      * Returns the event in Bola's display format.
      *
      * @return the task prefixed with its type marker and followed by its time range
