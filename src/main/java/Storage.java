@@ -1,8 +1,11 @@
 import java.io.IOException;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Saves and loads Bola's tasks using a file on the hard disk.
@@ -25,7 +28,7 @@ public class Storage {
      * @param filePath path of the data file
      */
     public Storage(Path filePath) {
-        this.filePath = filePath;
+        this.filePath = Objects.requireNonNull(filePath);
     }
 
     /**
@@ -40,8 +43,15 @@ public class Storage {
             return tasks;
         }
 
-        for (String taskData : Files.readAllLines(filePath)) {
-            tasks.add(parseTask(taskData));
+        List<String> savedLines = Files.readAllLines(filePath);
+        for (int i = 0; i < savedLines.size(); i++) {
+            String taskData = savedLines.get(i);
+            if (i == 0 && taskData.startsWith("\uFEFF")) {
+                taskData = taskData.substring(1);
+            }
+            if (!taskData.isBlank()) {
+                tasks.add(parseTask(taskData, i + 1));
+            }
         }
         return tasks;
     }
@@ -53,64 +63,153 @@ public class Storage {
      * @throws IOException if the tasks cannot be written
      */
     public void save(List<Task> tasks) throws IOException {
-        Path parentDirectory = filePath.getParent();
-        if (parentDirectory != null) {
-            Files.createDirectories(parentDirectory);
+        Objects.requireNonNull(tasks);
+        Path absoluteFilePath = filePath.toAbsolutePath();
+        Path parentDirectory = absoluteFilePath.getParent();
+        if (parentDirectory == null) {
+            throw new IOException("The data file must have a parent directory.");
         }
-        Files.write(filePath, tasks.stream().map(Task::toDataString).toList());
+        Files.createDirectories(parentDirectory);
+
+        Path temporaryFile = Files.createTempFile(parentDirectory, "bola-", ".tmp");
+        try {
+            Files.write(temporaryFile, tasks.stream().map(Task::toDataString).toList());
+            replaceDataFile(temporaryFile, absoluteFilePath);
+        } finally {
+            Files.deleteIfExists(temporaryFile);
+        }
+    }
+
+    /**
+     * Replaces the data file atomically when supported, with a portable fallback otherwise.
+     *
+     * @param temporaryFile fully written temporary file
+     * @param destinationFile data file to replace
+     * @throws IOException if the completed file cannot be moved into place
+     */
+    private void replaceDataFile(Path temporaryFile, Path destinationFile) throws IOException {
+        try {
+            Files.move(temporaryFile, destinationFile, StandardCopyOption.REPLACE_EXISTING,
+                    StandardCopyOption.ATOMIC_MOVE);
+        } catch (AtomicMoveNotSupportedException exception) {
+            Files.move(temporaryFile, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+        }
     }
 
     /**
      * Reconstructs one task from its saved representation.
      *
      * @param taskData one line from the data file
+     * @param lineNumber one-based line number used in error messages
      * @return reconstructed task
      * @throws IOException if the line does not match Bola's data format
      */
-    private Task parseTask(String taskData) throws IOException {
-        String[] fields = taskData.split("\\s*\\|\\s*", -1);
-        if (fields.length < 3) {
-            throw new IOException("Invalid task data: " + taskData);
-        }
+    private Task parseTask(String taskData, int lineNumber) throws IOException {
+        List<String> fields = splitFields(taskData);
+        requireFieldCount(fields, 3, Integer.MAX_VALUE, lineNumber);
+        requireNonBlank(fields.get(0), "task type", lineNumber);
+        requireNonBlank(fields.get(1), "completion status", lineNumber);
+        requireNonBlank(fields.get(2), "description", lineNumber);
 
         Task task;
-        switch (fields[0]) {
+        switch (fields.get(0)) {
         case "T":
-            requireFieldCount(fields, 3, taskData);
-            task = new Todo(fields[2]);
+            requireFieldCount(fields, 3, 3, lineNumber);
+            task = new Todo(fields.get(2));
             break;
         case "D":
-            requireFieldCount(fields, 4, taskData);
-            task = new Deadline(fields[2], fields[3]);
+            requireFieldCount(fields, 4, 4, lineNumber);
+            requireNonBlank(fields.get(3), "deadline", lineNumber);
+            task = new Deadline(fields.get(2), fields.get(3));
             break;
         case "E":
-            requireFieldCount(fields, 5, taskData);
-            task = new Event(fields[2], fields[3], fields[4]);
+            requireFieldCount(fields, 5, 5, lineNumber);
+            requireNonBlank(fields.get(3), "start time", lineNumber);
+            requireNonBlank(fields.get(4), "end time", lineNumber);
+            task = new Event(fields.get(2), fields.get(3), fields.get(4));
             break;
         default:
-            throw new IOException("Invalid task data: " + taskData);
+            throw invalidData(lineNumber, "unknown task type '" + fields.get(0) + "'");
         }
 
-        if (fields[1].equals("1")) {
+        if (fields.get(1).equals("1")) {
             task.markAsDone();
-        } else if (!fields[1].equals("0")) {
-            throw new IOException("Invalid task data: " + taskData);
+        } else if (!fields.get(1).equals("0")) {
+            throw invalidData(lineNumber, "completion status must be 0 or 1");
         }
         return task;
     }
 
     /**
-     * Checks that a saved task has the expected number of fields.
+     * Splits a task record at unescaped vertical bars and restores escaped characters.
+     *
+     * @param taskData one line from the data file
+     * @return parsed and trimmed fields
+     */
+    private List<String> splitFields(String taskData) {
+        ArrayList<String> fields = new ArrayList<>();
+        StringBuilder currentField = new StringBuilder();
+
+        for (int i = 0; i < taskData.length(); i++) {
+            char character = taskData.charAt(i);
+            if (character == '\\' && i + 1 < taskData.length()) {
+                char nextCharacter = taskData.charAt(i + 1);
+                if (nextCharacter == '\\' || nextCharacter == '|') {
+                    currentField.append(nextCharacter);
+                    i++;
+                    continue;
+                }
+            }
+            if (character == '|') {
+                fields.add(currentField.toString().strip());
+                currentField.setLength(0);
+            } else {
+                currentField.append(character);
+            }
+        }
+        fields.add(currentField.toString().strip());
+        return fields;
+    }
+
+    /**
+     * Checks that a saved task has an allowed number of fields.
      *
      * @param fields parsed task fields
-     * @param expectedCount expected number of fields
-     * @param taskData original saved task data
-     * @throws IOException if the field count is incorrect
+     * @param minimumCount minimum allowed number of fields
+     * @param maximumCount maximum allowed number of fields
+     * @param lineNumber one-based line number used in error messages
+     * @throws IOException if the field count is outside the allowed range
      */
-    private void requireFieldCount(String[] fields, int expectedCount, String taskData)
-            throws IOException {
-        if (fields.length != expectedCount) {
-            throw new IOException("Invalid task data: " + taskData);
+    private void requireFieldCount(List<String> fields, int minimumCount, int maximumCount,
+            int lineNumber) throws IOException {
+        if (fields.size() < minimumCount || fields.size() > maximumCount) {
+            throw invalidData(lineNumber, "incorrect number of fields");
         }
+    }
+
+    /**
+     * Checks that a required task field contains visible text.
+     *
+     * @param field field to validate
+     * @param fieldName field name used in the error message
+     * @param lineNumber one-based line number used in error messages
+     * @throws IOException if the field is blank
+     */
+    private void requireNonBlank(String field, String fieldName, int lineNumber)
+            throws IOException {
+        if (field.isBlank()) {
+            throw invalidData(lineNumber, fieldName + " cannot be blank");
+        }
+    }
+
+    /**
+     * Creates a consistent exception for malformed saved data.
+     *
+     * @param lineNumber one-based line number containing the error
+     * @param reason explanation of the malformed data
+     * @return exception describing the invalid record
+     */
+    private IOException invalidData(int lineNumber, String reason) {
+        return new IOException("Invalid task data on line " + lineNumber + ": " + reason + ".");
     }
 }

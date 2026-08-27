@@ -13,6 +13,7 @@ public class Bola {
     private static final String RESPONSE_INDENT = "     ";
     private static final String RESPONSE_ADDRESS = "Bola: ";
     private static final String ERROR_ADDRESS = "Bola doesn't understand: ";
+    private static final String STORAGE_ERROR_ADDRESS = "Bola couldn't access storage: ";
     private static final String BY_SEPARATOR = " /by";
     private static final String FROM_SEPARATOR = " /from";
     private static final String TO_SEPARATOR = " /to";
@@ -25,11 +26,13 @@ public class Bola {
     public static void main(String[] args) {
         Storage storage = new Storage();
         ArrayList<Task> tasks = new ArrayList<>();
-        boolean taskLoadingFailed = false;
+        boolean storageAvailable = true;
+        String loadingFailureReason = "";
         try {
             tasks = storage.load();
         } catch (IOException exception) {
-            taskLoadingFailed = true;
+            storageAvailable = false;
+            loadingFailureReason = exception.getMessage();
         }
 
         String banner = "    ____        __     \n"
@@ -42,8 +45,11 @@ public class Bola {
         System.out.println(ORANGE_TEXT + banner + RESET_TEXT_COLOUR);
         System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS + "Yo! I'm Bola.");
         System.out.println(RESPONSE_INDENT + "What are we working on today?");
-        if (taskLoadingFailed) {
-            System.out.println(RESPONSE_INDENT + ERROR_ADDRESS + "I couldn't load your tasks.");
+        if (!storageAvailable) {
+            System.out.println(RESPONSE_INDENT + STORAGE_ERROR_ADDRESS
+                    + "I couldn't load your tasks. " + loadingFailureReason);
+            System.out.println(RESPONSE_INDENT
+                    + "The data file won't be overwritten during this session.");
         }
         System.out.println(RESPONSE_DIVIDER);
 
@@ -109,13 +115,16 @@ public class Bola {
                 default:
                     throw new AssertionError("Unhandled command type: " + commandType);
                 }
-                if (taskListChanged) {
+                if (taskListChanged && storageAvailable) {
                     storage.save(tasks);
                 }
             } catch (BolaException exception) {
                 System.out.println(RESPONSE_INDENT + ERROR_ADDRESS + exception.getMessage());
             } catch (IOException exception) {
-                System.out.println(RESPONSE_INDENT + ERROR_ADDRESS + "I couldn't save your tasks.");
+                storageAvailable = false;
+                System.out.println(RESPONSE_INDENT + STORAGE_ERROR_ADDRESS
+                        + "I couldn't save your tasks. Further changes won't be saved "
+                        + "during this session.");
             }
             System.out.println(RESPONSE_DIVIDER);
         }

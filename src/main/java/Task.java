@@ -53,7 +53,17 @@ public class Task {
      * @return serialized task data
      */
     public String toDataString() {
-        return "T | " + getDataStatus() + " | " + description;
+        return "T | " + getDataStatus() + " | " + escapeDataField(description);
+    }
+
+    /**
+     * Escapes characters that otherwise have a special meaning in Bola's data format.
+     *
+     * @param value task field to escape
+     * @return field with backslashes and vertical bars escaped
+     */
+    protected String escapeDataField(String value) {
+        return value.replace("\\", "\\\\").replace("|", "\\|");
     }
 
     /**
