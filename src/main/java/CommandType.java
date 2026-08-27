@@ -7,6 +7,7 @@ import java.util.Optional;
 public enum CommandType {
     BYE("bye", false),
     LIST("list", false),
+    UPCOMING("upcoming", true),
     MARK("mark", true),
     UNMARK("unmark", true),
     DELETE("delete", true),
