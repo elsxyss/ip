@@ -64,17 +64,16 @@ public class Storage {
      */
     public void save(List<Task> tasks) throws IOException {
         Objects.requireNonNull(tasks);
-        Path absoluteFilePath = filePath.toAbsolutePath();
-        Path parentDirectory = absoluteFilePath.getParent();
+        Path parentDirectory = filePath.getParent();
         if (parentDirectory == null) {
-            throw new IOException("The data file must have a parent directory.");
+            parentDirectory = Path.of(".");
         }
         Files.createDirectories(parentDirectory);
 
         Path temporaryFile = Files.createTempFile(parentDirectory, "bola-", ".tmp");
         try {
             Files.write(temporaryFile, tasks.stream().map(Task::toDataString).toList());
-            replaceDataFile(temporaryFile, absoluteFilePath);
+            replaceDataFile(temporaryFile, filePath);
         } finally {
             Files.deleteIfExists(temporaryFile);
         }
