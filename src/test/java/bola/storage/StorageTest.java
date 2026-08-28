@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
+
 import bola.task.Deadline;
 import bola.task.Event;
 import bola.task.Task;
@@ -15,25 +17,12 @@ import bola.task.Todo;
  */
 public class StorageTest {
     /**
-     * Runs the storage checks using Java assertions.
-     *
-     * @param args command-line arguments; not used
-     * @throws Exception if temporary files cannot be created or read
-     */
-    public static void main(String[] args) throws Exception {
-        testMissingFileAndRoundTrip();
-        testEscapedCharacters();
-        testBlankLines();
-        testMalformedRecords();
-        testInvalidFilePath();
-    }
-
-    /**
      * Checks first-run loading, directory creation, serialization, loading, and empty overwrites.
      *
      * @throws Exception if temporary test files cannot be accessed
      */
-    private static void testMissingFileAndRoundTrip() throws Exception {
+    @Test
+    void testMissingFileAndRoundTrip() throws Exception {
         Path testDirectory = Files.createTempDirectory("bola-storage-test");
         Path dataFile = testDirectory.resolve("missing-directory").resolve("tasks.txt");
         Storage storage = new Storage(dataFile);
@@ -66,7 +55,8 @@ public class StorageTest {
      *
      * @throws Exception if temporary test files cannot be accessed
      */
-    private static void testEscapedCharacters() throws Exception {
+    @Test
+    void testEscapedCharacters() throws Exception {
         Path dataFile = Files.createTempDirectory("bola-escaping-test").resolve("tasks.txt");
         Storage storage = new Storage(dataFile);
         List<Task> tasks = List.of(
@@ -88,7 +78,8 @@ public class StorageTest {
      *
      * @throws Exception if temporary test files cannot be accessed
      */
-    private static void testBlankLines() throws Exception {
+    @Test
+    void testBlankLines() throws Exception {
         Path dataFile = Files.createTempDirectory("bola-blank-line-test").resolve("tasks.txt");
         Files.write(dataFile, List.of("\uFEFFT | 0 | valid task", "", "   "));
 
@@ -103,7 +94,8 @@ public class StorageTest {
      *
      * @throws Exception if temporary test files cannot be accessed
      */
-    private static void testMalformedRecords() throws Exception {
+    @Test
+    void testMalformedRecords() throws Exception {
         Path dataFile = Files.createTempDirectory("bola-invalid-data-test").resolve("tasks.txt");
         assertLoadFails(dataFile, "X | 0 | unknown type");
         assertLoadFails(dataFile, "T | 2 | invalid status");
@@ -129,7 +121,8 @@ public class StorageTest {
      *
      * @throws Exception if temporary test files cannot be accessed
      */
-    private static void testInvalidFilePath() throws Exception {
+    @Test
+    void testInvalidFilePath() throws Exception {
         Path directory = Files.createTempDirectory("bola-invalid-path-test");
         Storage storage = new Storage(directory);
 

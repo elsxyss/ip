@@ -3,16 +3,17 @@ package bola.task;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 
+import org.junit.jupiter.api.Test;
+
 /**
  * Checks parsing, display, and storage formats for task dates and times.
  */
 public class TaskDateTimeTest {
     /**
-     * Runs the date and time checks using Java assertions.
-     *
-     * @param args command-line arguments; not used
+     * Checks valid and invalid date-time parsing and formatting.
      */
-    public static void main(String[] args) {
+    @Test
+    void testParsingAndFormatting() {
         LocalDateTime dateOnly = TaskDateTime.parse("2019-10-15");
         assert dateOnly.equals(LocalDateTime.of(2019, 10, 15, 0, 0));
         assert TaskDateTime.formatForDisplay(dateOnly).equals("Oct 15 2019");

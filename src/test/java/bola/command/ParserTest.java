@@ -1,5 +1,7 @@
 package bola.command;
 
+import org.junit.jupiter.api.Test;
+
 import bola.exception.BolaException;
 import bola.task.Task;
 
@@ -8,26 +10,14 @@ import bola.task.Task;
  */
 public class ParserTest {
     /**
-     * Runs parser checks using Java assertions.
-     *
-     * @param args command-line arguments; not used
-     * @throws Exception if an expected valid command cannot be parsed
-     */
-    public static void main(String[] args) throws Exception {
-        Parser parser = new Parser();
-
-        testCommandAndNumberParsing(parser);
-        testTaskParsing(parser);
-        testInvalidInput(parser);
-    }
-
-    /**
      * Checks command recognition and numeric argument conversion.
      *
-     * @param parser parser under test
      * @throws BolaException if a valid input is unexpectedly rejected
      */
-    private static void testCommandAndNumberParsing(Parser parser) throws BolaException {
+    @Test
+    void testCommandAndNumberParsing() throws BolaException {
+        Parser parser = new Parser();
+
         assert parser.parseCommandType("list") == CommandType.LIST;
         assert parser.parseCommandType("deadline submit /by 2026-09-01")
                 == CommandType.DEADLINE;
@@ -38,10 +28,12 @@ public class ParserTest {
     /**
      * Checks construction of each task type from command text.
      *
-     * @param parser parser under test
      * @throws BolaException if a valid input is unexpectedly rejected
      */
-    private static void testTaskParsing(Parser parser) throws BolaException {
+    @Test
+    void testTaskParsing() throws BolaException {
+        Parser parser = new Parser();
+
         Task todo = parser.parseTodo("todo read book");
         Task deadline = parser.parseDeadline("deadline submit report /by 2026-09-01");
         Task event = parser.parseEvent(
@@ -56,9 +48,11 @@ public class ParserTest {
     /**
      * Checks representative validation failures and their user-facing explanations.
      *
-     * @param parser parser under test
      */
-    private static void testInvalidInput(Parser parser) {
+    @Test
+    void testInvalidInput() {
+        Parser parser = new Parser();
+
         assertParsingFails(() -> parser.parseCommandType("nonsense"), "Hmm?");
         assertParsingFails(() -> parser.parseTaskIndex("delete x", CommandType.DELETE, 2),
                 "Please enter a valid task number to delete.");

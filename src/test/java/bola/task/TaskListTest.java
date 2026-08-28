@@ -3,24 +3,17 @@ package bola.task;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
+
 /**
  * Checks task collection ownership and mutation operations.
  */
 public class TaskListTest {
     /**
-     * Runs task-list checks using Java assertions.
-     *
-     * @param args command-line arguments; not used
-     */
-    public static void main(String[] args) {
-        testCollectionOwnership();
-        testTaskOperations();
-    }
-
-    /**
      * Checks that callers cannot structurally modify the task collection.
      */
-    private static void testCollectionOwnership() {
+    @Test
+    void testCollectionOwnership() {
         ArrayList<Task> initialTasks = new ArrayList<>(List.of(new Todo("first")));
         TaskList tasks = new TaskList(initialTasks);
         initialTasks.clear();
@@ -37,7 +30,8 @@ public class TaskListTest {
     /**
      * Checks adding, marking, unmarking, and deleting tasks.
      */
-    private static void testTaskOperations() {
+    @Test
+    void testTaskOperations() {
         Task firstTask = new Todo("first");
         Task secondTask = new Todo("second");
         TaskList tasks = new TaskList();

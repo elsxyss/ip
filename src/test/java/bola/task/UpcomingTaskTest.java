@@ -3,16 +3,17 @@ package bola.task;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
+
 /**
  * Checks filtering and chronological sorting for the upcoming command.
  */
 public class UpcomingTaskTest {
     /**
      * Runs the upcoming-task checks using Java assertions.
-     *
-     * @param args command-line arguments; not used
      */
-    public static void main(String[] args) {
+    @Test
+    void testUpcomingTaskFilteringAndSorting() {
         LocalDate today = LocalDate.of(2026, 8, 28);
         Task boundaryDeadline = new Deadline("boundary", "2026-09-04");
         Task pastDeadline = new Deadline("past", "2026-08-27");
