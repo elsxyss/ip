@@ -1,3 +1,8 @@
+package bola.command;
+
+import bola.exception.BolaException;
+import bola.task.Task;
+
 /**
  * Checks command and argument parsing independently from the user interface.
  */

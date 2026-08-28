@@ -1,3 +1,5 @@
+package bola.storage;
+
 import java.io.IOException;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
@@ -7,6 +9,11 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import bola.task.Deadline;
+import bola.task.Event;
+import bola.task.Task;
+import bola.task.Todo;
 
 /**
  * Saves and loads Bola's tasks using a file on the hard disk.

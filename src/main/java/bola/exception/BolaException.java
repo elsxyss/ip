@@ -1,3 +1,5 @@
+package bola.exception;
+
 /**
  * Represents an error caused by a command that Bola cannot carry out.
  */

@@ -1,5 +1,9 @@
+package bola.ui;
+
 import java.util.List;
 import java.util.Scanner;
+
+import bola.task.Task;
 
 /**
  * Handles text input from and output to Bola's user.
