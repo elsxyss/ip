@@ -1,8 +1,5 @@
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -18,11 +15,11 @@ public class Bola {
         Ui ui = new Ui();
         Parser parser = new Parser();
         Storage storage = new Storage();
-        ArrayList<Task> tasks = new ArrayList<>();
+        TaskList tasks = new TaskList();
         boolean storageAvailable = true;
         String loadingFailureReason = "";
         try {
-            tasks = storage.load();
+            tasks = new TaskList(storage.load());
         } catch (IOException exception) {
             storageAvailable = false;
             loadingFailureReason = exception.getMessage();
@@ -42,7 +39,7 @@ public class Bola {
                     ui.showGoodbye();
                     return;
                 case LIST:
-                    ui.showTaskList(tasks);
+                    ui.showTaskList(tasks.getTasks());
                     break;
                 case UPCOMING:
                     int days = parser.parseUpcomingDays(command, commandType);
@@ -51,21 +48,21 @@ public class Bola {
                 case MARK:
                     int taskIndexToMark = parser.parseTaskIndex(
                             command, commandType, tasks.size());
-                    tasks.get(taskIndexToMark).markAsDone();
+                    Task markedTask = tasks.mark(taskIndexToMark);
                     taskListChanged = true;
-                    ui.showTaskMarked(tasks.get(taskIndexToMark));
+                    ui.showTaskMarked(markedTask);
                     break;
                 case UNMARK:
                     int taskIndexToUnmark = parser.parseTaskIndex(
                             command, commandType, tasks.size());
-                    tasks.get(taskIndexToUnmark).markAsNotDone();
+                    Task unmarkedTask = tasks.unmark(taskIndexToUnmark);
                     taskListChanged = true;
-                    ui.showTaskUnmarked(tasks.get(taskIndexToUnmark));
+                    ui.showTaskUnmarked(unmarkedTask);
                     break;
                 case DELETE:
                     int taskIndexToDelete = parser.parseTaskIndex(
                             command, commandType, tasks.size());
-                    Task removedTask = tasks.remove(taskIndexToDelete);
+                    Task removedTask = tasks.delete(taskIndexToDelete);
                     taskListChanged = true;
                     ui.showTaskDeleted(removedTask, tasks.size());
                     break;
@@ -91,7 +88,7 @@ public class Bola {
                     throw new AssertionError("Unhandled command type: " + commandType);
                 }
                 if (taskListChanged && storageAvailable) {
-                    storage.save(tasks);
+                    storage.save(tasks.getTasks());
                 }
             } catch (BolaException exception) {
                 ui.showError(exception.getMessage());
@@ -110,46 +107,8 @@ public class Bola {
      * @param tasks complete task list
      * @param ui user interface used to show the matching tasks
      */
-    private static void showUpcomingTasks(int days, List<Task> tasks, Ui ui) {
-        List<Task> upcomingTasks = findUpcomingTasks(tasks, LocalDate.now(), days);
-        ui.showUpcomingTasks(upcomingTasks, tasks, days);
+    private static void showUpcomingTasks(int days, TaskList tasks, Ui ui) {
+        List<Task> upcomingTasks = tasks.findUpcomingTasks(LocalDate.now(), days);
+        ui.showUpcomingTasks(upcomingTasks, tasks.getTasks(), days);
     }
-
-    /**
-     * Finds deadlines due and events starting within an inclusive date range.
-     *
-     * <p>The returned list is sorted chronologically without changing the original task list.</p>
-     *
-     * @param tasks tasks to search
-     * @param today first date to include
-     * @param days number of days ahead to include
-     * @return matching dated tasks in chronological order
-     */
-    static List<Task> findUpcomingTasks(List<Task> tasks, LocalDate today, int days) {
-        LocalDate lastDate = today.plusDays(days);
-        ArrayList<Task> upcomingTasks = new ArrayList<>();
-
-        for (Task task : tasks) {
-            LocalDate taskDate = getTaskDateTime(task).toLocalDate();
-            if (!taskDate.isBefore(today) && !taskDate.isAfter(lastDate)) {
-                upcomingTasks.add(task);
-            }
-        }
-        upcomingTasks.sort(Comparator.comparing(Bola::getTaskDateTime));
-        return upcomingTasks;
-    }
-
-    /**
-     * Returns the date used to order a dated task, or the latest possible date for a to-do.
-     */
-    private static LocalDateTime getTaskDateTime(Task task) {
-        if (task instanceof Deadline deadline) {
-            return deadline.getBy();
-        }
-        if (task instanceof Event event) {
-            return event.getFrom();
-        }
-        return LocalDateTime.MAX;
-    }
-
 }

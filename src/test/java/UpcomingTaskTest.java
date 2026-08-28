@@ -20,13 +20,14 @@ public class UpcomingTaskTest {
                 "consultation", "2026-08-30 1400", "2026-08-30 1500");
         Task outsideDeadline = new Deadline("outside range", "2026-09-05");
         Task todo = new Todo("undated task");
-        List<Task> tasks = List.of(boundaryDeadline, pastDeadline, upcomingDeadline,
-                todayDeadline, upcomingEvent, outsideDeadline, todo);
+        TaskList tasks = new TaskList(List.of(boundaryDeadline, pastDeadline, upcomingDeadline,
+                todayDeadline, upcomingEvent, outsideDeadline, todo));
 
-        List<Task> upcomingTasks = Bola.findUpcomingTasks(tasks, today, 7);
+        List<Task> upcomingTasks = tasks.findUpcomingTasks(today, 7);
 
         assert upcomingTasks.equals(List.of(
                 todayDeadline, upcomingEvent, upcomingDeadline, boundaryDeadline));
-        assert tasks.get(0) == boundaryDeadline : "The original task order must not change";
+        assert tasks.getTasks().get(0) == boundaryDeadline
+                : "The original task order must not change";
     }
 }
