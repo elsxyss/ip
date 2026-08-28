@@ -5,20 +5,11 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Scanner;
 
 /**
- * Stores tasks entered by the user, lists them on request, and says goodbye on exit.
+ * Coordinates Bola's user interface, task operations, and persistent storage.
  */
 public class Bola {
-    private static final String ORANGE_TEXT = "\u001B[38;2;217;72;0m";
-    private static final String RESET_TEXT_COLOUR = "\u001B[0m";
-    private static final String OUTER_DIVIDER = "================================================================";
-    private static final String RESPONSE_DIVIDER = "    ____________________________________________________________";
-    private static final String RESPONSE_INDENT = "     ";
-    private static final String RESPONSE_ADDRESS = "Bola: ";
-    private static final String ERROR_ADDRESS = "Bola doesn't understand: ";
-    private static final String STORAGE_ERROR_ADDRESS = "Bola couldn't access storage: ";
     private static final String BY_SEPARATOR = " /by";
     private static final String FROM_SEPARATOR = " /from";
     private static final String TO_SEPARATOR = " /to";
@@ -29,6 +20,7 @@ public class Bola {
      * @param args command-line arguments; not used
      */
     public static void main(String[] args) {
+        Ui ui = new Ui();
         Storage storage = new Storage();
         ArrayList<Task> tasks = new ArrayList<>();
         boolean storageAvailable = true;
@@ -40,28 +32,10 @@ public class Bola {
             loadingFailureReason = exception.getMessage();
         }
 
-        String banner = "    ____        __     \n"
-                + "   / __ )____  / /___ _\n"
-                + "  / __  / __ \\/ / __ `/\n"
-                + " / /_/ / /_/ / / /_/ / \n"
-                + "/_____/\\____/_/\\__,_/  \n";
+        ui.showWelcome(storageAvailable, loadingFailureReason);
 
-        System.out.println(OUTER_DIVIDER);
-        System.out.println(ORANGE_TEXT + banner + RESET_TEXT_COLOUR);
-        System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS + "Yo! I'm Bola.");
-        System.out.println(RESPONSE_INDENT + "What are we working on today?");
-        if (!storageAvailable) {
-            System.out.println(RESPONSE_INDENT + STORAGE_ERROR_ADDRESS
-                    + "I couldn't load your tasks. " + loadingFailureReason);
-            System.out.println(RESPONSE_INDENT
-                    + "The data file won't be overwritten during this session.");
-        }
-        System.out.println(RESPONSE_DIVIDER);
-
-        Scanner scanner = new Scanner(System.in);
-
-        while (scanner.hasNextLine()) {
-            String command = scanner.nextLine().strip();
+        while (ui.hasNextCommand()) {
+            String command = ui.readCommand();
             boolean taskListChanged = false;
 
             try {
@@ -70,54 +44,45 @@ public class Bola {
 
                 switch (commandType) {
                 case BYE:
-                    System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
-                            + "See you again soon! Bye ~");
-                    System.out.println(OUTER_DIVIDER);
+                    ui.showGoodbye();
                     return;
                 case LIST:
-                    System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS + "Here's your list ~");
-                    for (int i = 0; i < tasks.size(); i++) {
-                        System.out.println(RESPONSE_INDENT + "    " + (i + 1) + ". " + tasks.get(i));
-                    }
+                    ui.showTaskList(tasks);
                     break;
                 case UPCOMING:
-                    printUpcomingTasks(command, commandType, tasks);
+                    showUpcomingTasks(command, commandType, tasks, ui);
                     break;
                 case MARK:
                     int taskIndexToMark = getTaskIndex(command, commandType, tasks.size());
                     tasks.get(taskIndexToMark).markAsDone();
                     taskListChanged = true;
-                    System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
-                            + "Nice! I've marked this task as done.");
-                    System.out.println(RESPONSE_INDENT + "    " + tasks.get(taskIndexToMark));
+                    ui.showTaskMarked(tasks.get(taskIndexToMark));
                     break;
                 case UNMARK:
                     int taskIndexToUnmark = getTaskIndex(command, commandType, tasks.size());
                     tasks.get(taskIndexToUnmark).markAsNotDone();
                     taskListChanged = true;
-                    System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
-                            + "Okay, I've marked this task as not done.");
-                    System.out.println(RESPONSE_INDENT + "    " + tasks.get(taskIndexToUnmark));
+                    ui.showTaskUnmarked(tasks.get(taskIndexToUnmark));
                     break;
                 case DELETE:
                     int taskIndexToDelete = getTaskIndex(command, commandType, tasks.size());
                     Task removedTask = tasks.remove(taskIndexToDelete);
                     taskListChanged = true;
-                    printTaskDeleted(removedTask, tasks.size());
+                    ui.showTaskDeleted(removedTask, tasks.size());
                     break;
                 case TODO:
                     String description = getDescription(command, commandType, "ToDo");
                     Task todo = new Todo(description);
                     tasks.add(todo);
                     taskListChanged = true;
-                    printTaskAdded(todo, tasks.size());
+                    ui.showTaskAdded(todo, tasks.size());
                     break;
                 case DEADLINE:
-                    addDeadline(command, commandType, tasks);
+                    addDeadline(command, commandType, tasks, ui);
                     taskListChanged = true;
                     break;
                 case EVENT:
-                    addEvent(command, commandType, tasks);
+                    addEvent(command, commandType, tasks, ui);
                     taskListChanged = true;
                     break;
                 default:
@@ -127,14 +92,12 @@ public class Bola {
                     storage.save(tasks);
                 }
             } catch (BolaException exception) {
-                System.out.println(RESPONSE_INDENT + ERROR_ADDRESS + exception.getMessage());
+                ui.showError(exception.getMessage());
             } catch (IOException exception) {
                 storageAvailable = false;
-                System.out.println(RESPONSE_INDENT + STORAGE_ERROR_ADDRESS
-                        + "I couldn't save your tasks. Further changes won't be saved "
-                        + "during this session.");
+                ui.showSavingError();
             }
-            System.out.println(RESPONSE_DIVIDER);
+            ui.showDivider();
         }
     }
 
@@ -191,25 +154,14 @@ public class Bola {
      * @param input complete user input
      * @param commandType upcoming command type
      * @param tasks complete task list
+     * @param ui user interface used to show the matching tasks
      * @throws BolaException if the number of days is missing or invalid
      */
-    private static void printUpcomingTasks(String input, CommandType commandType,
-            List<Task> tasks) throws BolaException {
+    private static void showUpcomingTasks(String input, CommandType commandType,
+            List<Task> tasks, Ui ui) throws BolaException {
         int days = getUpcomingDays(input, commandType);
         List<Task> upcomingTasks = findUpcomingTasks(tasks, LocalDate.now(), days);
-        String dayWord = days == 1 ? "day" : "days";
-
-        System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
-                + "Here are your tasks for the next " + days + " " + dayWord + " ~");
-        if (upcomingTasks.isEmpty()) {
-            System.out.println(RESPONSE_INDENT + "    No dated tasks are coming up.");
-            return;
-        }
-
-        for (Task task : upcomingTasks) {
-            int originalTaskNumber = tasks.indexOf(task) + 1;
-            System.out.println(RESPONSE_INDENT + "    " + originalTaskNumber + ". " + task);
-        }
+        ui.showUpcomingTasks(upcomingTasks, tasks, days);
     }
 
     /**
@@ -281,10 +233,11 @@ public class Bola {
      * @param input complete user input
      * @param commandType deadline command type
      * @param tasks list to which the new deadline is added
+     * @param ui user interface used to confirm the addition
      * @throws BolaException if the description or deadline is missing
      */
-    private static void addDeadline(String input, CommandType commandType, ArrayList<Task> tasks)
-            throws BolaException {
+    private static void addDeadline(String input, CommandType commandType, ArrayList<Task> tasks,
+            Ui ui) throws BolaException {
         String taskDetails = input.substring(commandType.getKeyword().length()).strip();
         if (taskDetails.isEmpty() || taskDetails.startsWith("/by")) {
             throw new BolaException("What shall I add as your Deadline task?");
@@ -309,7 +262,7 @@ public class Bola {
         LocalDateTime by = parseTaskDateTime(byText);
         Task deadline = new Deadline(description, by);
         tasks.add(deadline);
-        printTaskAdded(deadline, tasks.size());
+        ui.showTaskAdded(deadline, tasks.size());
     }
 
     /**
@@ -318,10 +271,11 @@ public class Bola {
      * @param input complete user input
      * @param commandType event command type
      * @param tasks list to which the new event is added
+     * @param ui user interface used to confirm the addition
      * @throws BolaException if the description or time range is missing
      */
-    private static void addEvent(String input, CommandType commandType, ArrayList<Task> tasks)
-            throws BolaException {
+    private static void addEvent(String input, CommandType commandType, ArrayList<Task> tasks,
+            Ui ui) throws BolaException {
         String taskDetails = input.substring(commandType.getKeyword().length()).strip();
         if (taskDetails.isEmpty() || taskDetails.startsWith("/from")) {
             throw new BolaException("What shall I add as your Event task?");
@@ -351,7 +305,7 @@ public class Bola {
         LocalDateTime to = parseTaskDateTime(toText);
         Task event = new Event(description, from, to);
         tasks.add(event);
-        printTaskAdded(event, tasks.size());
+        ui.showTaskAdded(event, tasks.size());
     }
 
     /**
@@ -370,40 +324,4 @@ public class Bola {
         }
     }
 
-    /**
-     * Prints a confirmation after a task has been added.
-     *
-     * @param task task that was added
-     * @param taskCount number of tasks currently stored
-     */
-    private static void printTaskAdded(Task task, int taskCount) {
-        System.out.println(RESPONSE_INDENT + "Bola added:");
-        System.out.println(RESPONSE_INDENT + "    " + task);
-        printTaskCount(taskCount);
-    }
-
-    /**
-     * Prints the removed task and the grammatically correct number of remaining tasks.
-     *
-     * @param task task that was removed
-     * @param taskCount number of tasks remaining
-     */
-    private static void printTaskDeleted(Task task, int taskCount) {
-        System.out.println(RESPONSE_INDENT + "Bola removed:");
-        System.out.println(RESPONSE_INDENT + "    " + task);
-        printTaskCount(taskCount);
-    }
-
-    /**
-     * Prints the task count using singular wording only when exactly one task remains.
-     *
-     * @param taskCount number of tasks currently stored
-     */
-    private static void printTaskCount(int taskCount) {
-        if (taskCount == 1) {
-            System.out.println(RESPONSE_INDENT + "There is now 1 task in your list!");
-        } else {
-            System.out.println(RESPONSE_INDENT + "There are now " + taskCount + " tasks in your list!");
-        }
-    }
 }
