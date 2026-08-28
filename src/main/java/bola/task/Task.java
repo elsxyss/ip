@@ -4,7 +4,9 @@ package bola.task;
  * Represents a task and whether it has been completed.
  */
 public class Task {
+    /** Human-readable description of this task. */
     protected String description;
+    /** Whether this task has been completed. */
     protected boolean isDone;
 
     /**

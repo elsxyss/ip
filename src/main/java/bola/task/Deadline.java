@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
  * Represents a task that must be completed by a particular date or time.
  */
 public class Deadline extends Task {
+    /** Date and time by which this task must be completed. */
     protected LocalDateTime by;
 
     /**

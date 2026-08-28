@@ -21,6 +21,9 @@ public final class TaskDateTime {
     private static final DateTimeFormatter DISPLAY_DATE_TIME = formatter("MMM dd uuuu h:mm a");
     private static final DateTimeFormatter STORAGE_DATE_TIME = formatter("uuuu-MM-dd HHmm");
 
+    /**
+     * Prevents instantiation of this utility class.
+     */
     private TaskDateTime() {
     }
 
@@ -76,6 +79,9 @@ public final class TaskDateTime {
 
     /**
      * Creates a locale-stable formatter for user-facing text.
+     *
+     * @param pattern date-time pattern used by the formatter
+     * @return formatter that uses a consistent English locale
      */
     private static DateTimeFormatter formatter(String pattern) {
         return DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH);
@@ -83,6 +89,9 @@ public final class TaskDateTime {
 
     /**
      * Creates a strict formatter so impossible dates such as 31 February are rejected.
+     *
+     * @param pattern date-time pattern used by the formatter
+     * @return formatter that rejects invalid date and time values
      */
     private static DateTimeFormatter strictFormatter(String pattern) {
         return formatter(pattern).withResolverStyle(ResolverStyle.STRICT);

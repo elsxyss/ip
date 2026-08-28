@@ -19,6 +19,12 @@ public class Parser {
     private static final String TO_SEPARATOR = " /to";
 
     /**
+     * Creates a parser for interpreting Bola commands.
+     */
+    public Parser() {
+    }
+
+    /**
      * Identifies the command requested by the user.
      *
      * @param input complete user input
