@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -89,6 +90,27 @@ public class TaskList {
         Task task = tasks.get(index);
         task.markAsNotDone();
         return task;
+    }
+
+    /**
+     * Finds tasks whose descriptions contain the given keyword, ignoring letter case.
+     *
+     * <p>The matching tasks retain their order in the main task list.</p>
+     *
+     * @param keyword text to look for in task descriptions
+     * @return matching tasks in their original order
+     */
+    public List<Task> findTasks(String keyword) {
+        String normalisedKeyword = Objects.requireNonNull(keyword).toLowerCase(Locale.ROOT);
+        ArrayList<Task> matchingTasks = new ArrayList<>();
+
+        for (Task task : tasks) {
+            String normalisedDescription = task.getDescription().toLowerCase(Locale.ROOT);
+            if (normalisedDescription.contains(normalisedKeyword)) {
+                matchingTasks.add(task);
+            }
+        }
+        return matchingTasks;
     }
 
     /**

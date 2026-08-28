@@ -72,6 +72,10 @@ public class Bola {
                 case LIST:
                     ui.showTaskList(tasks.getTasks());
                     break;
+                case FIND:
+                    String keyword = parser.parseFindKeyword(command);
+                    ui.showMatchingTasks(tasks.findTasks(keyword));
+                    break;
                 case UPCOMING:
                     int days = parser.parseUpcomingDays(command, commandType);
                     showUpcomingTasks(days);

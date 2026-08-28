@@ -52,6 +52,27 @@ public class TaskListTest {
     }
 
     /**
+     * Checks case-insensitive substring matching and preservation of stored task order.
+     */
+    @Test
+    void findTasks_mixedDescriptions_returnsMatchesWithoutChangingStoredOrder() {
+        Task firstMatch = new Todo("Read Book");
+        Task nonMatch = new Deadline("submit report", "2026-09-02");
+        Task secondMatch = new Event(
+                "return book", "2026-09-03 1400", "2026-09-03 1500");
+        List<Task> originalOrder = List.of(firstMatch, nonMatch, secondMatch);
+        TaskList tasks = new TaskList(originalOrder);
+
+        List<Task> matches = tasks.findTasks("book");
+
+        assertAll(
+                () -> assertEquals(List.of(firstMatch, secondMatch), matches),
+                () -> assertEquals(originalOrder, tasks.getTasks(),
+                        "Finding tasks must not reorder stored tasks"),
+                () -> assertEquals(List.of(), tasks.findTasks("exercise")));
+    }
+
+    /**
      * Checks both inclusive date boundaries, chronological sorting, and exclusion rules.
      */
     @Test

@@ -34,6 +34,7 @@ public class ParserTest {
         assertAll(
                 () -> assertEquals(CommandType.BYE, parser.parseCommandType("bye")),
                 () -> assertEquals(CommandType.LIST, parser.parseCommandType("list")),
+                () -> assertEquals(CommandType.FIND, parser.parseCommandType("find book")),
                 () -> assertEquals(CommandType.UPCOMING,
                         parser.parseCommandType("upcoming 7")),
                 () -> assertEquals(CommandType.MARK, parser.parseCommandType("mark 1")),
@@ -46,8 +47,23 @@ public class ParserTest {
                         parser.parseCommandType("event lesson /from 2026-09-01 /to 2026-09-02")),
                 () -> assertParsingFails(() -> parser.parseCommandType("listing"), "Hmm?"),
                 () -> assertParsingFails(() -> parser.parseCommandType("list now"), "Hmm?"),
+                () -> assertParsingFails(() -> parser.parseCommandType("finder"), "Hmm?"),
                 () -> assertParsingFails(() -> parser.parseCommandType("TODO read"), "Hmm?"),
                 () -> assertParsingFails(() -> parser.parseCommandType(""), "Hmm?"));
+    }
+
+    /**
+     * Checks that find requires a keyword and preserves internal spaces in search text.
+     */
+    @Test
+    void parseFindKeyword_presentOrMissingKeyword_returnsKeywordOrThrows() throws BolaException {
+        assertAll(
+                () -> assertEquals("read   book", parser.parseFindKeyword(
+                        "find   read   book  ")),
+                () -> assertParsingFails(() -> parser.parseFindKeyword("find"),
+                        "What keyword shall I search for?"),
+                () -> assertParsingFails(() -> parser.parseFindKeyword("find   "),
+                        "What keyword shall I search for?"));
     }
 
     /**

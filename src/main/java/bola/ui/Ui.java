@@ -94,6 +94,20 @@ public class Ui {
     }
 
     /**
+     * Shows tasks whose descriptions match a search keyword.
+     *
+     * @param matchingTasks tasks that matched the keyword
+     */
+    public void showMatchingTasks(List<Task> matchingTasks) {
+        System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
+                + "Here are the matching tasks in your list:");
+        for (int i = 0; i < matchingTasks.size(); i++) {
+            System.out.println(RESPONSE_INDENT + "    " + (i + 1) + ". "
+                    + matchingTasks.get(i));
+        }
+    }
+
+    /**
      * Shows dated tasks due within the requested number of days.
      *
      * @param upcomingTasks matching tasks in chronological order

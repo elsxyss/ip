@@ -83,6 +83,21 @@ public class Parser {
     }
 
     /**
+     * Extracts the keyword supplied to a find command.
+     *
+     * @param input complete user input
+     * @return non-empty keyword to search for
+     * @throws BolaException if no keyword was supplied
+     */
+    public String parseFindKeyword(String input) throws BolaException {
+        String keyword = input.substring(CommandType.FIND.getKeyword().length()).strip();
+        if (keyword.isEmpty()) {
+            throw new BolaException("What keyword shall I search for?");
+        }
+        return keyword;
+    }
+
+    /**
      * Creates a to-do from a validated to-do command.
      *
      * @param input complete user input
