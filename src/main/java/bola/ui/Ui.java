@@ -32,7 +32,7 @@ public class Ui {
     /**
      * Returns whether another command is available from the user.
      *
-     * @return true if another line can be read
+     * @return true if another line can be read.
      */
     public boolean hasNextCommand() {
         return scanner.hasNextLine();
@@ -41,7 +41,7 @@ public class Ui {
     /**
      * Reads and trims the next command entered by the user.
      *
-     * @return the next command
+     * @return the next command.
      */
     public String readCommand() {
         return scanner.nextLine().strip();
@@ -50,10 +50,10 @@ public class Ui {
     /**
      * Shows Bola's greeting and any problem encountered while loading tasks.
      *
-     * @param storageAvailable whether tasks were loaded successfully
-     * @param loadingFailureReason reason loading failed, if applicable
+     * @param isStorageAvailable whether tasks were loaded successfully.
+     * @param loadingFailureReason reason loading failed, if applicable.
      */
-    public void showWelcome(boolean storageAvailable, String loadingFailureReason) {
+    public void showWelcome(boolean isStorageAvailable, String loadingFailureReason) {
         String banner = "    ____        __     \n"
                 + "   / __ )____  / /___ _\n"
                 + "  / __  / __ \\/ / __ `/\n"
@@ -64,7 +64,7 @@ public class Ui {
         System.out.println(ORANGE_TEXT + banner + RESET_TEXT_COLOUR);
         System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS + "Yo! I'm Bola.");
         System.out.println(RESPONSE_INDENT + "What are we working on today?");
-        if (!storageAvailable) {
+        if (!isStorageAvailable) {
             System.out.println(RESPONSE_INDENT + STORAGE_ERROR_ADDRESS
                     + "I couldn't load your tasks. " + loadingFailureReason);
             System.out.println(RESPONSE_INDENT
@@ -84,7 +84,7 @@ public class Ui {
     /**
      * Shows all tasks with their one-based task numbers.
      *
-     * @param tasks tasks to show
+     * @param tasks tasks to show.
      */
     public void showTaskList(List<Task> tasks) {
         System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS + "Here's your list ~");
@@ -96,9 +96,9 @@ public class Ui {
     /**
      * Shows dated tasks due within the requested number of days.
      *
-     * @param upcomingTasks matching tasks in chronological order
-     * @param allTasks complete task list, used to preserve the displayed task numbers
-     * @param days number of days in the requested range
+     * @param upcomingTasks matching tasks in chronological order.
+     * @param allTasks complete task list, used to preserve the displayed task numbers.
+     * @param days number of days in the requested range.
      */
     public void showUpcomingTasks(List<Task> upcomingTasks, List<Task> allTasks, int days) {
         String dayWord = days == 1 ? "day" : "days";
@@ -118,7 +118,7 @@ public class Ui {
     /**
      * Shows confirmation that a task was marked as done.
      *
-     * @param task task that was marked
+     * @param task task that was marked.
      */
     public void showTaskMarked(Task task) {
         System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
@@ -129,7 +129,7 @@ public class Ui {
     /**
      * Shows confirmation that a task was marked as not done.
      *
-     * @param task task that was unmarked
+     * @param task task that was unmarked.
      */
     public void showTaskUnmarked(Task task) {
         System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
@@ -140,8 +140,8 @@ public class Ui {
     /**
      * Shows a newly added task and the updated task count.
      *
-     * @param task task that was added
-     * @param taskCount number of tasks currently stored
+     * @param task task that was added.
+     * @param taskCount number of tasks currently stored.
      */
     public void showTaskAdded(Task task, int taskCount) {
         System.out.println(RESPONSE_INDENT + "Bola added:");
@@ -152,8 +152,8 @@ public class Ui {
     /**
      * Shows a removed task and the updated task count.
      *
-     * @param task task that was removed
-     * @param taskCount number of tasks remaining
+     * @param task task that was removed.
+     * @param taskCount number of tasks remaining.
      */
     public void showTaskDeleted(Task task, int taskCount) {
         System.out.println(RESPONSE_INDENT + "Bola removed:");
@@ -164,7 +164,7 @@ public class Ui {
     /**
      * Shows an invalid-command error.
      *
-     * @param message explanation of the invalid command
+     * @param message explanation of the invalid command.
      */
     public void showError(String message) {
         System.out.println(RESPONSE_INDENT + ERROR_ADDRESS + message);
@@ -189,7 +189,7 @@ public class Ui {
     /**
      * Shows the task count using singular wording only when exactly one task remains.
      *
-     * @param taskCount number of tasks currently stored
+     * @param taskCount number of tasks currently stored.
      */
     private void showTaskCount(int taskCount) {
         if (taskCount == 1) {

@@ -11,8 +11,8 @@ public class Deadline extends Task {
     /**
      * Creates an incomplete deadline task.
      *
-     * @param description description of the task
-     * @param by date and optional time by which the task must be completed
+     * @param description description of the task.
+     * @param by date and optional time by which the task must be completed.
      */
     public Deadline(String description, LocalDateTime by) {
         super(description);
@@ -22,8 +22,8 @@ public class Deadline extends Task {
     /**
      * Creates an incomplete deadline task from a supported date string.
      *
-     * @param description description of the task
-     * @param by date in a format supported by {@link TaskDateTime#parse(String)}
+     * @param description description of the task.
+     * @param by date in a format supported by {@link TaskDateTime#parse(String)}.
      */
     public Deadline(String description, String by) {
         this(description, TaskDateTime.parse(by));
@@ -32,7 +32,7 @@ public class Deadline extends Task {
     /**
      * Returns when this task is due.
      *
-     * @return deadline date and time
+     * @return deadline date and time.
      */
     public LocalDateTime getBy() {
         return by;
@@ -41,7 +41,7 @@ public class Deadline extends Task {
     /**
      * Returns this deadline in the format used for saving it to the hard disk.
      *
-     * @return serialized deadline data
+     * @return serialized deadline data.
      */
     @Override
     public String toDataString() {
@@ -52,7 +52,7 @@ public class Deadline extends Task {
     /**
      * Returns the deadline in Bola's display format.
      *
-     * @return the task prefixed with its type marker and followed by its deadline
+     * @return the task prefixed with its type marker and followed by its deadline.
      */
     @Override
     public String toString() {

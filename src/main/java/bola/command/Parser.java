@@ -21,9 +21,9 @@ public class Parser {
     /**
      * Identifies the command requested by the user.
      *
-     * @param input complete user input
-     * @return matching command type
-     * @throws BolaException if the input does not match a supported command
+     * @param input complete user input.
+     * @return matching command type.
+     * @throws BolaException if the input does not match a supported command.
      */
     public CommandType parseCommandType(String input) throws BolaException {
         return CommandType.fromInput(input).orElseThrow(() -> new BolaException("Hmm?"));
@@ -32,11 +32,11 @@ public class Parser {
     /**
      * Extracts and validates the task number in a command that targets an existing task.
      *
-     * @param input complete user input
-     * @param commandType command type, such as {@link CommandType#MARK}
-     * @param taskCount number of tasks currently stored
-     * @return corresponding zero-based list index
-     * @throws BolaException if the task number is missing, non-numeric, or out of range
+     * @param input complete user input.
+     * @param commandType command type, such as {@link CommandType#MARK}.
+     * @param taskCount number of tasks currently stored.
+     * @return corresponding zero-based list index.
+     * @throws BolaException if the task number is missing, non-numeric, or out of range.
      */
     public int parseTaskIndex(String input, CommandType commandType, int taskCount)
             throws BolaException {
@@ -60,10 +60,10 @@ public class Parser {
     /**
      * Extracts the positive number of days supplied to an upcoming command.
      *
-     * @param input complete user input
-     * @param commandType upcoming command type
-     * @return requested number of days
-     * @throws BolaException if the value is missing, non-numeric, or not positive
+     * @param input complete user input.
+     * @param commandType upcoming command type.
+     * @return requested number of days.
+     * @throws BolaException if the value is missing, non-numeric, or not positive.
      */
     public int parseUpcomingDays(String input, CommandType commandType) throws BolaException {
         String daysText = input.substring(commandType.getKeyword().length()).strip();
@@ -85,9 +85,9 @@ public class Parser {
     /**
      * Creates a to-do from a validated to-do command.
      *
-     * @param input complete user input
-     * @return newly parsed to-do
-     * @throws BolaException if no description was supplied
+     * @param input complete user input.
+     * @return newly parsed to-do.
+     * @throws BolaException if no description was supplied.
      */
     public Task parseTodo(String input) throws BolaException {
         return new Todo(parseDescription(input, CommandType.TODO, "ToDo"));
@@ -96,9 +96,9 @@ public class Parser {
     /**
      * Creates a deadline from a validated deadline command.
      *
-     * @param input complete user input
-     * @return newly parsed deadline
-     * @throws BolaException if its description or deadline is missing or invalid
+     * @param input complete user input.
+     * @return newly parsed deadline.
+     * @throws BolaException if its description or deadline is missing or invalid.
      */
     public Task parseDeadline(String input) throws BolaException {
         String taskDetails = input.substring(CommandType.DEADLINE.getKeyword().length()).strip();
@@ -129,9 +129,9 @@ public class Parser {
     /**
      * Creates an event from a validated event command.
      *
-     * @param input complete user input
-     * @return newly parsed event
-     * @throws BolaException if its description or time range is missing or invalid
+     * @param input complete user input.
+     * @return newly parsed event.
+     * @throws BolaException if its description or time range is missing or invalid.
      */
     public Task parseEvent(String input) throws BolaException {
         String taskDetails = input.substring(CommandType.EVENT.getKeyword().length()).strip();
@@ -167,11 +167,11 @@ public class Parser {
     /**
      * Extracts a required task description from a task command.
      *
-     * @param input complete user input
-     * @param commandType type of task command
-     * @param taskType task type used in the error message
-     * @return non-empty task description
-     * @throws BolaException if no description was supplied
+     * @param input complete user input.
+     * @param commandType type of task command.
+     * @param taskType task type used in the error message.
+     * @return non-empty task description.
+     * @throws BolaException if no description was supplied.
      */
     private String parseDescription(String input, CommandType commandType, String taskType)
             throws BolaException {
@@ -185,9 +185,9 @@ public class Parser {
     /**
      * Parses a task date and converts parsing failures into a helpful chatbot response.
      *
-     * @param dateTimeText date and optional time entered by the user
-     * @return parsed date and time
-     * @throws BolaException if the date is invalid or uses an unsupported format
+     * @param dateTimeText date and optional time entered by the user.
+     * @return parsed date and time.
+     * @throws BolaException if the date is invalid or uses an unsupported format.
      */
     private LocalDateTime parseTaskDateTime(String dateTimeText) throws BolaException {
         try {

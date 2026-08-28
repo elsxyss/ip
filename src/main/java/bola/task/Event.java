@@ -12,9 +12,9 @@ public class Event extends Task {
     /**
      * Creates an incomplete event task.
      *
-     * @param description description of the task
-     * @param from date and optional time at which the event starts
-     * @param to date and optional time at which the event ends
+     * @param description description of the task.
+     * @param from date and optional time at which the event starts.
+     * @param to date and optional time at which the event ends.
      */
     public Event(String description, LocalDateTime from, LocalDateTime to) {
         super(description);
@@ -25,9 +25,9 @@ public class Event extends Task {
     /**
      * Creates an incomplete event task from supported date strings.
      *
-     * @param description description of the task
-     * @param from date in a format supported by {@link TaskDateTime#parse(String)}
-     * @param to date in a format supported by {@link TaskDateTime#parse(String)}
+     * @param description description of the task.
+     * @param from date in a format supported by {@link TaskDateTime#parse(String)}.
+     * @param to date in a format supported by {@link TaskDateTime#parse(String)}.
      */
     public Event(String description, String from, String to) {
         this(description, TaskDateTime.parse(from), TaskDateTime.parse(to));
@@ -36,7 +36,7 @@ public class Event extends Task {
     /**
      * Returns when this event starts.
      *
-     * @return event start date and time
+     * @return event start date and time.
      */
     public LocalDateTime getFrom() {
         return from;
@@ -45,7 +45,7 @@ public class Event extends Task {
     /**
      * Returns when this event ends.
      *
-     * @return event end date and time
+     * @return event end date and time.
      */
     public LocalDateTime getTo() {
         return to;
@@ -54,7 +54,7 @@ public class Event extends Task {
     /**
      * Returns this event in the format used for saving it to the hard disk.
      *
-     * @return serialized event data
+     * @return serialized event data.
      */
     @Override
     public String toDataString() {
@@ -66,7 +66,7 @@ public class Event extends Task {
     /**
      * Returns the event in Bola's display format.
      *
-     * @return the task prefixed with its type marker and followed by its time range
+     * @return the task prefixed with its type marker and followed by its time range.
      */
     @Override
     public String toString() {

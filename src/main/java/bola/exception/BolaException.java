@@ -10,7 +10,7 @@ public class BolaException extends Exception {
     /**
      * Creates an exception with an explanation that can be shown to the user.
      *
-     * @param message explanation of the invalid command and how to correct it
+     * @param message explanation of the invalid command and how to correct it.
      */
     public BolaException(String message) {
         super(message);

@@ -19,7 +19,7 @@ public class StorageTest {
     /**
      * Checks first-run loading, directory creation, serialization, loading, and empty overwrites.
      *
-     * @throws Exception if temporary test files cannot be accessed
+     * @throws Exception if temporary test files cannot be accessed.
      */
     @Test
     void testMissingFileAndRoundTrip() throws Exception {
@@ -53,7 +53,7 @@ public class StorageTest {
     /**
      * Checks that vertical bars and backslashes survive a save-and-load round trip.
      *
-     * @throws Exception if temporary test files cannot be accessed
+     * @throws Exception if temporary test files cannot be accessed.
      */
     @Test
     void testEscapedCharacters() throws Exception {
@@ -76,7 +76,7 @@ public class StorageTest {
     /**
      * Checks that harmless empty lines and a UTF-8 byte-order mark are ignored.
      *
-     * @throws Exception if temporary test files cannot be accessed
+     * @throws Exception if temporary test files cannot be accessed.
      */
     @Test
     void testBlankLines() throws Exception {
@@ -92,7 +92,7 @@ public class StorageTest {
     /**
      * Checks all structural validation rules for corrupted task records.
      *
-     * @throws Exception if temporary test files cannot be accessed
+     * @throws Exception if temporary test files cannot be accessed.
      */
     @Test
     void testMalformedRecords() throws Exception {
@@ -119,7 +119,7 @@ public class StorageTest {
     /**
      * Checks that a directory cannot be mistaken for the data file.
      *
-     * @throws Exception if temporary test files cannot be accessed
+     * @throws Exception if temporary test files cannot be accessed.
      */
     @Test
     void testInvalidFilePath() throws Exception {
@@ -144,9 +144,9 @@ public class StorageTest {
     /**
      * Checks that loading one malformed record produces a descriptive failure.
      *
-     * @param dataFile temporary data file
-     * @param malformedRecord invalid record to test
-     * @throws Exception if temporary test files cannot be accessed
+     * @param dataFile temporary data file.
+     * @param malformedRecord invalid record to test.
+     * @throws Exception if temporary test files cannot be accessed.
      */
     private static void assertLoadFails(Path dataFile, String malformedRecord) throws Exception {
         Files.writeString(dataFile, malformedRecord);
