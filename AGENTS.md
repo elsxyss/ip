@@ -26,9 +26,11 @@ Unless the user says otherwise, assume that you are assisting a student working 
 
 ## Java coding standards
 
-All generated or modified Java code must follow, at minimum, the
-[SE-EDU Java coding standard](https://se-education.org/guides/conventions/java/index.html).
-If this repository defines a stricter convention, follow the stricter convention.
+Before creating, modifying, or reviewing any Java code, load and follow the
+project-specific `seedu-java-coding-standard` skill at
+`.agents/skills/seedu-java-coding-standard/SKILL.md`. All Java code in this
+repository must conform to that skill. If another repository rule is stricter,
+follow the stricter rule.
 
 ## Java version:
 
@@ -41,6 +43,11 @@ business logic. Update the relevant JUnit tests after every code change so the c
 target continues to be met and changed behavior is protected against regressions.
 
 ## Git
+
+Before proposing or creating any commit, commit message, or branch, load and
+follow the project-specific `seedu-git-standard` skill at
+`.agents/skills/seedu-git-standard/SKILL.md`. All future commits and branches
+must conform to that skill.
 
 Use lightweight tags unless the user requests an annotated tag.
 When proposing or creating a commit message, include enough detail to explain the rationale for the change.

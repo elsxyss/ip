@@ -24,7 +24,7 @@ public class TaskList {
     /**
      * Creates a task list containing a defensive copy of the supplied tasks.
      *
-     * @param tasks initial tasks
+     * @param tasks initial tasks.
      */
     public TaskList(List<Task> tasks) {
         this.tasks = new ArrayList<>(Objects.requireNonNull(tasks));
@@ -33,7 +33,7 @@ public class TaskList {
     /**
      * Returns the number of tasks in the list.
      *
-     * @return task count
+     * @return task count.
      */
     public int size() {
         return tasks.size();
@@ -42,7 +42,7 @@ public class TaskList {
     /**
      * Returns a read-only view of the tasks in their current order.
      *
-     * @return unmodifiable task view
+     * @return unmodifiable task view.
      */
     public List<Task> getTasks() {
         return Collections.unmodifiableList(tasks);
@@ -51,7 +51,7 @@ public class TaskList {
     /**
      * Adds a task to the end of the list.
      *
-     * @param task task to add
+     * @param task task to add.
      */
     public void add(Task task) {
         tasks.add(Objects.requireNonNull(task));
@@ -60,8 +60,8 @@ public class TaskList {
     /**
      * Removes and returns the task at the given zero-based index.
      *
-     * @param index zero-based task index
-     * @return removed task
+     * @param index zero-based task index.
+     * @return removed task.
      */
     public Task delete(int index) {
         return tasks.remove(index);
@@ -70,8 +70,8 @@ public class TaskList {
     /**
      * Marks and returns the task at the given zero-based index.
      *
-     * @param index zero-based task index
-     * @return marked task
+     * @param index zero-based task index.
+     * @return marked task.
      */
     public Task mark(int index) {
         Task task = tasks.get(index);
@@ -82,8 +82,8 @@ public class TaskList {
     /**
      * Unmarks and returns the task at the given zero-based index.
      *
-     * @param index zero-based task index
-     * @return unmarked task
+     * @param index zero-based task index.
+     * @return unmarked task.
      */
     public Task unmark(int index) {
         Task task = tasks.get(index);
@@ -96,9 +96,9 @@ public class TaskList {
      *
      * <p>The returned list is independent, so the stored task order is unchanged.</p>
      *
-     * @param today first date to include
-     * @param days number of days ahead to include
-     * @return matching dated tasks in chronological order
+     * @param today first date to include.
+     * @param days number of days ahead to include.
+     * @return matching dated tasks in chronological order.
      */
     public List<Task> findUpcomingTasks(LocalDate today, int days) {
         LocalDate lastDate = today.plusDays(days);

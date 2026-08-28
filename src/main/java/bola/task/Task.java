@@ -12,7 +12,7 @@ public class Task {
     /**
      * Creates an incomplete task with the given description.
      *
-     * @param description description of the task
+     * @param description description of the task.
      */
     public Task(String description) {
         this.description = description;
@@ -22,7 +22,7 @@ public class Task {
     /**
      * Returns the symbol used to display the task's completion status.
      *
-     * @return {@code X} if the task is done, or a space otherwise
+     * @return {@code X} if the task is done, or a space otherwise.
      */
     public String getStatusIcon() {
         return isDone ? "X" : " ";
@@ -45,7 +45,7 @@ public class Task {
     /**
      * Returns whether this task has been completed as a value suitable for the data file.
      *
-     * @return {@code 1} if done, or {@code 0} otherwise
+     * @return {@code 1} if done, or {@code 0} otherwise.
      */
     protected String getDataStatus() {
         return isDone ? "1" : "0";
@@ -54,7 +54,7 @@ public class Task {
     /**
      * Returns this task in the format used for saving it to the hard disk.
      *
-     * @return serialized task data
+     * @return serialized task data.
      */
     public String toDataString() {
         return "T | " + getDataStatus() + " | " + escapeDataField(description);
@@ -63,8 +63,8 @@ public class Task {
     /**
      * Escapes characters that otherwise have a special meaning in Bola's data format.
      *
-     * @param value task field to escape
-     * @return field with backslashes and vertical bars escaped
+     * @param value task field to escape.
+     * @return field with backslashes and vertical bars escaped.
      */
     protected String escapeDataField(String value) {
         return value.replace("\\", "\\\\").replace("|", "\\|");
@@ -73,7 +73,7 @@ public class Task {
     /**
      * Returns the task in the format used by Bola's responses.
      *
-     * @return the status icon followed by the task description
+     * @return the status icon followed by the task description.
      */
     @Override
     public String toString() {

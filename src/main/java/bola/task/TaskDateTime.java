@@ -32,8 +32,8 @@ public final class TaskDateTime {
      *
      * @param value date in {@code yyyy-MM-dd}, {@code yyyy-MM-dd HHmm}, or
      *              {@code d/M/yyyy HHmm} format
-     * @return the parsed value; a date without a time is represented as midnight
-     * @throws DateTimeParseException if the value is not a real date in a supported format
+     * @return the parsed value; a date without a time is represented as midnight.
+     * @throws DateTimeParseException if the value is not a real date in a supported format.
      */
     public static LocalDateTime parse(String value) {
         try {
@@ -54,8 +54,8 @@ public final class TaskDateTime {
     /**
      * Formats a task date for display, including its time when one is present.
      *
-     * @param dateTime date and optional time to format
-     * @return a user-friendly date such as {@code Dec 02 2019 6:00 PM}
+     * @param dateTime date and optional time to format.
+     * @return a user-friendly date such as {@code Dec 02 2019 6:00 PM}.
      */
     public static String formatForDisplay(LocalDateTime dateTime) {
         if (dateTime.toLocalTime().equals(LocalTime.MIDNIGHT)) {
@@ -67,8 +67,8 @@ public final class TaskDateTime {
     /**
      * Formats a task date in a stable representation suitable for saving and reloading.
      *
-     * @param dateTime date and optional time to format
-     * @return an ISO-style date with a compact 24-hour time when needed
+     * @param dateTime date and optional time to format.
+     * @return an ISO-style date with a compact 24-hour time when needed.
      */
     public static String formatForStorage(LocalDateTime dateTime) {
         if (dateTime.toLocalTime().equals(LocalTime.MIDNIGHT)) {

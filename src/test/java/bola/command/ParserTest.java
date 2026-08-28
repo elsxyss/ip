@@ -173,8 +173,8 @@ public class ParserTest {
     /**
      * Checks that an operation fails with the expected user-facing explanation.
      *
-     * @param operation parser operation expected to fail
-     * @param expectedMessage expected user-facing explanation
+     * @param operation parser operation expected to fail.
+     * @param expectedMessage expected user-facing explanation.
      */
     private static void assertParsingFails(ParsingOperation operation, String expectedMessage) {
         BolaException exception = assertThrows(BolaException.class, operation::run);
@@ -184,7 +184,7 @@ public class ParserTest {
     /**
      * Returns the shared explanation for an unsupported or impossible date.
      *
-     * @return invalid-date message
+     * @return invalid-date message.
      */
     private static String invalidDateMessage() {
         return "Please enter dates as yyyy-MM-dd, or include a time as "
@@ -199,7 +199,7 @@ public class ParserTest {
         /**
          * Runs the parser operation.
          *
-         * @throws BolaException if the supplied input is invalid
+         * @throws BolaException if the supplied input is invalid.
          */
         void run() throws BolaException;
     }

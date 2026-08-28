@@ -23,7 +23,7 @@ public class Bola {
     private final Parser parser;
     private final String loadingFailureReason;
 
-    private boolean storageAvailable;
+    private boolean isStorageAvailable;
 
     /**
      * Creates Bola and loads tasks from the specified data file.
@@ -31,7 +31,7 @@ public class Bola {
      * <p>If loading fails, Bola starts with an empty task list and avoids overwriting the
      * inaccessible data file during this session.</p>
      *
-     * @param filePath path of the data file
+     * @param filePath path of the data file.
      */
     public Bola(String filePath) {
         storage = new Storage(Path.of(filePath));
@@ -48,7 +48,7 @@ public class Bola {
             failureReason = exception.getMessage();
         }
         tasks = loadedTasks;
-        storageAvailable = canUseStorage;
+        isStorageAvailable = canUseStorage;
         loadingFailureReason = failureReason;
     }
 
@@ -56,7 +56,7 @@ public class Bola {
      * Displays Bola's greeting and responds to commands until the user enters {@code bye}.
      */
     public void run() {
-        ui.showWelcome(storageAvailable, loadingFailureReason);
+        ui.showWelcome(isStorageAvailable, loadingFailureReason);
 
         while (ui.hasNextCommand()) {
             String command = ui.readCommand();
@@ -66,65 +66,65 @@ public class Bola {
                 CommandType commandType = parser.parseCommandType(command);
 
                 switch (commandType) {
-                case BYE:
-                    ui.showGoodbye();
-                    return;
-                case LIST:
-                    ui.showTaskList(tasks.getTasks());
-                    break;
-                case UPCOMING:
-                    int days = parser.parseUpcomingDays(command, commandType);
-                    showUpcomingTasks(days);
-                    break;
-                case MARK:
-                    int taskIndexToMark = parser.parseTaskIndex(
-                            command, commandType, tasks.size());
-                    Task markedTask = tasks.mark(taskIndexToMark);
-                    taskListChanged = true;
-                    ui.showTaskMarked(markedTask);
-                    break;
-                case UNMARK:
-                    int taskIndexToUnmark = parser.parseTaskIndex(
-                            command, commandType, tasks.size());
-                    Task unmarkedTask = tasks.unmark(taskIndexToUnmark);
-                    taskListChanged = true;
-                    ui.showTaskUnmarked(unmarkedTask);
-                    break;
-                case DELETE:
-                    int taskIndexToDelete = parser.parseTaskIndex(
-                            command, commandType, tasks.size());
-                    Task removedTask = tasks.delete(taskIndexToDelete);
-                    taskListChanged = true;
-                    ui.showTaskDeleted(removedTask, tasks.size());
-                    break;
-                case TODO:
-                    Task todo = parser.parseTodo(command);
-                    tasks.add(todo);
-                    taskListChanged = true;
-                    ui.showTaskAdded(todo, tasks.size());
-                    break;
-                case DEADLINE:
-                    Task deadline = parser.parseDeadline(command);
-                    tasks.add(deadline);
-                    taskListChanged = true;
-                    ui.showTaskAdded(deadline, tasks.size());
-                    break;
-                case EVENT:
-                    Task event = parser.parseEvent(command);
-                    tasks.add(event);
-                    taskListChanged = true;
-                    ui.showTaskAdded(event, tasks.size());
-                    break;
-                default:
-                    throw new AssertionError("Unhandled command type: " + commandType);
+                    case BYE:
+                        ui.showGoodbye();
+                        return;
+                    case LIST:
+                        ui.showTaskList(tasks.getTasks());
+                        break;
+                    case UPCOMING:
+                        int days = parser.parseUpcomingDays(command, commandType);
+                        showUpcomingTasks(days);
+                        break;
+                    case MARK:
+                        int taskIndexToMark = parser.parseTaskIndex(
+                                command, commandType, tasks.size());
+                        Task markedTask = tasks.mark(taskIndexToMark);
+                        taskListChanged = true;
+                        ui.showTaskMarked(markedTask);
+                        break;
+                    case UNMARK:
+                        int taskIndexToUnmark = parser.parseTaskIndex(
+                                command, commandType, tasks.size());
+                        Task unmarkedTask = tasks.unmark(taskIndexToUnmark);
+                        taskListChanged = true;
+                        ui.showTaskUnmarked(unmarkedTask);
+                        break;
+                    case DELETE:
+                        int taskIndexToDelete = parser.parseTaskIndex(
+                                command, commandType, tasks.size());
+                        Task removedTask = tasks.delete(taskIndexToDelete);
+                        taskListChanged = true;
+                        ui.showTaskDeleted(removedTask, tasks.size());
+                        break;
+                    case TODO:
+                        Task todo = parser.parseTodo(command);
+                        tasks.add(todo);
+                        taskListChanged = true;
+                        ui.showTaskAdded(todo, tasks.size());
+                        break;
+                    case DEADLINE:
+                        Task deadline = parser.parseDeadline(command);
+                        tasks.add(deadline);
+                        taskListChanged = true;
+                        ui.showTaskAdded(deadline, tasks.size());
+                        break;
+                    case EVENT:
+                        Task event = parser.parseEvent(command);
+                        tasks.add(event);
+                        taskListChanged = true;
+                        ui.showTaskAdded(event, tasks.size());
+                        break;
+                    default:
+                        throw new AssertionError("Unhandled command type: " + commandType);
                 }
-                if (taskListChanged && storageAvailable) {
+                if (taskListChanged && isStorageAvailable) {
                     storage.save(tasks.getTasks());
                 }
             } catch (BolaException exception) {
                 ui.showError(exception.getMessage());
             } catch (IOException exception) {
-                storageAvailable = false;
+                isStorageAvailable = false;
                 ui.showSavingError();
             }
             ui.showDivider();
@@ -134,7 +134,7 @@ public class Bola {
     /**
      * Prints dated tasks from today through the requested number of days ahead.
      *
-     * @param days number of days ahead to include
+     * @param days number of days ahead to include.
      */
     private void showUpcomingTasks(int days) {
         List<Task> upcomingTasks = tasks.findUpcomingTasks(LocalDate.now(), days);
@@ -144,7 +144,7 @@ public class Bola {
     /**
      * Starts Bola using its default data-file location.
      *
-     * @param args command-line arguments; not used
+     * @param args command-line arguments; not used.
      */
     public static void main(String[] args) {
         new Bola("data/bola.txt").run();

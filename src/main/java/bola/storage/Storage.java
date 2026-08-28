@@ -33,7 +33,7 @@ public class Storage {
     /**
      * Creates storage that writes to the specified file.
      *
-     * @param filePath path of the data file
+     * @param filePath path of the data file.
      */
     public Storage(Path filePath) {
         this.filePath = Objects.requireNonNull(filePath);
@@ -42,8 +42,8 @@ public class Storage {
     /**
      * Loads the tasks in the data file, or returns an empty list if the file does not exist yet.
      *
-     * @return tasks reconstructed from the data file
-     * @throws IOException if the data file cannot be read or contains an invalid task
+     * @return tasks reconstructed from the data file.
+     * @throws IOException if the data file cannot be read or contains an invalid task.
      */
     public ArrayList<Task> load() throws IOException {
         ArrayList<Task> tasks = new ArrayList<>();
@@ -67,8 +67,8 @@ public class Storage {
     /**
      * Replaces the data file with the current task list, creating its parent directory if needed.
      *
-     * @param tasks tasks to save
-     * @throws IOException if the tasks cannot be written
+     * @param tasks tasks to save.
+     * @throws IOException if the tasks cannot be written.
      */
     public void save(List<Task> tasks) throws IOException {
         Objects.requireNonNull(tasks);
@@ -90,9 +90,9 @@ public class Storage {
     /**
      * Replaces the data file atomically when supported, with a portable fallback otherwise.
      *
-     * @param temporaryFile fully written temporary file
-     * @param destinationFile data file to replace
-     * @throws IOException if the completed file cannot be moved into place
+     * @param temporaryFile fully written temporary file.
+     * @param destinationFile data file to replace.
+     * @throws IOException if the completed file cannot be moved into place.
      */
     private void replaceDataFile(Path temporaryFile, Path destinationFile) throws IOException {
         try {
@@ -106,10 +106,10 @@ public class Storage {
     /**
      * Reconstructs one task from its saved representation.
      *
-     * @param taskData one line from the data file
-     * @param lineNumber one-based line number used in error messages
-     * @return reconstructed task
-     * @throws IOException if the line does not match Bola's data format
+     * @param taskData one line from the data file.
+     * @param lineNumber one-based line number used in error messages.
+     * @return reconstructed task.
+     * @throws IOException if the line does not match Bola's data format.
      */
     private Task parseTask(String taskData, int lineNumber) throws IOException {
         List<String> fields = splitFields(taskData);
@@ -154,8 +154,8 @@ public class Storage {
     /**
      * Splits a task record at unescaped vertical bars and restores escaped characters.
      *
-     * @param taskData one line from the data file
-     * @return parsed and trimmed fields
+     * @param taskData one line from the data file.
+     * @return parsed and trimmed fields.
      */
     private List<String> splitFields(String taskData) {
         ArrayList<String> fields = new ArrayList<>();
@@ -185,11 +185,11 @@ public class Storage {
     /**
      * Checks that a saved task has an allowed number of fields.
      *
-     * @param fields parsed task fields
-     * @param minimumCount minimum allowed number of fields
-     * @param maximumCount maximum allowed number of fields
-     * @param lineNumber one-based line number used in error messages
-     * @throws IOException if the field count is outside the allowed range
+     * @param fields parsed task fields.
+     * @param minimumCount minimum allowed number of fields.
+     * @param maximumCount maximum allowed number of fields.
+     * @param lineNumber one-based line number used in error messages.
+     * @throws IOException if the field count is outside the allowed range.
      */
     private void requireFieldCount(List<String> fields, int minimumCount, int maximumCount,
             int lineNumber) throws IOException {
@@ -201,10 +201,10 @@ public class Storage {
     /**
      * Checks that a required task field contains visible text.
      *
-     * @param field field to validate
-     * @param fieldName field name used in the error message
-     * @param lineNumber one-based line number used in error messages
-     * @throws IOException if the field is blank
+     * @param field field to validate.
+     * @param fieldName field name used in the error message.
+     * @param lineNumber one-based line number used in error messages.
+     * @throws IOException if the field is blank.
      */
     private void requireNonBlank(String field, String fieldName, int lineNumber)
             throws IOException {
@@ -216,9 +216,9 @@ public class Storage {
     /**
      * Creates a consistent exception for malformed saved data.
      *
-     * @param lineNumber one-based line number containing the error
-     * @param reason explanation of the malformed data
-     * @return exception describing the invalid record
+     * @param lineNumber one-based line number containing the error.
+     * @param reason explanation of the malformed data.
+     * @return exception describing the invalid record.
      */
     private IOException invalidData(int lineNumber, String reason) {
         return new IOException("Invalid task data on line " + lineNumber + ": " + reason + ".");
