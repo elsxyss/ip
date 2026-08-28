@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -6,25 +7,45 @@ import java.util.List;
  * Coordinates Bola's user interface, task operations, and persistent storage.
  */
 public class Bola {
+    private final Storage storage;
+    private final TaskList tasks;
+    private final Ui ui;
+    private final Parser parser;
+    private final String loadingFailureReason;
+
+    private boolean storageAvailable;
+
+    /**
+     * Creates Bola and loads tasks from the specified data file.
+     *
+     * <p>If loading fails, Bola starts with an empty task list and avoids overwriting the
+     * inaccessible data file during this session.</p>
+     *
+     * @param filePath path of the data file
+     */
+    public Bola(String filePath) {
+        storage = new Storage(Path.of(filePath));
+        ui = new Ui();
+        parser = new Parser();
+
+        TaskList loadedTasks = new TaskList();
+        boolean canUseStorage = true;
+        String failureReason = "";
+        try {
+            loadedTasks = new TaskList(storage.load());
+        } catch (IOException exception) {
+            canUseStorage = false;
+            failureReason = exception.getMessage();
+        }
+        tasks = loadedTasks;
+        storageAvailable = canUseStorage;
+        loadingFailureReason = failureReason;
+    }
+
     /**
      * Displays Bola's greeting and responds to commands until the user enters {@code bye}.
-     *
-     * @param args command-line arguments; not used
      */
-    public static void main(String[] args) {
-        Ui ui = new Ui();
-        Parser parser = new Parser();
-        Storage storage = new Storage();
-        TaskList tasks = new TaskList();
-        boolean storageAvailable = true;
-        String loadingFailureReason = "";
-        try {
-            tasks = new TaskList(storage.load());
-        } catch (IOException exception) {
-            storageAvailable = false;
-            loadingFailureReason = exception.getMessage();
-        }
-
+    public void run() {
         ui.showWelcome(storageAvailable, loadingFailureReason);
 
         while (ui.hasNextCommand()) {
@@ -43,7 +64,7 @@ public class Bola {
                     break;
                 case UPCOMING:
                     int days = parser.parseUpcomingDays(command, commandType);
-                    showUpcomingTasks(days, tasks, ui);
+                    showUpcomingTasks(days);
                     break;
                 case MARK:
                     int taskIndexToMark = parser.parseTaskIndex(
@@ -104,11 +125,18 @@ public class Bola {
      * Prints dated tasks from today through the requested number of days ahead.
      *
      * @param days number of days ahead to include
-     * @param tasks complete task list
-     * @param ui user interface used to show the matching tasks
      */
-    private static void showUpcomingTasks(int days, TaskList tasks, Ui ui) {
+    private void showUpcomingTasks(int days) {
         List<Task> upcomingTasks = tasks.findUpcomingTasks(LocalDate.now(), days);
         ui.showUpcomingTasks(upcomingTasks, tasks.getTasks(), days);
+    }
+
+    /**
+     * Starts Bola using its default data-file location.
+     *
+     * @param args command-line arguments; not used
+     */
+    public static void main(String[] args) {
+        new Bola("data/bola.txt").run();
     }
 }
