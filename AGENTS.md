@@ -34,6 +34,12 @@ If this repository defines a stricter convention, follow the stricter convention
 
 Ensure that Java 25 is used when running the application or build tasks. On macOS, use `sdk use java 25.0.3.fx-zulu` to switch to Java 25 if needed.
 
+## Test coverage
+
+Maintain JUnit test coverage of at least 50%, prioritizing complex, core, and critical
+business logic. Update the relevant JUnit tests after every code change so the coverage
+target continues to be met and changed behavior is protected against regressions.
+
 ## Git
 
 Use lightweight tags unless the user requests an annotated tag.
