@@ -1,7 +1,17 @@
+package bola;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
+
+import bola.command.CommandType;
+import bola.command.Parser;
+import bola.exception.BolaException;
+import bola.storage.Storage;
+import bola.task.Task;
+import bola.task.TaskList;
+import bola.ui.Ui;
 
 /**
  * Coordinates Bola's user interface, task operations, and persistent storage.
