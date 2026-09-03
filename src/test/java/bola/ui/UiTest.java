@@ -1,6 +1,7 @@
 package bola.ui;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -18,6 +19,52 @@ import bola.task.Todo;
  * Tests Bola's user-facing responses for successful, empty, and failed outcomes.
  */
 public class UiTest {
+    /**
+     * Checks grouped lines retain console spacing and order, including the closing divider.
+     */
+    @Test
+    void multilineResponses_console_preserveExactFormatting() {
+        Ui ui = new Ui();
+        String separator = System.lineSeparator();
+
+        assertAll(
+                () -> assertEquals(
+                        "     Bola: Eh hello! I'm Bola." + separator
+                                + "     Got anything to settle today?" + separator,
+                        captureOutput(() -> ui.showGreeting(true, ""))),
+                () -> assertEquals(
+                        "     Bola: Alamak, I couldn't save your tasks." + separator
+                                + "     Any more changes in this session won't be saved, okay?" + separator,
+                        captureOutput(ui::showSavingError)),
+                () -> assertEquals(
+                        "     Bola: All settled? Steady lah. See you again! 👋" + separator
+                                + "================================================================" + separator,
+                        captureOutput(ui::showGoodbye)));
+    }
+
+    /**
+     * Checks grouped GUI responses retain all lines while removing console indentation and dividers.
+     */
+    @Test
+    void multilineResponses_gui_preserveExactFormatting() {
+        Ui ui = new Ui();
+
+        assertAll(
+                () -> assertEquals(
+                        "Bola: Eh hello! I'm Bola.\n"
+                                + "Got anything to settle today?\n"
+                                + "Bola: Alamak, I couldn't load your saved tasks. Permission denied.\n"
+                                + "Don't worry—I won't overwrite your data file during this session.",
+                        ui.captureResponse(() -> ui.showGreeting(false, "Permission denied."))),
+                () -> assertEquals(
+                        "Bola: Can! I've added this task:\n"
+                                + "    [T][ ] buy kopi\n"
+                                + "Now got 1 task in your list.",
+                        ui.captureResponse(() -> ui.showTaskAdded(new Todo("buy kopi"), 1))),
+                () -> assertEquals("Bola: All settled? Steady lah. See you again! 👋",
+                        ui.captureResponse(ui::showGoodbye)));
+    }
+
     /**
      * Checks the normal greeting, storage warning, and farewell messages.
      */
