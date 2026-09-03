@@ -100,3 +100,55 @@ D | 0 | return book | 2026-09-10
         Bola: All settled? Steady lah. See you again! 👋
    ================================================================
    ```
+
+## TC-004: Preserve grouped task confirmation lines
+
+**Aim:** Verify that varargs-based output preserves line order, spacing, task status,
+and task counts for adding, marking, unmarking, and deleting a task.
+
+**Inputs:**
+
+1. `todo buy kopi`
+2. `mark 1`
+3. `unmark 1`
+4. `delete 1`
+5. `bye`
+
+**Expected outputs:**
+
+1. For `todo buy kopi`:
+
+   ```text
+        Bola: Can! I've added this task:
+            [T][ ] buy kopi
+        Now got 1 task in your list.
+   ```
+
+2. For `mark 1`:
+
+   ```text
+        Bola: Nice, one task settled liao! ✅
+            [T][X] buy kopi
+   ```
+
+3. For `unmark 1`:
+
+   ```text
+        Bola: Okay, this one not settled yet.
+            [T][ ] buy kopi
+   ```
+
+4. For `delete 1`:
+
+   ```text
+        Bola: Okay, removed already:
+            [T][ ] buy kopi
+        Bo lah! No more tasks in your list. 🎉
+   ```
+
+5. For `bye`:
+
+   ```text
+        Bola: All settled? Steady lah. See you again! 👋
+   ================================================================
+   ```

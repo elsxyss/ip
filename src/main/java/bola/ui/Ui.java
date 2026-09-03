@@ -61,8 +61,7 @@ public class Ui {
                 + " / /_/ / /_/ / / /_/ / \n"
                 + "/_____/\\____/_/\\__,_/  \n";
 
-        showLine(OUTER_DIVIDER);
-        showLine(ORANGE_TEXT + banner + RESET_TEXT_COLOUR);
+        showLines(OUTER_DIVIDER, ORANGE_TEXT + banner + RESET_TEXT_COLOUR);
         showGreeting(isStorageAvailable, loadingFailureReason);
         showDivider();
     }
@@ -71,12 +70,12 @@ public class Ui {
      * Shows the greeting and storage warning without the console banner.
      */
     public void showGreeting(boolean isStorageAvailable, String loadingFailureReason) {
-        showLine(RESPONSE_INDENT + RESPONSE_ADDRESS + "Eh hello! I'm Bola.");
-        showLine(RESPONSE_INDENT + "Got anything to settle today?");
+        showLines(RESPONSE_INDENT + RESPONSE_ADDRESS + "Eh hello! I'm Bola.",
+                RESPONSE_INDENT + "Got anything to settle today?");
         if (!isStorageAvailable) {
-            showLine(RESPONSE_INDENT + STORAGE_ERROR_ADDRESS
-                    + "I couldn't load your saved tasks. " + loadingFailureReason);
-            showLine(RESPONSE_INDENT
+            showLines(RESPONSE_INDENT + STORAGE_ERROR_ADDRESS
+                    + "I couldn't load your saved tasks. " + loadingFailureReason,
+                    RESPONSE_INDENT
                     + "Don't worry—I won't overwrite your data file during this session.");
         }
     }
@@ -85,9 +84,8 @@ public class Ui {
      * Shows Bola's farewell.
      */
     public void showGoodbye() {
-        showLine(RESPONSE_INDENT + RESPONSE_ADDRESS
-                + "All settled? Steady lah. See you again! 👋");
-        showLine(OUTER_DIVIDER);
+        showLines(RESPONSE_INDENT + RESPONSE_ADDRESS
+                + "All settled? Steady lah. See you again! 👋", OUTER_DIVIDER);
     }
 
     /**
@@ -159,9 +157,8 @@ public class Ui {
      * @param task task that was marked.
      */
     public void showTaskMarked(Task task) {
-        showLine(RESPONSE_INDENT + RESPONSE_ADDRESS
-                + "Nice, one task settled liao! ✅");
-        showLine(RESPONSE_INDENT + "    " + task);
+        showLines(RESPONSE_INDENT + RESPONSE_ADDRESS
+                + "Nice, one task settled liao! ✅", RESPONSE_INDENT + "    " + task);
     }
 
     /**
@@ -170,9 +167,8 @@ public class Ui {
      * @param task task that was unmarked.
      */
     public void showTaskUnmarked(Task task) {
-        showLine(RESPONSE_INDENT + RESPONSE_ADDRESS
-                + "Okay, this one not settled yet.");
-        showLine(RESPONSE_INDENT + "    " + task);
+        showLines(RESPONSE_INDENT + RESPONSE_ADDRESS
+                + "Okay, this one not settled yet.", RESPONSE_INDENT + "    " + task);
     }
 
     /**
@@ -182,9 +178,8 @@ public class Ui {
      * @param taskCount number of tasks currently stored.
      */
     public void showTaskAdded(Task task, int taskCount) {
-        showLine(RESPONSE_INDENT + RESPONSE_ADDRESS
-                + "Can! I've added this task:");
-        showLine(RESPONSE_INDENT + "    " + task);
+        showLines(RESPONSE_INDENT + RESPONSE_ADDRESS
+                + "Can! I've added this task:", RESPONSE_INDENT + "    " + task);
         showTaskCount(taskCount);
     }
 
@@ -195,8 +190,8 @@ public class Ui {
      * @param taskCount number of tasks remaining.
      */
     public void showTaskDeleted(Task task, int taskCount) {
-        showLine(RESPONSE_INDENT + RESPONSE_ADDRESS + "Okay, removed already:");
-        showLine(RESPONSE_INDENT + "    " + task);
+        showLines(RESPONSE_INDENT + RESPONSE_ADDRESS + "Okay, removed already:",
+                RESPONSE_INDENT + "    " + task);
         if (taskCount == 0) {
             showLine(RESPONSE_INDENT + "Bo lah! No more tasks in your list. 🎉");
         } else {
@@ -217,9 +212,8 @@ public class Ui {
      * Shows a failure to save tasks and explains its effect on the session.
      */
     public void showSavingError() {
-        showLine(RESPONSE_INDENT + STORAGE_ERROR_ADDRESS
-                + "I couldn't save your tasks.");
-        showLine(RESPONSE_INDENT
+        showLines(RESPONSE_INDENT + STORAGE_ERROR_ADDRESS
+                + "I couldn't save your tasks.", RESPONSE_INDENT
                 + "Any more changes in this session won't be saved, okay?");
     }
 
@@ -257,6 +251,17 @@ public class Ui {
             return response.toString().stripTrailing();
         } finally {
             response = null;
+        }
+    }
+
+    /**
+     * Sends the supplied lines in order using the console or GUI response formatting.
+     *
+     * @param lines lines to display.
+     */
+    private void showLines(String... lines) {
+        for (String line : lines) {
+            showLine(line);
         }
     }
 
