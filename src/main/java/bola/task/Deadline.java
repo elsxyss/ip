@@ -7,27 +7,27 @@ import java.time.LocalDateTime;
  */
 public class Deadline extends Task {
     /** Date and time by which this task must be completed. */
-    protected LocalDateTime by;
+    protected LocalDateTime byDate;
 
     /**
      * Creates an incomplete deadline task.
      *
      * @param description description of the task.
-     * @param by date and optional time by which the task must be completed.
+     * @param byDate date and optional time by which the task must be completed.
      */
-    public Deadline(String description, LocalDateTime by) {
+    public Deadline(String description, LocalDateTime byDate) {
         super(description);
-        this.by = by;
+        this.byDate = byDate;
     }
 
     /**
      * Creates an incomplete deadline task from a supported date string.
      *
      * @param description description of the task.
-     * @param by date in a format supported by {@link TaskDateTime#parse(String)}.
+     * @param byDate date in a format supported by {@link TaskDateTime#parse(String)}.
      */
-    public Deadline(String description, String by) {
-        this(description, TaskDateTime.parse(by));
+    public Deadline(String description, String byDate) {
+        this(description, TaskDateTime.parse(byDate));
     }
 
     /**
@@ -35,8 +35,8 @@ public class Deadline extends Task {
      *
      * @return deadline date and time.
      */
-    public LocalDateTime getBy() {
-        return by;
+    public LocalDateTime getByDate() {
+        return byDate;
     }
 
     /**
@@ -47,7 +47,7 @@ public class Deadline extends Task {
     @Override
     public String toDataString() {
         return "D | " + getDataStatus() + " | " + escapeDataField(description)
-                + " | " + TaskDateTime.formatForStorage(by);
+                + " | " + TaskDateTime.formatForStorage(byDate);
     }
 
     /**
@@ -57,6 +57,7 @@ public class Deadline extends Task {
      */
     @Override
     public String toString() {
-        return "[D]" + super.toString() + " (By: " + TaskDateTime.formatForDisplay(by) + ")";
+        return "[D]" + super.toString()
+                + " (By: " + TaskDateTime.formatForDisplay(byDate) + ")";
     }
 }

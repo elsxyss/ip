@@ -32,7 +32,8 @@ public class Parser {
      * @throws BolaException if the input does not match a supported command.
      */
     public CommandType parseCommandType(String input) throws BolaException {
-        return CommandType.fromInput(input).orElseThrow(() -> new BolaException("Hmm?"));
+        return CommandType.fromInput(input).orElseThrow(
+                () -> new BolaException("I don't understand that command leh."));
     }
 
     /**
@@ -49,17 +50,17 @@ public class Parser {
         String command = commandType.getKeyword();
         String taskNumber = input.substring(command.length()).strip();
         if (taskNumber.isEmpty()) {
-            throw new BolaException("Which task number shall I " + command + "?");
+            throw new BolaException("which task number you want me to " + command + "?");
         }
 
         try {
             int taskIndex = Integer.parseInt(taskNumber) - 1;
             if (taskIndex < 0 || taskIndex >= taskCount) {
-                throw new BolaException("There is no task numbered " + taskNumber + ".");
+                throw new BolaException("task number " + taskNumber + " doesn't exist leh.");
             }
             return taskIndex;
         } catch (NumberFormatException exception) {
-            throw new BolaException("Please enter a valid task number to " + command + ".");
+            throw new BolaException("please give me a valid task number to " + command + ", can?");
         }
     }
 
@@ -74,17 +75,19 @@ public class Parser {
     public int parseUpcomingDays(String input, CommandType commandType) throws BolaException {
         String daysText = input.substring(commandType.getKeyword().length()).strip();
         if (daysText.isEmpty()) {
-            throw new BolaException("How many days ahead shall I check? (e.g., upcoming 7)");
+            throw new BolaException(
+                    "how many days ahead should I check? Try upcoming 7.");
         }
 
         try {
             int days = Integer.parseInt(daysText);
             if (days <= 0) {
-                throw new BolaException("Please enter a positive number of days.");
+                throw new BolaException("the number of days must be positive, can?");
             }
             return days;
         } catch (NumberFormatException exception) {
-            throw new BolaException("Please enter a whole number of days (e.g., upcoming 7).");
+            throw new BolaException(
+                    "please use a whole number of days—for example, upcoming 7.");
         }
     }
 
@@ -98,7 +101,7 @@ public class Parser {
     public String parseFindKeyword(String input) throws BolaException {
         String keyword = input.substring(CommandType.FIND.getKeyword().length()).strip();
         if (keyword.isEmpty()) {
-            throw new BolaException("What keyword shall I search for?");
+            throw new BolaException("what keyword should I search for? Give me one, can?");
         }
         return keyword;
     }
@@ -111,7 +114,7 @@ public class Parser {
      * @throws BolaException if no description was supplied.
      */
     public Task parseTodo(String input) throws BolaException {
-        return new Todo(parseDescription(input, CommandType.TODO, "ToDo"));
+        return new Todo(parseDescription(input, CommandType.TODO, "to-do"));
     }
 
     /**
@@ -124,27 +127,26 @@ public class Parser {
     public Task parseDeadline(String input) throws BolaException {
         String taskDetails = input.substring(CommandType.DEADLINE.getKeyword().length()).strip();
         if (taskDetails.isEmpty() || taskDetails.startsWith("/by")) {
-            throw new BolaException("What shall I add as your Deadline task?");
+            throw new BolaException("what deadline task should I add for you?");
         }
 
         int bySeparatorIndex = taskDetails.indexOf(BY_SEPARATOR);
         if (bySeparatorIndex < 0) {
-            throw new BolaException(
-                    "When's your deadline for this task? (Please indicate with /by)");
+            throw new BolaException("when is this due? Use /by to tell me, can?");
         }
 
         String description = taskDetails.substring(0, bySeparatorIndex).strip();
-        String byText = taskDetails.substring(bySeparatorIndex + BY_SEPARATOR.length()).strip();
+        String byDateText = taskDetails.substring(
+                bySeparatorIndex + BY_SEPARATOR.length()).strip();
         if (description.isEmpty()) {
-            throw new BolaException("What shall I add as your Deadline task?");
+            throw new BolaException("what deadline task should I add for you?");
         }
-        if (byText.isEmpty()) {
-            throw new BolaException(
-                    "When's your deadline for this task? (Please indicate with /by)");
+        if (byDateText.isEmpty()) {
+            throw new BolaException("when is this due? Add a date after /by, can?");
         }
 
-        LocalDateTime by = parseTaskDateTime(byText);
-        return new Deadline(description, by);
+        LocalDateTime byDate = parseTaskDateTime(byDateText);
+        return new Deadline(description, byDate);
     }
 
     /**
@@ -157,32 +159,32 @@ public class Parser {
     public Task parseEvent(String input) throws BolaException {
         String taskDetails = input.substring(CommandType.EVENT.getKeyword().length()).strip();
         if (taskDetails.isEmpty() || taskDetails.startsWith("/from")) {
-            throw new BolaException("What shall I add as your Event task?");
+            throw new BolaException("what event should I add for you?");
         }
 
         int fromSeparatorIndex = taskDetails.indexOf(FROM_SEPARATOR);
         int toSeparatorIndex = taskDetails.indexOf(TO_SEPARATOR,
                 Math.max(0, fromSeparatorIndex + FROM_SEPARATOR.length()));
         if (fromSeparatorIndex < 0 || toSeparatorIndex < 0) {
-            throw new BolaException(
-                    "When's this event happening? (Please indicate with /from and /to)");
+            throw new BolaException("when is this event happening? Use /from and /to, can?");
         }
 
         String description = taskDetails.substring(0, fromSeparatorIndex).strip();
-        String fromText = taskDetails.substring(
+        String startDateText = taskDetails.substring(
                 fromSeparatorIndex + FROM_SEPARATOR.length(), toSeparatorIndex).strip();
-        String toText = taskDetails.substring(toSeparatorIndex + TO_SEPARATOR.length()).strip();
+        String endDateText = taskDetails.substring(
+                toSeparatorIndex + TO_SEPARATOR.length()).strip();
         if (description.isEmpty()) {
-            throw new BolaException("What shall I add as your Event task?");
+            throw new BolaException("what event should I add for you?");
         }
-        if (fromText.isEmpty() || toText.isEmpty()) {
+        if (startDateText.isEmpty() || endDateText.isEmpty()) {
             throw new BolaException(
-                    "When's this event happening? (Please indicate with /from and /to)");
+                    "I need both the start and end times. Use /from and /to, can?");
         }
 
-        LocalDateTime from = parseTaskDateTime(fromText);
-        LocalDateTime to = parseTaskDateTime(toText);
-        return new Event(description, from, to);
+        LocalDateTime startDate = parseTaskDateTime(startDateText);
+        LocalDateTime endDate = parseTaskDateTime(endDateText);
+        return new Event(description, startDate, endDate);
     }
 
     /**
@@ -198,7 +200,7 @@ public class Parser {
             throws BolaException {
         String description = input.substring(commandType.getKeyword().length()).strip();
         if (description.isEmpty()) {
-            throw new BolaException("What shall I add as your " + taskType + " task?");
+            throw new BolaException("what " + taskType + " should I add for you?");
         }
         return description;
     }
@@ -214,8 +216,8 @@ public class Parser {
         try {
             return TaskDateTime.parse(dateTimeText);
         } catch (DateTimeParseException exception) {
-            throw new BolaException("Please enter dates as yyyy-MM-dd, or include a time as "
-                    + "d/M/yyyy HHmm (e.g., 2/12/2019 1800).");
+            throw new BolaException("this date cannot leh. Use yyyy-MM-dd, or d/M/yyyy HHmm "
+                    + "when including a time—for example, 2/12/2019 1800.");
         }
     }
 }

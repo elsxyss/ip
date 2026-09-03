@@ -144,10 +144,10 @@ public class TaskList {
      */
     private static LocalDateTime getTaskDateTime(Task task) {
         if (task instanceof Deadline deadline) {
-            return deadline.getBy();
+            return deadline.getByDate();
         }
         if (task instanceof Event event) {
-            return event.getFrom();
+            return event.getStartDate();
         }
         return LocalDateTime.MAX;
     }

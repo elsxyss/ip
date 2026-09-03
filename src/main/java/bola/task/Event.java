@@ -7,32 +7,32 @@ import java.time.LocalDateTime;
  */
 public class Event extends Task {
     /** Date and time at which this event starts. */
-    protected LocalDateTime from;
+    protected LocalDateTime startDate;
     /** Date and time at which this event ends. */
-    protected LocalDateTime to;
+    protected LocalDateTime endDate;
 
     /**
      * Creates an incomplete event task.
      *
      * @param description description of the task.
-     * @param from date and optional time at which the event starts.
-     * @param to date and optional time at which the event ends.
+     * @param startDate date and optional time at which the event starts.
+     * @param endDate date and optional time at which the event ends.
      */
-    public Event(String description, LocalDateTime from, LocalDateTime to) {
+    public Event(String description, LocalDateTime startDate, LocalDateTime endDate) {
         super(description);
-        this.from = from;
-        this.to = to;
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
     /**
      * Creates an incomplete event task from supported date strings.
      *
      * @param description description of the task.
-     * @param from date in a format supported by {@link TaskDateTime#parse(String)}.
-     * @param to date in a format supported by {@link TaskDateTime#parse(String)}.
+     * @param startDate date in a format supported by {@link TaskDateTime#parse(String)}.
+     * @param endDate date in a format supported by {@link TaskDateTime#parse(String)}.
      */
-    public Event(String description, String from, String to) {
-        this(description, TaskDateTime.parse(from), TaskDateTime.parse(to));
+    public Event(String description, String startDate, String endDate) {
+        this(description, TaskDateTime.parse(startDate), TaskDateTime.parse(endDate));
     }
 
     /**
@@ -40,8 +40,8 @@ public class Event extends Task {
      *
      * @return event start date and time.
      */
-    public LocalDateTime getFrom() {
-        return from;
+    public LocalDateTime getStartDate() {
+        return startDate;
     }
 
     /**
@@ -49,8 +49,8 @@ public class Event extends Task {
      *
      * @return event end date and time.
      */
-    public LocalDateTime getTo() {
-        return to;
+    public LocalDateTime getEndDate() {
+        return endDate;
     }
 
     /**
@@ -61,8 +61,8 @@ public class Event extends Task {
     @Override
     public String toDataString() {
         return "E | " + getDataStatus() + " | " + escapeDataField(description)
-                + " | " + TaskDateTime.formatForStorage(from)
-                + " | " + TaskDateTime.formatForStorage(to);
+                + " | " + TaskDateTime.formatForStorage(startDate)
+                + " | " + TaskDateTime.formatForStorage(endDate);
     }
 
     /**
@@ -73,7 +73,7 @@ public class Event extends Task {
     @Override
     public String toString() {
         return "[E]" + super.toString() + " ("
-                + TaskDateTime.formatForDisplay(from) + " – "
-                + TaskDateTime.formatForDisplay(to) + ")";
+                + TaskDateTime.formatForDisplay(startDate) + " – "
+                + TaskDateTime.formatForDisplay(endDate) + ")";
     }
 }

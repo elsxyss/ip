@@ -14,6 +14,23 @@ import org.junit.jupiter.api.Test;
  */
 public class TaskDateTimeTest {
     /**
+     * Checks that dated tasks expose their clearly named date values.
+     */
+    @Test
+    void datedTaskGetters_constructedDates_returnExpectedValues() {
+        LocalDateTime deadlineDate = LocalDateTime.of(2026, 9, 10, 18, 0);
+        LocalDateTime eventStartDate = LocalDateTime.of(2026, 9, 11, 14, 0);
+        LocalDateTime eventEndDate = LocalDateTime.of(2026, 9, 11, 16, 0);
+        Deadline deadline = new Deadline("submit report", deadlineDate);
+        Event event = new Event("project meeting", eventStartDate, eventEndDate);
+
+        assertAll(
+                () -> assertEquals(deadlineDate, deadline.getByDate()),
+                () -> assertEquals(eventStartDate, event.getStartDate()),
+                () -> assertEquals(eventEndDate, event.getEndDate()));
+    }
+
+    /**
      * Checks every supported input format, including leap-day and single-digit values.
      */
     @Test

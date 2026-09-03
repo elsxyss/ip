@@ -45,11 +45,16 @@ public class ParserTest {
                         parser.parseCommandType("deadline submit /by 2026-09-01")),
                 () -> assertEquals(CommandType.EVENT,
                         parser.parseCommandType("event lesson /from 2026-09-01 /to 2026-09-02")),
-                () -> assertParsingFails(() -> parser.parseCommandType("listing"), "Hmm?"),
-                () -> assertParsingFails(() -> parser.parseCommandType("list now"), "Hmm?"),
-                () -> assertParsingFails(() -> parser.parseCommandType("finder"), "Hmm?"),
-                () -> assertParsingFails(() -> parser.parseCommandType("TODO read"), "Hmm?"),
-                () -> assertParsingFails(() -> parser.parseCommandType(""), "Hmm?"));
+                () -> assertParsingFails(() -> parser.parseCommandType("listing"),
+                        "I don't understand that command leh."),
+                () -> assertParsingFails(() -> parser.parseCommandType("list now"),
+                        "I don't understand that command leh."),
+                () -> assertParsingFails(() -> parser.parseCommandType("finder"),
+                        "I don't understand that command leh."),
+                () -> assertParsingFails(() -> parser.parseCommandType("TODO read"),
+                        "I don't understand that command leh."),
+                () -> assertParsingFails(() -> parser.parseCommandType(""),
+                        "I don't understand that command leh."));
     }
 
     /**
@@ -61,9 +66,9 @@ public class ParserTest {
                 () -> assertEquals("read   book", parser.parseFindKeyword(
                         "find   read   book  ")),
                 () -> assertParsingFails(() -> parser.parseFindKeyword("find"),
-                        "What keyword shall I search for?"),
+                        "what keyword should I search for? Give me one, can?"),
                 () -> assertParsingFails(() -> parser.parseFindKeyword("find   "),
-                        "What keyword shall I search for?"));
+                        "what keyword should I search for? Give me one, can?"));
     }
 
     /**
@@ -77,19 +82,23 @@ public class ParserTest {
                 () -> assertEquals(1,
                         parser.parseTaskIndex("delete   2  ", CommandType.DELETE, 3)),
                 () -> assertParsingFails(() -> parser.parseTaskIndex(
-                        "mark", CommandType.MARK, 3), "Which task number shall I mark?"),
+                        "mark", CommandType.MARK, 3),
+                        "which task number you want me to mark?"),
                 () -> assertParsingFails(() -> parser.parseTaskIndex(
-                        "mark 0", CommandType.MARK, 3), "There is no task numbered 0."),
+                        "mark 0", CommandType.MARK, 3),
+                        "task number 0 doesn't exist leh."),
                 () -> assertParsingFails(() -> parser.parseTaskIndex(
-                        "mark 4", CommandType.MARK, 3), "There is no task numbered 4."),
+                        "mark 4", CommandType.MARK, 3),
+                        "task number 4 doesn't exist leh."),
                 () -> assertParsingFails(() -> parser.parseTaskIndex(
-                        "mark -1", CommandType.MARK, 3), "There is no task numbered -1."),
+                        "mark -1", CommandType.MARK, 3),
+                        "task number -1 doesn't exist leh."),
                 () -> assertParsingFails(() -> parser.parseTaskIndex(
                         "delete two", CommandType.DELETE, 3),
-                        "Please enter a valid task number to delete."),
+                        "please give me a valid task number to delete, can?"),
                 () -> assertParsingFails(() -> parser.parseTaskIndex(
                         "delete 1 2", CommandType.DELETE, 3),
-                        "Please enter a valid task number to delete."));
+                        "please give me a valid task number to delete, can?"));
     }
 
     /**
@@ -104,16 +113,16 @@ public class ParserTest {
                         parser.parseUpcomingDays("upcoming   365  ", CommandType.UPCOMING)),
                 () -> assertParsingFails(() -> parser.parseUpcomingDays(
                         "upcoming", CommandType.UPCOMING),
-                        "How many days ahead shall I check? (e.g., upcoming 7)"),
+                        "how many days ahead should I check? Try upcoming 7."),
                 () -> assertParsingFails(() -> parser.parseUpcomingDays(
                         "upcoming 0", CommandType.UPCOMING),
-                        "Please enter a positive number of days."),
+                        "the number of days must be positive, can?"),
                 () -> assertParsingFails(() -> parser.parseUpcomingDays(
                         "upcoming -2", CommandType.UPCOMING),
-                        "Please enter a positive number of days."),
+                        "the number of days must be positive, can?"),
                 () -> assertParsingFails(() -> parser.parseUpcomingDays(
                         "upcoming 1.5", CommandType.UPCOMING),
-                        "Please enter a whole number of days (e.g., upcoming 7)."));
+                        "please use a whole number of days—for example, upcoming 7."));
     }
 
     /**
@@ -126,9 +135,9 @@ public class ParserTest {
         assertEquals("T | 0 | read book", todo.toDataString());
         assertAll(
                 () -> assertParsingFails(() -> parser.parseTodo("todo"),
-                        "What shall I add as your ToDo task?"),
+                        "what to-do should I add for you?"),
                 () -> assertParsingFails(() -> parser.parseTodo("todo   "),
-                        "What shall I add as your ToDo task?"));
+                        "what to-do should I add for you?"));
     }
 
     /**
@@ -147,13 +156,13 @@ public class ParserTest {
                 () -> assertEquals("D | 0 | demo | 2026-09-01 1400",
                         dateAndTime.toDataString()),
                 () -> assertParsingFails(() -> parser.parseDeadline("deadline"),
-                        "What shall I add as your Deadline task?"),
+                        "what deadline task should I add for you?"),
                 () -> assertParsingFails(() -> parser.parseDeadline("deadline /by 2026-09-01"),
-                        "What shall I add as your Deadline task?"),
+                        "what deadline task should I add for you?"),
                 () -> assertParsingFails(() -> parser.parseDeadline("deadline submit report"),
-                        "When's your deadline for this task? (Please indicate with /by)"),
+                        "when is this due? Use /by to tell me, can?"),
                 () -> assertParsingFails(() -> parser.parseDeadline("deadline submit /by"),
-                        "When's your deadline for this task? (Please indicate with /by)"),
+                        "when is this due? Add a date after /by, can?"),
                 () -> assertParsingFails(() -> parser.parseDeadline(
                         "deadline submit /by 2026-02-29"), invalidDateMessage()));
     }
@@ -170,18 +179,18 @@ public class ParserTest {
                 event.toDataString());
         assertAll(
                 () -> assertParsingFails(() -> parser.parseEvent("event"),
-                        "What shall I add as your Event task?"),
+                        "what event should I add for you?"),
                 () -> assertParsingFails(() -> parser.parseEvent(
                         "event /from 2026-09-01 /to 2026-09-02"),
-                        "What shall I add as your Event task?"),
+                        "what event should I add for you?"),
                 () -> assertParsingFails(() -> parser.parseEvent("event demo"),
-                        "When's this event happening? (Please indicate with /from and /to)"),
+                        "when is this event happening? Use /from and /to, can?"),
                 () -> assertParsingFails(() -> parser.parseEvent(
                         "event demo /from 2026-09-01"),
-                        "When's this event happening? (Please indicate with /from and /to)"),
+                        "when is this event happening? Use /from and /to, can?"),
                 () -> assertParsingFails(() -> parser.parseEvent(
                         "event demo /from /to 2026-09-02"),
-                        "When's this event happening? (Please indicate with /from and /to)"),
+                        "I need both the start and end times. Use /from and /to, can?"),
                 () -> assertParsingFails(() -> parser.parseEvent(
                         "event demo /from today /to 2026-09-02"), invalidDateMessage()));
     }
@@ -203,8 +212,8 @@ public class ParserTest {
      * @return invalid-date message.
      */
     private static String invalidDateMessage() {
-        return "Please enter dates as yyyy-MM-dd, or include a time as "
-                + "d/M/yyyy HHmm (e.g., 2/12/2019 1800).";
+        return "this date cannot leh. Use yyyy-MM-dd, or d/M/yyyy HHmm "
+                + "when including a time—for example, 2/12/2019 1800.";
     }
 
     /**

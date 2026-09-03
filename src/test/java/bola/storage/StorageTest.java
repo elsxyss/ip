@@ -97,22 +97,38 @@ public class StorageTest {
     @Test
     void testMalformedRecords() throws Exception {
         Path dataFile = Files.createTempDirectory("bola-invalid-data-test").resolve("tasks.txt");
-        assertLoadFails(dataFile, "X | 0 | unknown type");
-        assertLoadFails(dataFile, "T | 2 | invalid status");
-        assertLoadFails(dataFile, "T | 0");
-        assertLoadFails(dataFile, "T | 0 | ");
-        assertLoadFails(dataFile, "T | 0 | task | extra field");
-        assertLoadFails(dataFile, "D | 0 | deadline | ");
-        assertLoadFails(dataFile, "E | 0 | event | start | ");
-        assertLoadFails(dataFile, "D | 0 | deadline | 2019-02-29");
-        assertLoadFails(dataFile, "E | 0 | event | 2019-01-01 | tomorrow");
+        assertLoadFails(dataFile, "X | 0 | unknown type",
+                "Line 1 of the data file has an unknown task type: 'X'.");
+        assertLoadFails(dataFile, "T | 2 | invalid status",
+                "Line 1 of the data file has an invalid completion status; it must be 0 or 1.");
+        assertLoadFails(dataFile, " | 0 | missing type",
+                "Line 1 of the data file is missing its task type.");
+        assertLoadFails(dataFile, "T | | missing status",
+                "Line 1 of the data file is missing its completion status.");
+        assertLoadFails(dataFile, "T | 0",
+                "Line 1 of the data file has the wrong number of fields.");
+        assertLoadFails(dataFile, "T | 0 | ",
+                "Line 1 of the data file is missing its description.");
+        assertLoadFails(dataFile, "T | 0 | task | extra field",
+                "Line 1 of the data file has the wrong number of fields.");
+        assertLoadFails(dataFile, "D | 0 | deadline | ",
+                "Line 1 of the data file is missing its deadline.");
+        assertLoadFails(dataFile, "E | 0 | event | start | ",
+                "Line 1 of the data file is missing its end time.");
+        assertLoadFails(dataFile, "E | 0 | event | | 2019-01-01",
+                "Line 1 of the data file is missing its start time.");
+        assertLoadFails(dataFile, "D | 0 | deadline | 2019-02-29",
+                "Line 1 of the data file has an invalid date format.");
+        assertLoadFails(dataFile, "E | 0 | event | 2019-01-01 | tomorrow",
+                "Line 1 of the data file has an invalid date format.");
 
         Files.write(dataFile, List.of("T | 0 | valid", "X | 0 | invalid"));
         try {
             new Storage(dataFile).load();
             assert false : "Loading malformed data should fail";
         } catch (IOException exception) {
-            assert exception.getMessage().contains("line 2");
+            assert exception.getMessage().equals(
+                    "Line 2 of the data file has an unknown task type: 'X'.");
         }
     }
 
@@ -146,15 +162,17 @@ public class StorageTest {
      *
      * @param dataFile temporary data file.
      * @param malformedRecord invalid record to test.
+     * @param expectedMessage expected loading-failure explanation.
      * @throws Exception if temporary test files cannot be accessed.
      */
-    private static void assertLoadFails(Path dataFile, String malformedRecord) throws Exception {
+    private static void assertLoadFails(Path dataFile, String malformedRecord,
+            String expectedMessage) throws Exception {
         Files.writeString(dataFile, malformedRecord);
         try {
             new Storage(dataFile).load();
             assert false : "Loading malformed data should fail: " + malformedRecord;
         } catch (IOException exception) {
-            assert exception.getMessage().contains("line 1");
+            assert exception.getMessage().equals(expectedMessage);
         }
     }
 }

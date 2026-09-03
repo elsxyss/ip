@@ -137,16 +137,18 @@ public class Storage {
                 task = new Event(fields.get(2), fields.get(3), fields.get(4));
                 break;
             default:
-                throw invalidData(lineNumber, "unknown task type '" + fields.get(0) + "'");
+                throw invalidData(lineNumber,
+                        "has an unknown task type: '" + fields.get(0) + "'.");
             }
         } catch (DateTimeParseException exception) {
-            throw invalidData(lineNumber, "date must use yyyy-MM-dd or d/M/yyyy HHmm format");
+            throw invalidData(lineNumber, "has an invalid date format.");
         }
 
         if (fields.get(1).equals("1")) {
             task.markAsDone();
         } else if (!fields.get(1).equals("0")) {
-            throw invalidData(lineNumber, "completion status must be 0 or 1");
+            throw invalidData(lineNumber,
+                    "has an invalid completion status; it must be 0 or 1.");
         }
         return task;
     }
@@ -194,7 +196,7 @@ public class Storage {
     private void requireFieldCount(List<String> fields, int minimumCount, int maximumCount,
             int lineNumber) throws IOException {
         if (fields.size() < minimumCount || fields.size() > maximumCount) {
-            throw invalidData(lineNumber, "incorrect number of fields");
+            throw invalidData(lineNumber, "has the wrong number of fields.");
         }
     }
 
@@ -209,7 +211,7 @@ public class Storage {
     private void requireNonBlank(String field, String fieldName, int lineNumber)
             throws IOException {
         if (field.isBlank()) {
-            throw invalidData(lineNumber, fieldName + " cannot be blank");
+            throw invalidData(lineNumber, "is missing its " + fieldName + ".");
         }
     }
 
@@ -221,6 +223,6 @@ public class Storage {
      * @return exception describing the invalid record.
      */
     private IOException invalidData(int lineNumber, String reason) {
-        return new IOException("Invalid task data on line " + lineNumber + ": " + reason + ".");
+        return new IOException("Line " + lineNumber + " of the data file " + reason);
     }
 }

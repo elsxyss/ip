@@ -23,7 +23,7 @@ public class Bola {
     private final Parser parser;
     private final String loadingFailureReason;
 
-    private boolean storageAvailable;
+    private boolean isStorageAvailable;
 
     /**
      * Creates Bola and loads tasks from the specified data file.
@@ -48,7 +48,7 @@ public class Bola {
             failureReason = exception.getMessage();
         }
         tasks = loadedTasks;
-        storageAvailable = canUseStorage;
+        isStorageAvailable = canUseStorage;
         loadingFailureReason = failureReason;
     }
 
@@ -56,7 +56,7 @@ public class Bola {
      * Displays Bola's greeting and responds to commands until the user enters {@code bye}.
      */
     public void run() {
-        ui.showWelcome(storageAvailable, loadingFailureReason);
+        ui.showWelcome(isStorageAvailable, loadingFailureReason);
 
         while (ui.hasNextCommand()) {
             String command = ui.readCommand();
@@ -74,7 +74,7 @@ public class Bola {
                     break;
                 case FIND:
                     String keyword = parser.parseFindKeyword(command);
-                    ui.showMatchingTasks(tasks.findTasks(keyword));
+                    ui.showMatchingTasks(tasks.findTasks(keyword), keyword);
                     break;
                 case UPCOMING:
                     int days = parser.parseUpcomingDays(command, commandType);
@@ -122,13 +122,13 @@ public class Bola {
                 default:
                     throw new AssertionError("Unhandled command type: " + commandType);
                 }
-                if (taskListChanged && storageAvailable) {
+                if (taskListChanged && isStorageAvailable) {
                     storage.save(tasks.getTasks());
                 }
             } catch (BolaException exception) {
                 ui.showError(exception.getMessage());
             } catch (IOException exception) {
-                storageAvailable = false;
+                isStorageAvailable = false;
                 ui.showSavingError();
             }
             ui.showDivider();
