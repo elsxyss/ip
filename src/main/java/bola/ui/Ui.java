@@ -21,6 +21,7 @@ public class Ui {
     private static final String STORAGE_ERROR_ADDRESS = "Bola: Alamak, ";
 
     private final Scanner scanner;
+    private StringBuilder response;
 
     /**
      * Creates a user interface that reads commands from standard input.
@@ -60,26 +61,33 @@ public class Ui {
                 + " / /_/ / /_/ / / /_/ / \n"
                 + "/_____/\\____/_/\\__,_/  \n";
 
-        System.out.println(OUTER_DIVIDER);
-        System.out.println(ORANGE_TEXT + banner + RESET_TEXT_COLOUR);
-        System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS + "Eh hello! I'm Bola 🇸🇬");
-        System.out.println(RESPONSE_INDENT + "Got anything to settle today?");
+        showLine(OUTER_DIVIDER);
+        showLine(ORANGE_TEXT + banner + RESET_TEXT_COLOUR);
+        showGreeting(isStorageAvailable, loadingFailureReason);
+        showDivider();
+    }
+
+    /**
+     * Shows the greeting and storage warning without the console banner.
+     */
+    public void showGreeting(boolean isStorageAvailable, String loadingFailureReason) {
+        showLine(RESPONSE_INDENT + RESPONSE_ADDRESS + "Eh hello! I'm Bola.");
+        showLine(RESPONSE_INDENT + "Got anything to settle today?");
         if (!isStorageAvailable) {
-            System.out.println(RESPONSE_INDENT + STORAGE_ERROR_ADDRESS
+            showLine(RESPONSE_INDENT + STORAGE_ERROR_ADDRESS
                     + "I couldn't load your saved tasks. " + loadingFailureReason);
-            System.out.println(RESPONSE_INDENT
+            showLine(RESPONSE_INDENT
                     + "Don't worry—I won't overwrite your data file during this session.");
         }
-        showDivider();
     }
 
     /**
      * Shows Bola's farewell.
      */
     public void showGoodbye() {
-        System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
+        showLine(RESPONSE_INDENT + RESPONSE_ADDRESS
                 + "All settled? Steady lah. See you again! 👋");
-        System.out.println(OUTER_DIVIDER);
+        showLine(OUTER_DIVIDER);
     }
 
     /**
@@ -89,14 +97,14 @@ public class Ui {
      */
     public void showTaskList(List<Task> tasks) {
         if (tasks.isEmpty()) {
-            System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
+            showLine(RESPONSE_INDENT + RESPONSE_ADDRESS
                     + "Bo lah! Your task list is empty. 😌");
             return;
         }
 
-        System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS + "Your tasks all here:");
+        showLine(RESPONSE_INDENT + RESPONSE_ADDRESS + "Your tasks all here:");
         for (int i = 0; i < tasks.size(); i++) {
-            System.out.println(RESPONSE_INDENT + "    " + (i + 1) + ". " + tasks.get(i));
+            showLine(RESPONSE_INDENT + "    " + (i + 1) + ". " + tasks.get(i));
         }
     }
 
@@ -108,15 +116,15 @@ public class Ui {
      */
     public void showMatchingTasks(List<Task> matchingTasks, String keyword) {
         if (matchingTasks.isEmpty()) {
-            System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
+            showLine(RESPONSE_INDENT + RESPONSE_ADDRESS
                     + "Bo lah! No tasks matching \"" + keyword + "\".");
             return;
         }
 
-        System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
+        showLine(RESPONSE_INDENT + RESPONSE_ADDRESS
                 + "Can, found these matching tasks:");
         for (int i = 0; i < matchingTasks.size(); i++) {
-            System.out.println(RESPONSE_INDENT + "    " + (i + 1) + ". "
+            showLine(RESPONSE_INDENT + "    " + (i + 1) + ". "
                     + matchingTasks.get(i));
         }
     }
@@ -131,17 +139,17 @@ public class Ui {
     public void showUpcomingTasks(List<Task> upcomingTasks, List<Task> allTasks, int days) {
         String dayWord = days == 1 ? "day" : "days";
         if (upcomingTasks.isEmpty()) {
-            System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
+            showLine(RESPONSE_INDENT + RESPONSE_ADDRESS
                     + "Bo lah! No dated tasks coming up in the next "
                     + days + " " + dayWord + ". 😌");
             return;
         }
 
-        System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
+        showLine(RESPONSE_INDENT + RESPONSE_ADDRESS
                 + "Next " + days + " " + dayWord + " got these tasks:");
         for (Task task : upcomingTasks) {
             int originalTaskNumber = allTasks.indexOf(task) + 1;
-            System.out.println(RESPONSE_INDENT + "    " + originalTaskNumber + ". " + task);
+            showLine(RESPONSE_INDENT + "    " + originalTaskNumber + ". " + task);
         }
     }
 
@@ -151,9 +159,9 @@ public class Ui {
      * @param task task that was marked.
      */
     public void showTaskMarked(Task task) {
-        System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
+        showLine(RESPONSE_INDENT + RESPONSE_ADDRESS
                 + "Nice, one task settled liao! ✅");
-        System.out.println(RESPONSE_INDENT + "    " + task);
+        showLine(RESPONSE_INDENT + "    " + task);
     }
 
     /**
@@ -162,9 +170,9 @@ public class Ui {
      * @param task task that was unmarked.
      */
     public void showTaskUnmarked(Task task) {
-        System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
+        showLine(RESPONSE_INDENT + RESPONSE_ADDRESS
                 + "Okay, this one not settled yet.");
-        System.out.println(RESPONSE_INDENT + "    " + task);
+        showLine(RESPONSE_INDENT + "    " + task);
     }
 
     /**
@@ -174,9 +182,9 @@ public class Ui {
      * @param taskCount number of tasks currently stored.
      */
     public void showTaskAdded(Task task, int taskCount) {
-        System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
+        showLine(RESPONSE_INDENT + RESPONSE_ADDRESS
                 + "Can! I've added this task:");
-        System.out.println(RESPONSE_INDENT + "    " + task);
+        showLine(RESPONSE_INDENT + "    " + task);
         showTaskCount(taskCount);
     }
 
@@ -187,10 +195,10 @@ public class Ui {
      * @param taskCount number of tasks remaining.
      */
     public void showTaskDeleted(Task task, int taskCount) {
-        System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS + "Okay, removed already:");
-        System.out.println(RESPONSE_INDENT + "    " + task);
+        showLine(RESPONSE_INDENT + RESPONSE_ADDRESS + "Okay, removed already:");
+        showLine(RESPONSE_INDENT + "    " + task);
         if (taskCount == 0) {
-            System.out.println(RESPONSE_INDENT + "Bo lah! No more tasks in your list. 🎉");
+            showLine(RESPONSE_INDENT + "Bo lah! No more tasks in your list. 🎉");
         } else {
             showTaskCount(taskCount);
         }
@@ -202,16 +210,16 @@ public class Ui {
      * @param message explanation of the invalid command.
      */
     public void showError(String message) {
-        System.out.println(RESPONSE_INDENT + ERROR_ADDRESS + message);
+        showLine(RESPONSE_INDENT + ERROR_ADDRESS + message);
     }
 
     /**
      * Shows a failure to save tasks and explains its effect on the session.
      */
     public void showSavingError() {
-        System.out.println(RESPONSE_INDENT + STORAGE_ERROR_ADDRESS
+        showLine(RESPONSE_INDENT + STORAGE_ERROR_ADDRESS
                 + "I couldn't save your tasks.");
-        System.out.println(RESPONSE_INDENT
+        showLine(RESPONSE_INDENT
                 + "Any more changes in this session won't be saved, okay?");
     }
 
@@ -219,7 +227,7 @@ public class Ui {
      * Shows the divider between two responses.
      */
     public void showDivider() {
-        System.out.println(RESPONSE_DIVIDER);
+        showLine(RESPONSE_DIVIDER);
     }
 
     /**
@@ -229,10 +237,38 @@ public class Ui {
      */
     private void showTaskCount(int taskCount) {
         if (taskCount == 1) {
-            System.out.println(RESPONSE_INDENT + "Now got 1 task in your list.");
+            showLine(RESPONSE_INDENT + "Now got 1 task in your list.");
         } else {
-            System.out.println(RESPONSE_INDENT + "Now got " + taskCount
+            showLine(RESPONSE_INDENT + "Now got " + taskCount
                     + " tasks in your list.");
+        }
+    }
+
+    /**
+     * Collects a response for a GUI dialog without redirecting global console output.
+     *
+     * @param operation response-producing operation.
+     * @return plain text with console indentation and dividers removed.
+     */
+    public String captureResponse(Runnable operation) {
+        response = new StringBuilder();
+        try {
+            operation.run();
+            return response.toString().stripTrailing();
+        } finally {
+            response = null;
+        }
+    }
+
+    /**
+     * Sends one line to the console or the current GUI response.
+     */
+    private void showLine(String line) {
+        if (response == null) {
+            System.out.println(line);
+        } else if (!line.equals(OUTER_DIVIDER) && !line.equals(RESPONSE_DIVIDER)) {
+            String text = line.startsWith(RESPONSE_INDENT) ? line.substring(RESPONSE_INDENT.length()) : line;
+            response.append(text).append("\n");
         }
     }
 }
