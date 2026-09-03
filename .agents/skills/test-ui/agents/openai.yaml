@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test UI"
+  short_description: "Run fail-fast console UI test plans"
+  default_prompt: "Use $test-ui to run the cases in test/ui-test-plan.md and show the console transcript."

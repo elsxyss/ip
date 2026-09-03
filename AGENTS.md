@@ -42,6 +42,17 @@ Maintain JUnit test coverage of at least 50%, prioritizing complex, core, and cr
 business logic. Update the relevant JUnit tests after every code change so the coverage
 target continues to be met and changed behavior is protected against regressions.
 
+## UI regression testing
+
+After every code change:
+
+1. Review `test/ui-test-plan.md` and update it if the change adds or alters a UI test
+   scenario, its inputs, its expected output, or relevant test configuration.
+2. Invoke the project-specific `test-ui` skill at `.agents/skills/test-ui/SKILL.md` and
+   run the relevant UI test cases. Follow the skill's fail-fast and console-session
+   reporting requirements. If the affected cases cannot be identified confidently, run
+   the full UI test plan.
+
 ## Git
 
 Before proposing or creating any commit, commit message, or branch, load and
