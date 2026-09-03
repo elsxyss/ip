@@ -97,8 +97,8 @@ public class TaskList {
      *
      * <p>The matching tasks retain their order in the main task list.</p>
      *
-     * @param keyword text to look for in task descriptions
-     * @return matching tasks in their original order
+     * @param keyword text to look for in task descriptions.
+     * @return matching tasks in their original order.
      */
     public List<Task> findTasks(String keyword) {
         String normalisedKeyword = Objects.requireNonNull(keyword).toLowerCase(Locale.ROOT);
@@ -139,8 +139,8 @@ public class TaskList {
     /**
      * Returns the date used to order a dated task, or the latest possible date for a to-do.
      *
-     * @param task task whose ordering date is required
-     * @return deadline, event start time, or the latest possible date for an undated task
+     * @param task task whose ordering date is required.
+     * @return deadline, event start time, or the latest possible date for an undated task.
      */
     private static LocalDateTime getTaskDateTime(Task task) {
         if (task instanceof Deadline deadline) {

@@ -5,8 +5,8 @@ description: Apply the project-mandated SE-EDU Java coding standard when creatin
 
 # SE-EDU Java Coding Standard
 
-Use the [SE-EDU Java coding standard](https://se-education.org/guides/conventions/java/index.html)
-for every Java file in this project. For topics it does not cover, use the
+Use the [SE-EDU basic + intermediate Java coding standard](https://se-education.org/guides/conventions/java/intermediate.html)
+for every Java file in this project, including test code. For topics it does not cover, use the
 [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html).
 If another project rule is stricter, follow the stricter rule.
 
@@ -39,23 +39,19 @@ If another project rule is stricter, follow the stricter rule.
 ## Declarations and statements
 
 - Put every class in a package and use explicit imports. Keep imports minimal and consistently ordered.
-- Organize each type as: class documentation, declaration, static fields, instance fields, constructors, methods.
-  Within each field group, order visibility as public, protected, package-private, private.
-- Put method modifiers in the order: access, `static`, `abstract`, `synchronized`, unusual modifiers, `final`,
-  `native`. The access modifier, when present, comes first.
 - Attach array brackets to the type, such as `int[] values`.
 - Initialize variables at declaration when a valid value is available and declare them in the smallest useful scope.
 - Keep fields non-public unless they are constants or members of a behavior-free data class.
-- Use `this` only when a field is shadowed by a parameter or local variable.
 
 ## Comments and Javadoc
 
 - Write comments in English using American spelling and avoid local slang.
 - Add descriptive Javadoc to every class and public method, except getters/setters, overrides whose inherited
-  documentation applies exactly, and test code. Add Javadoc to non-trivial private methods.
+  documentation applies exactly, and test code.
 - Start Javadoc with a concise summary sentence using forms such as “Returns”, “Adds”, or “Sends”. Keep `/**` on
-  its own line, align subsequent `*` characters, leave one blank line before tags, punctuate tag descriptions, and
-  place no blank line between the comment and declaration.
+  its own line for class and method comments, align subsequent `*` characters, leave one blank line before tags,
+  punctuate tag descriptions, and place no blank line between the comment and declaration. A field Javadoc may be
+  written on one line.
 - Include either every `@param` tag or none. Omit them only when every parameter is already self-explanatory or
   explained in the description. Omit `@return` when the return value is already obvious.
 - Indent block comments with the code they describe. Trailing comments are allowed when they remain clear.

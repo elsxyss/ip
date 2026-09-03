@@ -24,8 +24,8 @@ public enum CommandType {
     /**
      * Creates a command type with its user-facing keyword.
      *
-     * @param keyword word used to invoke the command
-     * @param acceptsArguments whether the command may be followed by arguments
+     * @param keyword word used to invoke the command.
+     * @param acceptsArguments whether the command may be followed by arguments.
      */
     CommandType(String keyword, boolean acceptsArguments) {
         this.keyword = keyword;
@@ -35,7 +35,7 @@ public enum CommandType {
     /**
      * Returns the keyword used to invoke this command.
      *
-     * @return command keyword
+     * @return command keyword.
      */
     public String getKeyword() {
         return keyword;
@@ -44,8 +44,8 @@ public enum CommandType {
     /**
      * Identifies the command invoked by the given input.
      *
-     * @param input complete user input
-     * @return the matching command type, or an empty value if the input is not a valid command
+     * @param input complete user input.
+     * @return the matching command type, or an empty value if the input is not a valid command.
      */
     public static Optional<CommandType> fromInput(String input) {
         return Arrays.stream(values())

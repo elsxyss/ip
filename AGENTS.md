@@ -26,7 +26,7 @@ Unless the user says otherwise, assume that you are assisting a student working 
 
 ## Java coding standards
 
-Before creating, modifying, or reviewing any Java code, load and follow the
+Before creating, modifying, formatting, or reviewing any Java code (including tests), load and follow the
 project-specific `seedu-java-coding-standard` skill at
 `.agents/skills/seedu-java-coding-standard/SKILL.md`. All Java code in this
 repository must conform to that skill. If another repository rule is stricter,

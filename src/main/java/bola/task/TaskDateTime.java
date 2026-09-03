@@ -31,7 +31,7 @@ public final class TaskDateTime {
      * Parses a date, with an optional time, from a supported command or storage value.
      *
      * @param value date in {@code yyyy-MM-dd}, {@code yyyy-MM-dd HHmm}, or
-     *              {@code d/M/yyyy HHmm} format
+     *              {@code d/M/yyyy HHmm} format.
      * @return the parsed value; a date without a time is represented as midnight.
      * @throws DateTimeParseException if the value is not a real date in a supported format.
      */
@@ -80,8 +80,8 @@ public final class TaskDateTime {
     /**
      * Creates a locale-stable formatter for user-facing text.
      *
-     * @param pattern date-time pattern used by the formatter
-     * @return formatter that uses a consistent English locale
+     * @param pattern date-time pattern used by the formatter.
+     * @return formatter that uses a consistent English locale.
      */
     private static DateTimeFormatter formatter(String pattern) {
         return DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH);
@@ -90,8 +90,8 @@ public final class TaskDateTime {
     /**
      * Creates a strict formatter so impossible dates such as 31 February are rejected.
      *
-     * @param pattern date-time pattern used by the formatter
-     * @return formatter that rejects invalid date and time values
+     * @param pattern date-time pattern used by the formatter.
+     * @return formatter that rejects invalid date and time values.
      */
     private static DateTimeFormatter strictFormatter(String pattern) {
         return formatter(pattern).withResolverStyle(ResolverStyle.STRICT);

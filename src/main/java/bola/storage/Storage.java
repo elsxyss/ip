@@ -121,24 +121,24 @@ public class Storage {
         Task task;
         try {
             switch (fields.get(0)) {
-            case "T":
-                requireFieldCount(fields, 3, 3, lineNumber);
-                task = new Todo(fields.get(2));
-                break;
-            case "D":
-                requireFieldCount(fields, 4, 4, lineNumber);
-                requireNonBlank(fields.get(3), "deadline", lineNumber);
-                task = new Deadline(fields.get(2), fields.get(3));
-                break;
-            case "E":
-                requireFieldCount(fields, 5, 5, lineNumber);
-                requireNonBlank(fields.get(3), "start time", lineNumber);
-                requireNonBlank(fields.get(4), "end time", lineNumber);
-                task = new Event(fields.get(2), fields.get(3), fields.get(4));
-                break;
-            default:
-                throw invalidData(lineNumber,
-                        "has an unknown task type: '" + fields.get(0) + "'.");
+                case "T":
+                    requireFieldCount(fields, 3, 3, lineNumber);
+                    task = new Todo(fields.get(2));
+                    break;
+                case "D":
+                    requireFieldCount(fields, 4, 4, lineNumber);
+                    requireNonBlank(fields.get(3), "deadline", lineNumber);
+                    task = new Deadline(fields.get(2), fields.get(3));
+                    break;
+                case "E":
+                    requireFieldCount(fields, 5, 5, lineNumber);
+                    requireNonBlank(fields.get(3), "start time", lineNumber);
+                    requireNonBlank(fields.get(4), "end time", lineNumber);
+                    task = new Event(fields.get(2), fields.get(3), fields.get(4));
+                    break;
+                default:
+                    throw invalidData(lineNumber,
+                            "has an unknown task type: '" + fields.get(0) + "'.");
             }
         } catch (DateTimeParseException exception) {
             throw invalidData(lineNumber, "has an invalid date format.");

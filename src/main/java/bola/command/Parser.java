@@ -94,9 +94,9 @@ public class Parser {
     /**
      * Extracts the keyword supplied to a find command.
      *
-     * @param input complete user input
-     * @return non-empty keyword to search for
-     * @throws BolaException if no keyword was supplied
+     * @param input complete user input.
+     * @return non-empty keyword to search for.
+     * @throws BolaException if no keyword was supplied.
      */
     public String parseFindKeyword(String input) throws BolaException {
         String keyword = input.substring(CommandType.FIND.getKeyword().length()).strip();
