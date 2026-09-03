@@ -67,11 +67,12 @@ public class UiTest {
                 () -> assertTrue(populatedList.contains("1. [T][ ] buy kopi")),
                 () -> assertTrue(emptyList.contains(
                         "Bola: Bo lah! Your task list is empty. 😌")),
-                () -> assertTrue(matchingTasks.contains("Bola: Found these matching tasks:")),
+                () -> assertTrue(matchingTasks.contains(
+                        "Bola: Can, found these matching tasks:")),
                 () -> assertTrue(noMatches.contains(
                         "Bola: Bo lah! No tasks matching \"exercise\".")),
                 () -> assertTrue(upcomingTasks.contains(
-                        "Bola: These are your tasks for the next 7 days:")),
+                        "Bola: Next 7 days got these tasks:")),
                 () -> assertTrue(noUpcomingTask.contains(
                         "Bola: Bo lah! No dated tasks coming up in the next 1 day. 😌")));
     }

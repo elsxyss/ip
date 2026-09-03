@@ -114,7 +114,7 @@ public class Ui {
         }
 
         System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
-                + "Found these matching tasks:");
+                + "Can, found these matching tasks:");
         for (int i = 0; i < matchingTasks.size(); i++) {
             System.out.println(RESPONSE_INDENT + "    " + (i + 1) + ". "
                     + matchingTasks.get(i));
@@ -138,7 +138,7 @@ public class Ui {
         }
 
         System.out.println(RESPONSE_INDENT + RESPONSE_ADDRESS
-                + "These are your tasks for the next " + days + " " + dayWord + ":");
+                + "Next " + days + " " + dayWord + " got these tasks:");
         for (Task task : upcomingTasks) {
             int originalTaskNumber = allTasks.indexOf(task) + 1;
             System.out.println(RESPONSE_INDENT + "    " + originalTaskNumber + ". " + task);
