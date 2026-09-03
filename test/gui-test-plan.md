@@ -1,0 +1,37 @@
+# FXML JavaFX GUI test plan (Part 4)
+
+Use Java 25 with JavaFX. Build with `./gradlew shadowJar`, copy `build/libs/bola.jar`
+to a fresh temporary directory, and run `java -jar bola.jar` there to protect real task data.
+
+1. Check the 400-by-600 chat area, Bola title, greeting with a left avatar, input, and Send button.
+   Bola's avatar must be the cheerful kopi cup; user messages must use the smiling kaya toast.
+   The greeting must show `Bola: Eh hello! I'm Bola.` on the first line and
+   `Got anything to settle today?` on the next line, without a flag.
+2. Submit `todo read book` with Enter. Check the right user dialog and left task-added response.
+   Every message (including the greeting) must have a white bubble with a visible black border
+   and black text. Round all corners except the bottom-right corner for the user and the
+   bottom-left corner for Bola. The bubble's top edge must align with its avatar's top edge.
+   Short bubbles must fit their text instead of stretching to the avatar's height.
+   The input should clear and retain focus.
+3. Submit `list` with Send. Check that the saved task appears once in Bola's response.
+4. Submit `mark 1`, `unmark 1`, `find book`, and an invalid command.
+   Check that normal confirmations and validation errors appear as chat responses.
+5. Submit a long task description and enough `list` commands to fill the window.
+   Check wrapping, visible avatars, no horizontal scrollbar, and automatic scrolling to the newest reply.
+   Long and multiline messages must stay inside their bubble borders with padding on every side;
+   their top edges must still align with the avatars. Keep the existing chat background.
+6. Submit whitespace only. No dialog should be added.
+7. Submit `bye`. Check the farewell appears immediately and both input and Send are disabled.
+   After three seconds, a separate Bola dialog must read `[Closing in 5 seconds...]`.
+   The farewell must remain in the chat throughout the eight-second closing sequence.
+   After five more seconds (eight seconds after `bye`), the window must close automatically.
+   Repeat in a fresh session using the other input method (Enter/Send).
+8. Reopen the JAR from the same temporary directory. `list` should retain the task.
+
+The packaged JAR must include `view/MainWindow.fxml`, `view/DialogBox.fxml`,
+`styles/dialog.css`, and both avatar PNGs. Launch it outside the repository to verify that
+FXML, CSS, and image paths resolve from the JAR. No FXML loading or injection errors should appear.
+Both Enter and Send must invoke the controller handler declared in `MainWindow.fxml`.
+
+Automated checks: `./gradlew check jacocoTestReport` loads the FXML views on the JavaFX thread,
+exercises both input handlers and the closing schedule, and checks bubble styling and layout.

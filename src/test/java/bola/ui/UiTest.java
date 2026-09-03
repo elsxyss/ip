@@ -31,7 +31,9 @@ public class UiTest {
         String goodbyeOutput = captureOutput(ui::showGoodbye);
 
         assertAll(
-                () -> assertTrue(availableOutput.contains("Bola: Eh hello! I'm Bola 🇸🇬")),
+                () -> assertTrue(availableOutput.contains(
+                        "Bola: Eh hello! I'm Bola." + System.lineSeparator()
+                                + "     Got anything to settle today?")),
                 () -> assertTrue(availableOutput.contains("Got anything to settle today?")),
                 () -> assertTrue(unavailableOutput.contains(
                         "Bola: Alamak, I couldn't load your saved tasks. Permission denied.")),

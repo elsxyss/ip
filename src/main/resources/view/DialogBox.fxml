@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+
+<fx:root type="javafx.scene.layout.HBox" alignment="TOP_RIGHT" spacing="8.0" fillHeight="false"
+         stylesheets="@../styles/dialog.css"
+         xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+    <padding>
+        <Insets top="8.0" right="8.0" bottom="8.0" left="8.0" />
+    </padding>
+    <children>
+        <Label fx:id="text" wrapText="true" minWidth="0.0" minHeight="-Infinity"
+               HBox.hgrow="ALWAYS" styleClass="chat-bubble">
+            <padding>
+                <Insets top="10.0" right="10.0" bottom="10.0" left="10.0" />
+            </padding>
+        </Label>
+        <ImageView fx:id="displayPicture" fitWidth="100.0" fitHeight="100.0" preserveRatio="true" />
+    </children>
+</fx:root>

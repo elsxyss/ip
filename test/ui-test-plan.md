@@ -3,7 +3,7 @@
 ## Test configuration
 
 - Build command: `./gradlew shadowJar`
-- Launch command: `java -jar bola.jar`
+- Launch command: `java -jar bola.jar --cli` (the default launch now opens JavaFX).
 - Java version: 25
 - Isolation: Run each test case in a new temporary directory containing a copy of `build/libs/bola.jar`.
 - Default data precondition: No `data/bola.txt` file.
@@ -11,7 +11,17 @@
 
 ## TC-001: Exit the application
 
-**Aim:** Verify that `bye` ends the session with Bola's farewell.
+**Aim:** Verify the simplified greeting and that `bye` still ends the console session immediately.
+
+**Greeting check:** Before sending `bye`, verify these two consecutive greeting lines
+(five leading spaces on each line):
+
+```text
+     Bola: Eh hello! I'm Bola.
+     Got anything to settle today?
+```
+
+The console must not show the GUI-only closing countdown.
 
 **Inputs:**
 

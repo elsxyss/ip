@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefWidth="400.0" prefHeight="600.0"
+            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="bola.ui.MainWindow">
+    <fx:define>
+        <Image fx:id="userImage" url="@../images/DaUser.png" />
+        <Image fx:id="bolaImage" url="@../images/DaBola.png" />
+    </fx:define>
+    <children>
+        <ScrollPane fx:id="scrollPane" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="ALWAYS"
+                    AnchorPane.topAnchor="1.0" AnchorPane.leftAnchor="1.0"
+                    AnchorPane.rightAnchor="1.0" AnchorPane.bottomAnchor="42.0">
+            <content>
+                <VBox fx:id="dialogContainer" />
+            </content>
+        </ScrollPane>
+        <TextField fx:id="userInput" promptText="Enter a Bola command" onAction="#handleUserInput"
+                   AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="65.0"
+                   AnchorPane.bottomAnchor="1.0" />
+        <Button fx:id="sendButton" text="Send" prefWidth="60.0" onAction="#handleUserInput"
+                AnchorPane.rightAnchor="1.0" AnchorPane.bottomAnchor="1.0" />
+    </children>
+</AnchorPane>
