@@ -23,6 +23,10 @@ Run `./gradlew run` with Java 25. On macOS, use the JavaFX-bundled JDK:
 The GUI follows [SE-EDU's tutorial Part 4](https://se-education.org/guides/tutorials/javaFxPart4.html):
 FXML views define the chat window and dialogs, while Java controllers handle input and automatic scrolling.
 Type existing Bola commands and press Enter or click Send. Blank input is ignored.
+The window can resize in both directions, following
+[tutorial Part 5](https://se-education.org/guides/tutorials/javaFxPart5.html).
+The chat area and input follow the window dimensions, while Send stays at the bottom right.
+The minimum window size is 400 by 220 pixels.
 After `bye`, input is disabled and the farewell appears immediately. After three seconds,
 `[Closing in 5 seconds...]` appears as a separate message. After five more seconds
 (eight seconds after `bye`), the GUI closes automatically.

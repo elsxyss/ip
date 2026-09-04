@@ -1,4 +1,4 @@
-# FXML JavaFX GUI test plan (Part 4)
+# FXML JavaFX GUI test plan (Parts 4 and 5)
 
 Use Java 25 with JavaFX. Build with `./gradlew shadowJar`, copy `build/libs/bola.jar`
 to a fresh temporary directory, and run `java -jar bola.jar` there to protect real task data.
@@ -10,7 +10,9 @@ to a fresh temporary directory, and run `java -jar bola.jar` there to protect re
 2. Submit `todo read book` with Enter. Check the right user dialog and left task-added response.
    Every message (including the greeting) must have a white bubble with a visible black border
    and black text. Round all corners except the bottom-right corner for the user and the
-   bottom-left corner for Bola. The bubble's top edge must align with its avatar's top edge.
+   bottom-left corner for Bola. The bubble's top edge must align with the visible artwork's top edge,
+   excluding transparent margins and nearly invisible export artifacts in the avatar PNG.
+   Check this for both the cup and toast, including a short user message such as `okay`.
    Short bubbles must fit their text instead of stretching to the avatar's height.
    The input should clear and retain focus.
 3. Submit `list` with Send. Check that the saved task appears once in Bola's response.
@@ -19,7 +21,12 @@ to a fresh temporary directory, and run `java -jar bola.jar` there to protect re
 5. Submit a long task description and enough `list` commands to fill the window.
    Check wrapping, visible avatars, no horizontal scrollbar, and automatic scrolling to the newest reply.
    Long and multiline messages must stay inside their bubble borders with padding on every side;
-   their top edges must still align with the avatars. Keep the existing chat background.
+   their top edges must still align with the visible avatars and extend below them.
+   Keep the existing chat background.
+   Enlarge and shrink the window horizontally and vertically. The input must stretch across
+   the bottom, Send must stay at the bottom right, and the chat area must fill the remaining space.
+   Messages must rewrap to the viewport width without a horizontal scrollbar or overlapping controls.
+   The window must not shrink below 400 pixels wide or 220 pixels high.
 6. Submit whitespace only. No dialog should be added.
 7. Submit `bye`. Check the farewell appears immediately and both input and Send are disabled.
    After three seconds, a separate Bola dialog must read `[Closing in 5 seconds...]`.

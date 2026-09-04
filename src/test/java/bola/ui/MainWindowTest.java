@@ -14,7 +14,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import bola.Bola;
+import bola.Main;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -25,6 +27,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 /**
@@ -112,6 +115,49 @@ public class MainWindowTest {
         DialogBox dialog = (DialogBox) dialogs.getChildren().get(index);
         return dialog.getChildren().stream().filter(Label.class::isInstance)
                 .map(Label.class::cast).findFirst().orElseThrow().getText();
+    }
+
+    @Test
+    void mainWindow_resize_keepsControlsAnchored() throws Exception {
+        FxTestSupport.run(() -> {
+            Platform.setImplicitExit(false);
+            Main application = new Main();
+            Stage stage = new Stage();
+            try {
+                application.start(stage);
+                assertTrue(stage.isResizable());
+                assertEquals(400, stage.getMinWidth());
+                assertEquals(220, stage.getMinHeight());
+                AnchorPane root = (AnchorPane) stage.getScene().getRoot();
+                TextField input = (TextField) root.lookup("#userInput");
+                Button send = (Button) root.lookup("#sendButton");
+                ScrollPane scroll = (ScrollPane) root.lookup("#scrollPane");
+                VBox dialogs = (VBox) root.lookup("#dialogContainer");
+
+                for (double[] size : new double[][] {{800, 900}, {400, 220}, {600, 600}}) {
+                    root.resize(size[0], size[1]);
+                    root.applyCss();
+                    root.layout();
+
+                    assertEquals(1, input.getLayoutX(), 0.01);
+                    assertEquals(size[0] - 66, input.getWidth(), 0.01);
+                    assertEquals(size[1] - 1, input.getLayoutY() + input.getHeight(), 0.01);
+                    assertEquals(size[0] - 1, send.getLayoutX() + send.getWidth(), 0.01);
+                    assertEquals(size[1] - 1, send.getLayoutY() + send.getHeight(), 0.01);
+                    assertTrue(input.getBoundsInParent().getMaxX() < send.getLayoutX());
+                    assertEquals(1, scroll.getLayoutX(), 0.01);
+                    assertEquals(1, scroll.getLayoutY(), 0.01);
+                    assertEquals(size[0] - 2, scroll.getWidth(), 0.01);
+                    assertEquals(size[1] - 43, scroll.getHeight(), 0.01);
+                    assertTrue(scroll.getBoundsInParent().getMaxY() <= input.getLayoutY());
+                    assertEquals(scroll.getViewportBounds().getWidth(), dialogs.getWidth(), 1);
+                }
+            } finally {
+                application.stop();
+                stage.hide();
+            }
+            return null;
+        });
     }
 
     @Test

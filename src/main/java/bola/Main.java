@@ -25,7 +25,9 @@ public class Main extends Application {
 
         stage.setTitle("Bola");
         stage.setScene(new Scene(root));
-        stage.setResizable(false);
+        stage.setResizable(true);
+        stage.setMinWidth(400);
+        stage.setMinHeight(220);
         stage.show();
         controller.focusInput();
     }
