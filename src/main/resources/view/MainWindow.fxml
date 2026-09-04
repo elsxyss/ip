@@ -8,6 +8,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <AnchorPane prefWidth="400.0" prefHeight="600.0"
+            stylesheets="@../styles/main-window.css"
             xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="bola.ui.MainWindow">
     <fx:define>

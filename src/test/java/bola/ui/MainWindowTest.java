@@ -26,6 +26,10 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -151,6 +155,18 @@ public class MainWindowTest {
                     assertEquals(size[1] - 43, scroll.getHeight(), 0.01);
                     assertTrue(scroll.getBoundsInParent().getMaxY() <= input.getLayoutY());
                     assertEquals(scroll.getViewportBounds().getWidth(), dialogs.getWidth(), 1);
+                    BackgroundImage background = scroll.getBackground().getImages().getFirst();
+                    assertFalse(background.getImage().isError());
+                    assertTrue(background.getImage().getUrl().endsWith("bola-kopitiam-background.png"));
+                    assertTrue(background.getSize().isCover());
+                    assertEquals(BackgroundPosition.CENTER, background.getPosition());
+                    assertEquals(BackgroundRepeat.NO_REPEAT, background.getRepeatX());
+                    assertEquals(BackgroundRepeat.NO_REPEAT, background.getRepeatY());
+                    Region viewport = (Region) scroll.lookup(".viewport");
+                    assertFalse(viewport.getBackground().getFills().stream()
+                            .anyMatch(fill -> fill.getFill().isOpaque()));
+                    assertFalse(dialogs.getBackground().getFills().stream()
+                            .anyMatch(fill -> fill.getFill().isOpaque()));
                 }
             } finally {
                 application.stop();
