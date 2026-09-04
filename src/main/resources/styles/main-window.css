@@ -1,0 +1,11 @@
+#scrollPane {
+    -fx-background-image: url("../images/bola-kopitiam-background.png");
+    -fx-background-size: cover;
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+}
+
+#scrollPane > .viewport,
+#dialogContainer {
+    -fx-background-color: transparent;
+}

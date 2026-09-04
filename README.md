@@ -27,6 +27,8 @@ The window can resize in both directions, following
 [tutorial Part 5](https://se-education.org/guides/tutorials/javaFxPart5.html).
 The chat area and input follow the window dimensions, while Send stays at the bottom right.
 The minimum window size is 400 by 220 pixels.
+The kopitiam chat background scales with the chat area, preserving its proportions and
+cropping centrally to fill the available space. It stays fixed behind scrolling messages.
 After `bye`, input is disabled and the farewell appears immediately. After three seconds,
 `[Closing in 5 seconds...]` appears as a separate message. After five more seconds
 (eight seconds after `bye`), the GUI closes automatically.

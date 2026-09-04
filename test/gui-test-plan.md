@@ -22,7 +22,9 @@ to a fresh temporary directory, and run `java -jar bola.jar` there to protect re
    Check wrapping, visible avatars, no horizontal scrollbar, and automatic scrolling to the newest reply.
    Long and multiline messages must stay inside their bubble borders with padding on every side;
    their top edges must still align with the visible avatars and extend below them.
-   Keep the existing chat background.
+   The supplied kopitiam PNG must be visible behind the messages and stay fixed while scrolling.
+   Its proportions must stay unchanged, with centered cropping to fill the chat area at every size.
+   Check that no opaque viewport hides the image and that bubbles remain readable and white.
    Enlarge and shrink the window horizontally and vertically. The input must stretch across
    the bottom, Send must stay at the bottom right, and the chat area must fill the remaining space.
    Messages must rewrap to the viewport width without a horizontal scrollbar or overlapping controls.
@@ -36,7 +38,8 @@ to a fresh temporary directory, and run `java -jar bola.jar` there to protect re
 8. Reopen the JAR from the same temporary directory. `list` should retain the task.
 
 The packaged JAR must include `view/MainWindow.fxml`, `view/DialogBox.fxml`,
-`styles/dialog.css`, and both avatar PNGs. Launch it outside the repository to verify that
+`styles/dialog.css`, `styles/main-window.css`, `images/bola-kopitiam-background.png`,
+and both avatar PNGs. Launch it outside the repository to verify that
 FXML, CSS, and image paths resolve from the JAR. No FXML loading or injection errors should appear.
 Both Enter and Send must invoke the controller handler declared in `MainWindow.fxml`.
 

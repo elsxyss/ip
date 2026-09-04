@@ -6,7 +6,8 @@
 - Launch command: `java -jar bola.jar --cli` (the default launch now opens JavaFX).
 - Java version: 25
 - Avatar alignment is covered by `test/gui-test-plan.md` and `DialogBoxTest` using the actual PNGs.
-  Window resizing is covered by `test/gui-test-plan.md` and `MainWindowTest`.
+  Window resizing and the responsive chat background are covered by `test/gui-test-plan.md`
+  and `MainWindowTest`.
   For changes limited to GUI layout, run TC-001 as the console launch/exit smoke test.
 - Isolation: Run each test case in a new temporary directory containing a copy of `build/libs/bola.jar`.
 - Default data precondition: No `data/bola.txt` file.
