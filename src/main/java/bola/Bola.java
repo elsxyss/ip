@@ -92,69 +92,9 @@ public class Bola {
      * Processes one command using the same logic for console and graphical interfaces.
      */
     private void executeCommand(String command) {
-        boolean taskListChanged = false;
-
         try {
             CommandType commandType = parser.parseCommandType(command);
-
-            switch (commandType) {
-                case BYE:
-                    ui.showGoodbye();
-                    isExit = true;
-                    return;
-                case LIST:
-                    ui.showTaskList(tasks.getTasks());
-                    break;
-                case FIND:
-                    String keyword = parser.parseFindKeyword(command);
-                    ui.showMatchingTasks(tasks.findTasks(keyword), keyword);
-                    break;
-                case UPCOMING:
-                    int days = parser.parseUpcomingDays(command, commandType);
-                    showUpcomingTasks(days);
-                    break;
-                case MARK:
-                    int taskIndexToMark = parser.parseTaskIndex(
-                            command, commandType, tasks.size());
-                    Task markedTask = tasks.mark(taskIndexToMark);
-                    taskListChanged = true;
-                    ui.showTaskMarked(markedTask);
-                    break;
-                case UNMARK:
-                    int taskIndexToUnmark = parser.parseTaskIndex(
-                            command, commandType, tasks.size());
-                    Task unmarkedTask = tasks.unmark(taskIndexToUnmark);
-                    taskListChanged = true;
-                    ui.showTaskUnmarked(unmarkedTask);
-                    break;
-                case DELETE:
-                    int taskIndexToDelete = parser.parseTaskIndex(
-                            command, commandType, tasks.size());
-                    Task removedTask = tasks.delete(taskIndexToDelete);
-                    taskListChanged = true;
-                    ui.showTaskDeleted(removedTask, tasks.size());
-                    break;
-                case TODO:
-                    Task todo = parser.parseTodo(command);
-                    tasks.add(todo);
-                    taskListChanged = true;
-                    ui.showTaskAdded(todo, tasks.size());
-                    break;
-                case DEADLINE:
-                    Task deadline = parser.parseDeadline(command);
-                    tasks.add(deadline);
-                    taskListChanged = true;
-                    ui.showTaskAdded(deadline, tasks.size());
-                    break;
-                case EVENT:
-                    Task event = parser.parseEvent(command);
-                    tasks.add(event);
-                    taskListChanged = true;
-                    ui.showTaskAdded(event, tasks.size());
-                    break;
-                default:
-                    throw new AssertionError("Unhandled command type: " + commandType);
-            }
+            boolean taskListChanged = executeCommand(command, commandType);
             if (taskListChanged && isStorageAvailable) {
                 storage.save(tasks.getTasks());
             }
@@ -167,13 +107,107 @@ public class Bola {
     }
 
     /**
-     * Prints dated tasks from today through the requested number of days ahead.
+     * Executes a parsed command and reports whether it changed the task list.
      *
-     * @param days number of days ahead to include.
+     * @param command complete user input.
+     * @param commandType parsed command type.
+     * @return true if the task list changed.
+     * @throws BolaException if the command arguments are invalid.
      */
-    private void showUpcomingTasks(int days) {
+    private boolean executeCommand(String command, CommandType commandType) throws BolaException {
+        return switch (commandType) {
+            case BYE -> {
+                ui.showGoodbye();
+                isExit = true;
+                yield false;
+            }
+            case LIST -> {
+                ui.showTaskList(tasks.getTasks());
+                yield false;
+            }
+            case FIND -> {
+                showMatchingTasks(command);
+                yield false;
+            }
+            case UPCOMING -> {
+                showUpcomingTasks(command, commandType);
+                yield false;
+            }
+            case MARK -> {
+                markTask(command, commandType);
+                yield true;
+            }
+            case UNMARK -> {
+                unmarkTask(command, commandType);
+                yield true;
+            }
+            case DELETE -> {
+                deleteTask(command, commandType);
+                yield true;
+            }
+            case TODO -> {
+                addTask(parser.parseTodo(command));
+                yield true;
+            }
+            case DEADLINE -> {
+                addTask(parser.parseDeadline(command));
+                yield true;
+            }
+            case EVENT -> {
+                addTask(parser.parseEvent(command));
+                yield true;
+            }
+        };
+    }
+
+    /**
+     * Shows tasks whose descriptions contain the command's search keyword.
+     */
+    private void showMatchingTasks(String command) throws BolaException {
+        String keyword = parser.parseFindKeyword(command);
+        ui.showMatchingTasks(tasks.findTasks(keyword), keyword);
+    }
+
+    /**
+     * Shows dated tasks in the range requested by an upcoming command.
+     */
+    private void showUpcomingTasks(String command, CommandType commandType) throws BolaException {
+        int days = parser.parseUpcomingDays(command, commandType);
         List<Task> upcomingTasks = tasks.findUpcomingTasks(LocalDate.now(), days);
         ui.showUpcomingTasks(upcomingTasks, tasks.getTasks(), days);
+    }
+
+    /**
+     * Marks the task selected by the command as done.
+     */
+    private void markTask(String command, CommandType commandType) throws BolaException {
+        int taskIndex = parser.parseTaskIndex(command, commandType, tasks.size());
+        ui.showTaskMarked(tasks.mark(taskIndex));
+    }
+
+    /**
+     * Marks the task selected by the command as not done.
+     */
+    private void unmarkTask(String command, CommandType commandType) throws BolaException {
+        int taskIndex = parser.parseTaskIndex(command, commandType, tasks.size());
+        ui.showTaskUnmarked(tasks.unmark(taskIndex));
+    }
+
+    /**
+     * Deletes the task selected by the command.
+     */
+    private void deleteTask(String command, CommandType commandType) throws BolaException {
+        int taskIndex = parser.parseTaskIndex(command, commandType, tasks.size());
+        Task removedTask = tasks.delete(taskIndex);
+        ui.showTaskDeleted(removedTask, tasks.size());
+    }
+
+    /**
+     * Adds a task and shows its confirmation.
+     */
+    private void addTask(Task task) {
+        tasks.add(task);
+        ui.showTaskAdded(task, tasks.size());
     }
 
     /**
