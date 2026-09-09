@@ -52,6 +52,19 @@ public class TaskListTest {
     }
 
     /**
+     * Checks that task mutations document their validated-index precondition.
+     */
+    @Test
+    void taskOperations_invalidIndexes_throwAssertionError() {
+        TaskList tasks = new TaskList(List.of(new Todo("first")));
+
+        assertAll(
+                () -> assertThrows(AssertionError.class, () -> tasks.mark(-1)),
+                () -> assertThrows(AssertionError.class, () -> tasks.unmark(1)),
+                () -> assertThrows(AssertionError.class, () -> tasks.delete(2)));
+    }
+
+    /**
      * Checks case-insensitive substring matching and preservation of stored task order.
      */
     @Test
@@ -102,21 +115,20 @@ public class TaskListTest {
     }
 
     /**
-     * Checks a zero-day range and lists with no matching dated tasks.
+     * Checks invalid day ranges and lists with no matching dated tasks.
      */
     @Test
-    void findUpcomingTasks_zeroDayOrNoDatedTasks_returnsExpectedList() {
+    void findUpcomingTasks_invalidDayRangeOrNoDatedTasks_returnsExpectedResult() {
         LocalDate today = LocalDate.of(2026, 8, 28);
-        Task midnight = new Deadline("midnight", "2026-08-28");
-        Task afternoon = new Event(
-                "afternoon", "2026-08-28 1400", "2026-08-28 1500");
-        Task tomorrow = new Deadline("tomorrow", "2026-08-29");
-        TaskList datedTasks = new TaskList(List.of(afternoon, tomorrow, midnight));
+        TaskList datedTasks = new TaskList(List.of(
+                new Deadline("tomorrow", "2026-08-29")));
         TaskList undatedTasks = new TaskList(List.of(new Todo("read")));
 
         assertAll(
-                () -> assertEquals(List.of(midnight, afternoon),
-                        datedTasks.findUpcomingTasks(today, 0)),
+                () -> assertThrows(AssertionError.class,
+                        () -> datedTasks.findUpcomingTasks(today, 0)),
+                () -> assertThrows(AssertionError.class,
+                        () -> datedTasks.findUpcomingTasks(null, 7)),
                 () -> assertEquals(List.of(), undatedTasks.findUpcomingTasks(today, 7)),
                 () -> assertEquals(List.of(), new TaskList().findUpcomingTasks(today, 7)));
     }
