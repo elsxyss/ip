@@ -47,8 +47,16 @@ public class Parser {
      */
     public int parseTaskIndex(String input, CommandType commandType, int taskCount)
             throws BolaException {
+        assert commandType == CommandType.MARK || commandType == CommandType.UNMARK
+                || commandType == CommandType.DELETE
+                : "Only task mutation commands have a task index";
+        assert taskCount >= 0 : "Task count cannot be negative";
+
         String command = commandType.getKeyword();
-        String taskNumber = parseArguments(input, commandType);
+        assert input.equals(command) || input.startsWith(command + " ")
+                : "Input must match the supplied command type";
+
+        String taskNumber = input.substring(command.length()).strip();
         if (taskNumber.isEmpty()) {
             throw new BolaException("which task number you want me to " + command + "?");
         }
@@ -73,7 +81,13 @@ public class Parser {
      * @throws BolaException if the value is missing, non-numeric, or not positive.
      */
     public int parseUpcomingDays(String input, CommandType commandType) throws BolaException {
-        String daysText = parseArguments(input, commandType);
+        assert commandType == CommandType.UPCOMING
+                : "Only the upcoming command has a day range";
+        assert input.equals(commandType.getKeyword())
+                || input.startsWith(commandType.getKeyword() + " ")
+                : "Input must match the supplied command type";
+
+        String daysText = input.substring(commandType.getKeyword().length()).strip();
         if (daysText.isEmpty()) {
             throw new BolaException(
                     "how many days ahead should I check? Try upcoming 7.");
@@ -99,7 +113,7 @@ public class Parser {
      * @throws BolaException if no keyword was supplied.
      */
     public String parseFindKeyword(String input) throws BolaException {
-        String keyword = parseArguments(input, CommandType.FIND);
+        String keyword = input.substring(CommandType.FIND.getKeyword().length()).strip();
         if (keyword.isEmpty()) {
             throw new BolaException("what keyword should I search for? Give me one, can?");
         }
@@ -125,7 +139,7 @@ public class Parser {
      * @throws BolaException if its description or deadline is missing or invalid.
      */
     public Task parseDeadline(String input) throws BolaException {
-        String taskDetails = parseArguments(input, CommandType.DEADLINE);
+        String taskDetails = input.substring(CommandType.DEADLINE.getKeyword().length()).strip();
         if (taskDetails.isEmpty() || taskDetails.startsWith("/by")) {
             throw new BolaException("what deadline task should I add for you?");
         }
@@ -157,7 +171,7 @@ public class Parser {
      * @throws BolaException if its description or time range is missing or invalid.
      */
     public Task parseEvent(String input) throws BolaException {
-        String taskDetails = parseArguments(input, CommandType.EVENT);
+        String taskDetails = input.substring(CommandType.EVENT.getKeyword().length()).strip();
         if (taskDetails.isEmpty() || taskDetails.startsWith("/from")) {
             throw new BolaException("what event should I add for you?");
         }
@@ -198,18 +212,11 @@ public class Parser {
      */
     private String parseDescription(String input, CommandType commandType, String taskType)
             throws BolaException {
-        String description = parseArguments(input, commandType);
+        String description = input.substring(commandType.getKeyword().length()).strip();
         if (description.isEmpty()) {
             throw new BolaException("what " + taskType + " should I add for you?");
         }
         return description;
-    }
-
-    /**
-     * Removes a command keyword and returns its trimmed arguments.
-     */
-    private String parseArguments(String input, CommandType commandType) {
-        return input.substring(commandType.getKeyword().length()).strip();
     }
 
     /**
