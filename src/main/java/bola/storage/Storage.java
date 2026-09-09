@@ -20,6 +20,26 @@ import bola.task.Todo;
  */
 public class Storage {
     private static final Path DEFAULT_FILE_PATH = Path.of("data", "bola.txt");
+    private static final String BYTE_ORDER_MARK = "\uFEFF";
+
+    private static final int TASK_TYPE_INDEX = 0;
+    private static final int COMPLETION_STATUS_INDEX = 1;
+    private static final int DESCRIPTION_INDEX = 2;
+    private static final int START_OR_DEADLINE_INDEX = 3;
+    private static final int END_TIME_INDEX = 4;
+
+    private static final int TODO_FIELD_COUNT = 3;
+    private static final int DEADLINE_FIELD_COUNT = 4;
+    private static final int EVENT_FIELD_COUNT = 5;
+
+    private static final String TODO_TYPE = "T";
+    private static final String DEADLINE_TYPE = "D";
+    private static final String EVENT_TYPE = "E";
+    private static final String INCOMPLETE_STATUS = "0";
+    private static final String COMPLETE_STATUS = "1";
+
+    private static final char ESCAPE_CHARACTER = '\\';
+    private static final char FIELD_SEPARATOR = '|';
 
     private final Path filePath;
 
@@ -54,8 +74,8 @@ public class Storage {
         List<String> savedLines = Files.readAllLines(filePath);
         for (int i = 0; i < savedLines.size(); i++) {
             String taskData = savedLines.get(i);
-            if (i == 0 && taskData.startsWith("\uFEFF")) {
-                taskData = taskData.substring(1);
+            if (i == 0 && taskData.startsWith(BYTE_ORDER_MARK)) {
+                taskData = taskData.substring(BYTE_ORDER_MARK.length());
             }
             if (!taskData.isBlank()) {
                 tasks.add(parseTask(taskData, i + 1));
@@ -113,40 +133,44 @@ public class Storage {
      */
     private Task parseTask(String taskData, int lineNumber) throws IOException {
         List<String> fields = splitFields(taskData);
-        requireFieldCount(fields, 3, Integer.MAX_VALUE, lineNumber);
-        requireNonBlank(fields.get(0), "task type", lineNumber);
-        requireNonBlank(fields.get(1), "completion status", lineNumber);
-        requireNonBlank(fields.get(2), "description", lineNumber);
+        requireFieldCount(fields, TODO_FIELD_COUNT, Integer.MAX_VALUE, lineNumber);
+        requireNonBlank(fields.get(TASK_TYPE_INDEX), "task type", lineNumber);
+        requireNonBlank(fields.get(COMPLETION_STATUS_INDEX), "completion status", lineNumber);
+        requireNonBlank(fields.get(DESCRIPTION_INDEX), "description", lineNumber);
 
         Task task;
         try {
-            switch (fields.get(0)) {
-                case "T":
-                    requireFieldCount(fields, 3, 3, lineNumber);
-                    task = new Todo(fields.get(2));
+            switch (fields.get(TASK_TYPE_INDEX)) {
+                case TODO_TYPE:
+                    requireFieldCount(fields, TODO_FIELD_COUNT, TODO_FIELD_COUNT, lineNumber);
+                    task = new Todo(fields.get(DESCRIPTION_INDEX));
                     break;
-                case "D":
-                    requireFieldCount(fields, 4, 4, lineNumber);
-                    requireNonBlank(fields.get(3), "deadline", lineNumber);
-                    task = new Deadline(fields.get(2), fields.get(3));
+                case DEADLINE_TYPE:
+                    requireFieldCount(fields, DEADLINE_FIELD_COUNT, DEADLINE_FIELD_COUNT,
+                            lineNumber);
+                    requireNonBlank(fields.get(START_OR_DEADLINE_INDEX), "deadline", lineNumber);
+                    task = new Deadline(fields.get(DESCRIPTION_INDEX),
+                            fields.get(START_OR_DEADLINE_INDEX));
                     break;
-                case "E":
-                    requireFieldCount(fields, 5, 5, lineNumber);
-                    requireNonBlank(fields.get(3), "start time", lineNumber);
-                    requireNonBlank(fields.get(4), "end time", lineNumber);
-                    task = new Event(fields.get(2), fields.get(3), fields.get(4));
+                case EVENT_TYPE:
+                    requireFieldCount(fields, EVENT_FIELD_COUNT, EVENT_FIELD_COUNT, lineNumber);
+                    requireNonBlank(fields.get(START_OR_DEADLINE_INDEX), "start time", lineNumber);
+                    requireNonBlank(fields.get(END_TIME_INDEX), "end time", lineNumber);
+                    task = new Event(fields.get(DESCRIPTION_INDEX),
+                            fields.get(START_OR_DEADLINE_INDEX), fields.get(END_TIME_INDEX));
                     break;
                 default:
                     throw invalidData(lineNumber,
-                            "has an unknown task type: '" + fields.get(0) + "'.");
+                            "has an unknown task type: '"
+                                    + fields.get(TASK_TYPE_INDEX) + "'.");
             }
         } catch (DateTimeParseException exception) {
             throw invalidData(lineNumber, "has an invalid date format.");
         }
 
-        if (fields.get(1).equals("1")) {
+        if (fields.get(COMPLETION_STATUS_INDEX).equals(COMPLETE_STATUS)) {
             task.markAsDone();
-        } else if (!fields.get(1).equals("0")) {
+        } else if (!fields.get(COMPLETION_STATUS_INDEX).equals(INCOMPLETE_STATUS)) {
             throw invalidData(lineNumber,
                     "has an invalid completion status; it must be 0 or 1.");
         }
@@ -165,15 +189,15 @@ public class Storage {
 
         for (int i = 0; i < taskData.length(); i++) {
             char character = taskData.charAt(i);
-            if (character == '\\' && i + 1 < taskData.length()) {
+            if (character == ESCAPE_CHARACTER && i + 1 < taskData.length()) {
                 char nextCharacter = taskData.charAt(i + 1);
-                if (nextCharacter == '\\' || nextCharacter == '|') {
+                if (nextCharacter == ESCAPE_CHARACTER || nextCharacter == FIELD_SEPARATOR) {
                     currentField.append(nextCharacter);
                     i++;
                     continue;
                 }
             }
-            if (character == '|') {
+            if (character == FIELD_SEPARATOR) {
                 fields.add(currentField.toString().strip());
                 currentField.setLength(0);
             } else {
