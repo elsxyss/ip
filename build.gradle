@@ -15,10 +15,6 @@ repositories {
     mavenCentral()
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     String javaFxVersion = '17.0.7'
 
