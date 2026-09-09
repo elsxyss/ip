@@ -108,15 +108,10 @@ public class TaskList {
      */
     public List<Task> findTasks(String keyword) {
         String normalisedKeyword = Objects.requireNonNull(keyword).toLowerCase(Locale.ROOT);
-        ArrayList<Task> matchingTasks = new ArrayList<>();
-
-        for (Task task : tasks) {
-            String normalisedDescription = task.getDescription().toLowerCase(Locale.ROOT);
-            if (normalisedDescription.contains(normalisedKeyword)) {
-                matchingTasks.add(task);
-            }
-        }
-        return matchingTasks;
+        return tasks.stream()
+                .filter(task -> task.getDescription().toLowerCase(Locale.ROOT)
+                        .contains(normalisedKeyword))
+                .toList();
     }
 
     /**
@@ -133,16 +128,13 @@ public class TaskList {
         assert days > 0 : "Upcoming-task searches require a positive day range";
 
         LocalDate lastDate = today.plusDays(days);
-        ArrayList<Task> upcomingTasks = new ArrayList<>();
-
-        for (Task task : tasks) {
-            LocalDate taskDate = getTaskDateTime(task).toLocalDate();
-            if (!taskDate.isBefore(today) && !taskDate.isAfter(lastDate)) {
-                upcomingTasks.add(task);
-            }
-        }
-        upcomingTasks.sort(Comparator.comparing(TaskList::getTaskDateTime));
-        return upcomingTasks;
+        return tasks.stream()
+                .filter(task -> {
+                    LocalDate taskDate = getTaskDateTime(task).toLocalDate();
+                    return !taskDate.isBefore(today) && !taskDate.isAfter(lastDate);
+                })
+                .sorted(Comparator.comparing(TaskList::getTaskDateTime))
+                .toList();
     }
 
     /**

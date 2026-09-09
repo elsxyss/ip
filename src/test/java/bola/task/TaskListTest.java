@@ -80,6 +80,7 @@ public class TaskListTest {
 
         assertAll(
                 () -> assertEquals(List.of(firstMatch, secondMatch), matches),
+                () -> assertEquals(List.of(firstMatch, secondMatch), tasks.findTasks("BOOK")),
                 () -> assertEquals(originalOrder, tasks.getTasks(),
                         "Finding tasks must not reorder stored tasks"),
                 () -> assertEquals(List.of(), tasks.findTasks("exercise")));
