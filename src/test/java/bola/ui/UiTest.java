@@ -2,6 +2,7 @@ package bola.ui;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -124,6 +125,21 @@ public class UiTest {
                         "Bola: Next 7 days got these tasks:")),
                 () -> assertTrue(noUpcomingTask.contains(
                         "Bola: Bo lah! No dated tasks coming up in the next 1 day. 😌")));
+    }
+
+    /**
+     * Checks that upcoming-task output documents the assumptions made by its numbering logic.
+     */
+    @Test
+    void showUpcomingTasks_invalidContext_throwsAssertionError() {
+        Ui ui = new Ui();
+        Task deadline = new Deadline("submit report", "2026-09-10");
+
+        assertAll(
+                () -> assertThrows(AssertionError.class,
+                        () -> ui.showUpcomingTasks(List.of(), List.of(), 0)),
+                () -> assertThrows(AssertionError.class,
+                        () -> ui.showUpcomingTasks(List.of(deadline), List.of(), 7)));
     }
 
     /**

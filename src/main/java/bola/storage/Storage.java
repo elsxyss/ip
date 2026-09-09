@@ -112,6 +112,9 @@ public class Storage {
      * @throws IOException if the line does not match Bola's data format.
      */
     private Task parseTask(String taskData, int lineNumber) throws IOException {
+        assert !taskData.isBlank() : "Only non-blank task records should be parsed";
+        assert lineNumber > 0 : "Data-file line numbers are one-based";
+
         List<String> fields = splitFields(taskData);
         requireFieldCount(fields, 3, Integer.MAX_VALUE, lineNumber);
         requireNonBlank(fields.get(0), "task type", lineNumber);
