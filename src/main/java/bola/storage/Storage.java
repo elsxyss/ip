@@ -138,43 +138,74 @@ public class Storage {
         requireNonBlank(fields.get(COMPLETION_STATUS_INDEX), "completion status", lineNumber);
         requireNonBlank(fields.get(DESCRIPTION_INDEX), "description", lineNumber);
 
-        Task task;
+        Task task = createTask(fields, lineNumber);
+        restoreCompletionStatus(task, fields.get(COMPLETION_STATUS_INDEX), lineNumber);
+        return task;
+    }
+
+    /**
+     * Creates the task subtype identified by a saved record.
+     *
+     * @param fields parsed task fields.
+     * @param lineNumber one-based line number used in error messages.
+     * @return reconstructed task with its default incomplete status.
+     * @throws IOException if the task type, field count, or date fields are invalid.
+     */
+    private Task createTask(List<String> fields, int lineNumber) throws IOException {
         try {
-            switch (fields.get(TASK_TYPE_INDEX)) {
-                case TODO_TYPE:
-                    requireFieldCount(fields, TODO_FIELD_COUNT, TODO_FIELD_COUNT, lineNumber);
-                    task = new Todo(fields.get(DESCRIPTION_INDEX));
-                    break;
-                case DEADLINE_TYPE:
-                    requireFieldCount(fields, DEADLINE_FIELD_COUNT, DEADLINE_FIELD_COUNT,
-                            lineNumber);
-                    requireNonBlank(fields.get(START_OR_DEADLINE_INDEX), "deadline", lineNumber);
-                    task = new Deadline(fields.get(DESCRIPTION_INDEX),
-                            fields.get(START_OR_DEADLINE_INDEX));
-                    break;
-                case EVENT_TYPE:
-                    requireFieldCount(fields, EVENT_FIELD_COUNT, EVENT_FIELD_COUNT, lineNumber);
-                    requireNonBlank(fields.get(START_OR_DEADLINE_INDEX), "start time", lineNumber);
-                    requireNonBlank(fields.get(END_TIME_INDEX), "end time", lineNumber);
-                    task = new Event(fields.get(DESCRIPTION_INDEX),
-                            fields.get(START_OR_DEADLINE_INDEX), fields.get(END_TIME_INDEX));
-                    break;
-                default:
-                    throw invalidData(lineNumber,
-                            "has an unknown task type: '"
-                                    + fields.get(TASK_TYPE_INDEX) + "'.");
-            }
+            return switch (fields.get(TASK_TYPE_INDEX)) {
+                case TODO_TYPE -> createTodo(fields, lineNumber);
+                case DEADLINE_TYPE -> createDeadline(fields, lineNumber);
+                case EVENT_TYPE -> createEvent(fields, lineNumber);
+                default -> throw invalidData(lineNumber,
+                        "has an unknown task type: '"
+                                + fields.get(TASK_TYPE_INDEX) + "'.");
+            };
         } catch (DateTimeParseException exception) {
             throw invalidData(lineNumber, "has an invalid date format.");
         }
+    }
 
-        if (fields.get(COMPLETION_STATUS_INDEX).equals(COMPLETE_STATUS)) {
+    /**
+     * Creates a to-do from validated common fields.
+     */
+    private Task createTodo(List<String> fields, int lineNumber) throws IOException {
+        requireFieldCount(fields, TODO_FIELD_COUNT, TODO_FIELD_COUNT, lineNumber);
+        return new Todo(fields.get(DESCRIPTION_INDEX));
+    }
+
+    /**
+     * Creates a deadline after validating its subtype-specific fields.
+     */
+    private Task createDeadline(List<String> fields, int lineNumber) throws IOException {
+        requireFieldCount(fields, DEADLINE_FIELD_COUNT, DEADLINE_FIELD_COUNT, lineNumber);
+        requireNonBlank(fields.get(START_OR_DEADLINE_INDEX), "deadline", lineNumber);
+        return new Deadline(fields.get(DESCRIPTION_INDEX),
+                fields.get(START_OR_DEADLINE_INDEX));
+    }
+
+    /**
+     * Creates an event after validating its subtype-specific fields.
+     */
+    private Task createEvent(List<String> fields, int lineNumber) throws IOException {
+        requireFieldCount(fields, EVENT_FIELD_COUNT, EVENT_FIELD_COUNT, lineNumber);
+        requireNonBlank(fields.get(START_OR_DEADLINE_INDEX), "start time", lineNumber);
+        requireNonBlank(fields.get(END_TIME_INDEX), "end time", lineNumber);
+        return new Event(fields.get(DESCRIPTION_INDEX),
+                fields.get(START_OR_DEADLINE_INDEX), fields.get(END_TIME_INDEX));
+    }
+
+    /**
+     * Restores and validates a reconstructed task's saved completion status.
+     */
+    private void restoreCompletionStatus(Task task, String completionStatus, int lineNumber)
+            throws IOException {
+        if (completionStatus.equals(COMPLETE_STATUS)) {
             task.markAsDone();
-        } else if (!fields.get(COMPLETION_STATUS_INDEX).equals(INCOMPLETE_STATUS)) {
+        } else if (!completionStatus.equals(INCOMPLETE_STATUS)) {
             throw invalidData(lineNumber,
                     "has an invalid completion status; it must be 0 or 1.");
         }
-        return task;
     }
 
     /**
