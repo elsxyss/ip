@@ -102,6 +102,20 @@ public class ParserTest {
     }
 
     /**
+     * Checks that index parsing documents assumptions established by command dispatch.
+     */
+    @Test
+    void parseTaskIndex_invalidInternalContext_throwsAssertionError() {
+        assertAll(
+                () -> assertThrows(AssertionError.class,
+                        () -> parser.parseTaskIndex("list 1", CommandType.LIST, 3)),
+                () -> assertThrows(AssertionError.class,
+                        () -> parser.parseTaskIndex("mark 1", CommandType.MARK, -1)),
+                () -> assertThrows(AssertionError.class,
+                        () -> parser.parseTaskIndex("delete 1", CommandType.MARK, 3)));
+    }
+
+    /**
      * Checks that upcoming accepts positive whole numbers only.
      */
     @Test
@@ -123,6 +137,18 @@ public class ParserTest {
                 () -> assertParsingFails(() -> parser.parseUpcomingDays(
                         "upcoming 1.5", CommandType.UPCOMING),
                         "please use a whole number of days—for example, upcoming 7."));
+    }
+
+    /**
+     * Checks that upcoming parsing documents assumptions established by command dispatch.
+     */
+    @Test
+    void parseUpcomingDays_invalidInternalContext_throwsAssertionError() {
+        assertAll(
+                () -> assertThrows(AssertionError.class,
+                        () -> parser.parseUpcomingDays("list 7", CommandType.LIST)),
+                () -> assertThrows(AssertionError.class,
+                        () -> parser.parseUpcomingDays("list 7", CommandType.UPCOMING)));
     }
 
     /**

@@ -135,6 +135,8 @@ public class Ui {
      * @param days number of days in the requested range.
      */
     public void showUpcomingTasks(List<Task> upcomingTasks, List<Task> allTasks, int days) {
+        assert days > 0 : "Upcoming-task responses require a positive day range";
+
         String dayWord = days == 1 ? "day" : "days";
         if (upcomingTasks.isEmpty()) {
             showLine(RESPONSE_INDENT + RESPONSE_ADDRESS
@@ -147,6 +149,8 @@ public class Ui {
                 + "Next " + days + " " + dayWord + " got these tasks:");
         for (Task task : upcomingTasks) {
             int originalTaskNumber = allTasks.indexOf(task) + 1;
+            assert originalTaskNumber > 0
+                    : "Every upcoming task must belong to the complete task list";
             showLine(RESPONSE_INDENT + "    " + originalTaskNumber + ". " + task);
         }
     }

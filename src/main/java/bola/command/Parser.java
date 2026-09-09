@@ -47,7 +47,15 @@ public class Parser {
      */
     public int parseTaskIndex(String input, CommandType commandType, int taskCount)
             throws BolaException {
+        assert commandType == CommandType.MARK || commandType == CommandType.UNMARK
+                || commandType == CommandType.DELETE
+                : "Only task mutation commands have a task index";
+        assert taskCount >= 0 : "Task count cannot be negative";
+
         String command = commandType.getKeyword();
+        assert input.equals(command) || input.startsWith(command + " ")
+                : "Input must match the supplied command type";
+
         String taskNumber = input.substring(command.length()).strip();
         if (taskNumber.isEmpty()) {
             throw new BolaException("which task number you want me to " + command + "?");
@@ -73,6 +81,12 @@ public class Parser {
      * @throws BolaException if the value is missing, non-numeric, or not positive.
      */
     public int parseUpcomingDays(String input, CommandType commandType) throws BolaException {
+        assert commandType == CommandType.UPCOMING
+                : "Only the upcoming command has a day range";
+        assert input.equals(commandType.getKeyword())
+                || input.startsWith(commandType.getKeyword() + " ")
+                : "Input must match the supplied command type";
+
         String daysText = input.substring(commandType.getKeyword().length()).strip();
         if (daysText.isEmpty()) {
             throw new BolaException(

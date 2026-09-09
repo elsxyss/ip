@@ -65,6 +65,8 @@ public class TaskList {
      * @return removed task.
      */
     public Task delete(int index) {
+        assert index >= 0 && index < tasks.size()
+                : "Task index must refer to an existing task";
         return tasks.remove(index);
     }
 
@@ -75,6 +77,8 @@ public class TaskList {
      * @return marked task.
      */
     public Task mark(int index) {
+        assert index >= 0 && index < tasks.size()
+                : "Task index must refer to an existing task";
         Task task = tasks.get(index);
         task.markAsDone();
         return task;
@@ -87,6 +91,8 @@ public class TaskList {
      * @return unmarked task.
      */
     public Task unmark(int index) {
+        assert index >= 0 && index < tasks.size()
+                : "Task index must refer to an existing task";
         Task task = tasks.get(index);
         task.markAsNotDone();
         return task;
@@ -123,6 +129,9 @@ public class TaskList {
      * @return matching dated tasks in chronological order.
      */
     public List<Task> findUpcomingTasks(LocalDate today, int days) {
+        assert today != null : "Upcoming-task searches require a starting date";
+        assert days > 0 : "Upcoming-task searches require a positive day range";
+
         LocalDate lastDate = today.plusDays(days);
         ArrayList<Task> upcomingTasks = new ArrayList<>();
 
