@@ -3,6 +3,7 @@ package bola.ui;
 import java.util.List;
 import java.util.Scanner;
 
+import bola.command.CommandType;
 import bola.task.Task;
 
 /**
@@ -86,6 +87,28 @@ public class Ui {
     public void showGoodbye() {
         showLines(RESPONSE_INDENT + RESPONSE_ADDRESS
                 + "All settled? Steady lah. See you again! 👋", OUTER_DIVIDER);
+    }
+
+    /**
+     * Shows every supported command and the task-selection syntax.
+     */
+    public void showHelp() {
+        showLines(RESPONSE_INDENT + RESPONSE_ADDRESS + "Can! Here are the commands:",
+                RESPONSE_INDENT + "    todo <description>",
+                RESPONSE_INDENT + "    deadline <description> /by <date>",
+                RESPONSE_INDENT + "    event <description> /from <date> /to <date>",
+                RESPONSE_INDENT + "    list",
+                RESPONSE_INDENT + "    find <keyword>",
+                RESPONSE_INDENT + "    upcoming <days>",
+                RESPONSE_INDENT + "    mark <selection>",
+                RESPONSE_INDENT + "    unmark <selection>",
+                RESPONSE_INDENT + "    delete <selection>",
+                RESPONSE_INDENT + "    help",
+                RESPONSE_INDENT + "    bye",
+                RESPONSE_INDENT + "Selection can use task numbers, inclusive ranges, or all.",
+                RESPONSE_INDENT + "Example: delete 1, 3-5 8",
+                RESPONSE_INDENT
+                        + "Dates use yyyy-MM-dd, or d/M/yyyy HHmm when including a time.");
     }
 
     /**
@@ -176,6 +199,35 @@ public class Ui {
     }
 
     /**
+     * Shows confirmation that several tasks were marked as done.
+     *
+     * @param markedTasks tasks after they were marked.
+     * @param taskIndexes original zero-based task indexes.
+     * @param taskCount number of tasks currently stored.
+     */
+    public void showTasksMarked(List<Task> markedTasks, List<Integer> taskIndexes, int taskCount) {
+        showLine(RESPONSE_INDENT + RESPONSE_ADDRESS + "Nice, " + markedTasks.size()
+                + " tasks settled liao! ✅");
+        showNumberedTasks(markedTasks, taskIndexes);
+        showTaskCount(taskCount);
+    }
+
+    /**
+     * Shows confirmation that several tasks were marked as not done.
+     *
+     * @param unmarkedTasks tasks after they were unmarked.
+     * @param taskIndexes original zero-based task indexes.
+     * @param taskCount number of tasks currently stored.
+     */
+    public void showTasksUnmarked(List<Task> unmarkedTasks, List<Integer> taskIndexes,
+            int taskCount) {
+        showLine(RESPONSE_INDENT + RESPONSE_ADDRESS + "Okay, these " + unmarkedTasks.size()
+                + " tasks not settled yet.");
+        showNumberedTasks(unmarkedTasks, taskIndexes);
+        showTaskCount(taskCount);
+    }
+
+    /**
      * Shows a newly added task and the updated task count.
      *
      * @param task task that was added.
@@ -201,6 +253,55 @@ public class Ui {
         } else {
             showTaskCount(taskCount);
         }
+    }
+
+    /**
+     * Shows several removed tasks and the updated task count.
+     *
+     * @param deletedTasks tasks that were removed.
+     * @param taskIndexes original zero-based task indexes.
+     * @param taskCount number of tasks remaining.
+     */
+    public void showTasksDeleted(List<Task> deletedTasks, List<Integer> taskIndexes,
+            int taskCount) {
+        showLine(RESPONSE_INDENT + RESPONSE_ADDRESS + "Okay, removed these "
+                + deletedTasks.size() + " tasks already:");
+        showNumberedTasks(deletedTasks, taskIndexes);
+        if (taskCount == 0) {
+            showLine(RESPONSE_INDENT + "Bo lah! No more tasks in your list. 🎉");
+        } else {
+            showTaskCount(taskCount);
+        }
+    }
+
+    /**
+     * Asks the user to confirm a pending mass operation.
+     *
+     * @param commandType operation awaiting confirmation.
+     * @param taskCount number of selected tasks.
+     * @param isAll whether the selection used {@code all}.
+     */
+    public void showMassOperationConfirmation(CommandType commandType, int taskCount,
+            boolean isAll) {
+        String taskWord = taskCount == 1 ? "task" : "tasks";
+        String selection = isAll ? "all " + taskCount + " " + taskWord
+                : "these " + taskCount + " " + taskWord;
+        showLine(RESPONSE_INDENT + RESPONSE_ADDRESS + "U sure u want to "
+                + commandType.getKeyword() + " " + selection + "? (Yes/No)");
+    }
+
+    /**
+     * Shows that a pending mass operation was cancelled.
+     */
+    public void showOperationCancelled() {
+        showLine(RESPONSE_INDENT + RESPONSE_ADDRESS + "Okay, cancelled. No tasks changed.");
+    }
+
+    /**
+     * Shows that a pending operation still requires a yes-or-no answer.
+     */
+    public void showConfirmationAnswerError() {
+        showLine(RESPONSE_INDENT + ERROR_ADDRESS + "please answer Yes or No, can?");
     }
 
     /**
@@ -239,6 +340,18 @@ public class Ui {
         } else {
             showLine(RESPONSE_INDENT + "Now got " + taskCount
                     + " tasks in your list.");
+        }
+    }
+
+    /**
+     * Shows tasks with their original one-based task numbers.
+     */
+    private void showNumberedTasks(List<Task> selectedTasks, List<Integer> taskIndexes) {
+        assert selectedTasks.size() == taskIndexes.size()
+                : "Every displayed task must have an original task index";
+        for (int i = 0; i < selectedTasks.size(); i++) {
+            showLine(RESPONSE_INDENT + "    " + (taskIndexes.get(i) + 1) + ". "
+                    + selectedTasks.get(i));
         }
     }
 

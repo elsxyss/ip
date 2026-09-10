@@ -2,6 +2,10 @@ package bola.command;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import bola.exception.BolaException;
 import bola.task.Deadline;
@@ -70,6 +74,150 @@ public class Parser {
         } catch (NumberFormatException exception) {
             throw new BolaException("please give me a valid task number to " + command + ", can?");
         }
+    }
+
+    /**
+     * Extracts and validates all task numbers in a task mutation command.
+     *
+     * <p>Numbers are returned as distinct zero-based indexes in their original list order.</p>
+     *
+     * @param input complete user input.
+     * @param commandType task mutation command type.
+     * @param taskCount number of tasks currently stored.
+     * @return validated task selection.
+     * @throws BolaException if the selection is missing, malformed, reversed, or out of range.
+     */
+    public TaskSelection parseTaskSelection(String input, CommandType commandType, int taskCount)
+            throws BolaException {
+        assert isTaskMutation(commandType) : "Only task mutation commands have task selections";
+        assert taskCount >= 0 : "Task count cannot be negative";
+
+        String command = commandType.getKeyword();
+        assert input.equals(command) || input.startsWith(command + " ")
+                : "Input must match the supplied command type";
+
+        String selectionText = input.substring(command.length()).strip();
+        if (selectionText.isEmpty()) {
+            throw new BolaException("which task number you want me to " + command + "?");
+        }
+        if (selectionText.equals("all")) {
+            if (taskCount == 0) {
+                throw new BolaException("there are no tasks to " + command + " leh.");
+            }
+            return new TaskSelection(allTaskIndexes(taskCount), true);
+        }
+        if (containsAllKeyword(selectionText)) {
+            throw new BolaException("all must be used by itself for " + command + ", can?");
+        }
+
+        String[] selectors = splitSelectors(selectionText, command);
+        Set<Integer> taskIndexes = new TreeSet<>();
+        for (String selector : selectors) {
+            addSelectorIndexes(selector, command, taskCount, selectors.length, taskIndexes);
+        }
+        return new TaskSelection(new ArrayList<>(taskIndexes), false);
+    }
+
+    /**
+     * Returns whether a command changes existing tasks by number.
+     */
+    private boolean isTaskMutation(CommandType commandType) {
+        return commandType == CommandType.MARK || commandType == CommandType.UNMARK
+                || commandType == CommandType.DELETE;
+    }
+
+    /**
+     * Returns every valid zero-based task index.
+     */
+    private List<Integer> allTaskIndexes(int taskCount) {
+        ArrayList<Integer> taskIndexes = new ArrayList<>();
+        for (int i = 0; i < taskCount; i++) {
+            taskIndexes.add(i);
+        }
+        return taskIndexes;
+    }
+
+    /**
+     * Returns whether {@code all} occurs as a separate selector.
+     */
+    private boolean containsAllKeyword(String selectionText) {
+        return List.of(selectionText.split("[\\s,]+"))
+                .contains("all");
+    }
+
+    /**
+     * Splits a selection after rejecting missing comma-separated items.
+     */
+    private String[] splitSelectors(String selectionText, String command) throws BolaException {
+        if (selectionText.matches("^,.*") || selectionText.matches(".*,$")
+                || selectionText.matches(".*,[\\s]*,.*")) {
+            throw invalidTaskSelection(command, true);
+        }
+        return selectionText.split("[\\s,]+");
+    }
+
+    /**
+     * Adds one number or inclusive range to the selected indexes.
+     */
+    private void addSelectorIndexes(String selector, String command, int taskCount,
+            int selectorCount, Set<Integer> taskIndexes) throws BolaException {
+        if (selector.matches("[+-]?\\d+")) {
+            int taskNumber = parseTaskNumber(selector, command, selectorCount > 1);
+            validateTaskNumber(taskNumber, selector, taskCount);
+            taskIndexes.add(taskNumber - 1);
+            return;
+        }
+        if (!selector.matches("\\d+-\\d+")) {
+            throw invalidTaskSelection(command, selectorCount > 1 || selector.contains("-"));
+        }
+
+        String[] boundaries = selector.split("-", -1);
+        int firstTaskNumber = parseTaskNumber(boundaries[0], command, true);
+        int lastTaskNumber = parseTaskNumber(boundaries[1], command, true);
+        if (firstTaskNumber > lastTaskNumber) {
+            throw new BolaException("range " + selector
+                    + " cannot leh; the start number must not be greater than the end number.");
+        }
+        validateTaskNumber(firstTaskNumber, boundaries[0], taskCount);
+        if (lastTaskNumber > taskCount) {
+            throw new BolaException("task number " + (taskCount + 1) + " doesn't exist leh.");
+        }
+        for (int taskNumber = firstTaskNumber; taskNumber <= lastTaskNumber; taskNumber++) {
+            taskIndexes.add(taskNumber - 1);
+        }
+    }
+
+    /**
+     * Parses one integer and converts overflow into a user-facing selection error.
+     */
+    private int parseTaskNumber(String taskNumberText, String command, boolean isMassSyntax)
+            throws BolaException {
+        try {
+            return Integer.parseInt(taskNumberText);
+        } catch (NumberFormatException exception) {
+            throw invalidTaskSelection(command, isMassSyntax);
+        }
+    }
+
+    /**
+     * Checks that a one-based task number refers to an existing task.
+     */
+    private void validateTaskNumber(int taskNumber, String taskNumberText, int taskCount)
+            throws BolaException {
+        if (taskNumber < 1 || taskNumber > taskCount) {
+            throw new BolaException("task number " + taskNumberText + " doesn't exist leh.");
+        }
+    }
+
+    /**
+     * Creates the appropriate singular or mass selection error.
+     */
+    private BolaException invalidTaskSelection(String command, boolean isMassSyntax) {
+        if (isMassSyntax) {
+            return new BolaException("please give me valid task numbers or ranges to "
+                    + command + ", can?");
+        }
+        return new BolaException("please give me a valid task number to " + command + ", can?");
     }
 
     /**

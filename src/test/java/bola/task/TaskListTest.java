@@ -65,6 +65,40 @@ public class TaskListTest {
     }
 
     /**
+     * Checks bulk mutations preserve original order and avoid deletion index shifts.
+     */
+    @Test
+    void bulkTaskOperations_validIndexes_mutateEachSelectedTaskOnce() {
+        Task firstTask = new Todo("first");
+        Task secondTask = new Todo("second");
+        Task thirdTask = new Todo("third");
+        Task fourthTask = new Todo("fourth");
+        TaskList tasks = new TaskList(List.of(firstTask, secondTask, thirdTask, fourthTask));
+
+        assertEquals(List.of(firstTask, thirdTask), tasks.mark(List.of(0, 2)));
+        assertEquals(List.of(firstTask, thirdTask), tasks.unmark(List.of(0, 2)));
+        assertEquals(List.of(secondTask, fourthTask), tasks.delete(List.of(1, 3)));
+        assertAll(
+                () -> assertEquals(List.of(firstTask, thirdTask), tasks.getTasks()),
+                () -> assertEquals("T | 0 | first", firstTask.toDataString()),
+                () -> assertEquals("T | 0 | third", thirdTask.toDataString()));
+    }
+
+    /**
+     * Checks bulk operations reject empty, unordered, duplicate, and invalid indexes.
+     */
+    @Test
+    void bulkTaskOperations_invalidIndexes_throwAssertionError() {
+        TaskList tasks = new TaskList(List.of(new Todo("first"), new Todo("second")));
+
+        assertAll(
+                () -> assertThrows(AssertionError.class, () -> tasks.mark(List.of())),
+                () -> assertThrows(AssertionError.class, () -> tasks.mark(List.of(1, 0))),
+                () -> assertThrows(AssertionError.class, () -> tasks.unmark(List.of(0, 0))),
+                () -> assertThrows(AssertionError.class, () -> tasks.delete(List.of(0, 2))));
+    }
+
+    /**
      * Checks case-insensitive substring matching and preservation of stored task order.
      */
     @Test

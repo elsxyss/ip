@@ -7,6 +7,7 @@ import java.util.List;
 
 import bola.command.CommandType;
 import bola.command.Parser;
+import bola.command.TaskSelection;
 import bola.exception.BolaException;
 import bola.storage.Storage;
 import bola.task.Task;
@@ -25,6 +26,7 @@ public class Bola {
 
     private boolean isStorageAvailable;
     private boolean isExit;
+    private PendingOperation pendingOperation;
 
     /**
      * Creates Bola and loads tasks from the specified data file.
@@ -93,8 +95,13 @@ public class Bola {
      */
     private void executeCommand(String command) {
         try {
-            CommandType commandType = parser.parseCommandType(command);
-            boolean taskListChanged = executeCommand(command, commandType);
+            boolean taskListChanged;
+            if (pendingOperation == null) {
+                CommandType commandType = parser.parseCommandType(command);
+                taskListChanged = executeCommand(command, commandType);
+            } else {
+                taskListChanged = handleConfirmation(command);
+            }
             if (taskListChanged && isStorageAvailable) {
                 storage.save(tasks.getTasks());
             }
@@ -121,6 +128,10 @@ public class Bola {
                 isExit = true;
                 yield false;
             }
+            case HELP -> {
+                ui.showHelp();
+                yield false;
+            }
             case LIST -> {
                 ui.showTaskList(tasks.getTasks());
                 yield false;
@@ -134,16 +145,13 @@ public class Bola {
                 yield false;
             }
             case MARK -> {
-                markTask(command, commandType);
-                yield true;
+                yield handleTaskMutation(command, commandType);
             }
             case UNMARK -> {
-                unmarkTask(command, commandType);
-                yield true;
+                yield handleTaskMutation(command, commandType);
             }
             case DELETE -> {
-                deleteTask(command, commandType);
-                yield true;
+                yield handleTaskMutation(command, commandType);
             }
             case TODO -> {
                 addTask(parser.parseTodo(command));
@@ -178,28 +186,81 @@ public class Bola {
     }
 
     /**
-     * Marks the task selected by the command as done.
+     * Validates a task selection and either executes it or requests confirmation.
+     *
+     * @return whether the operation changed the task list immediately.
      */
-    private void markTask(String command, CommandType commandType) throws BolaException {
-        int taskIndex = parser.parseTaskIndex(command, commandType, tasks.size());
-        ui.showTaskMarked(tasks.mark(taskIndex));
+    private boolean handleTaskMutation(String command, CommandType commandType)
+            throws BolaException {
+        TaskSelection selection = parser.parseTaskSelection(command, commandType, tasks.size());
+        if (requiresConfirmation(commandType, selection)) {
+            pendingOperation = new PendingOperation(commandType, selection);
+            ui.showMassOperationConfirmation(commandType, selection.taskIndexes().size(),
+                    selection.isAll());
+            return false;
+        }
+        executeTaskMutation(commandType, selection);
+        return true;
     }
 
     /**
-     * Marks the task selected by the command as not done.
+     * Returns whether a valid task mutation requires a yes-or-no response.
      */
-    private void unmarkTask(String command, CommandType commandType) throws BolaException {
-        int taskIndex = parser.parseTaskIndex(command, commandType, tasks.size());
-        ui.showTaskUnmarked(tasks.unmark(taskIndex));
+    private boolean requiresConfirmation(CommandType commandType, TaskSelection selection) {
+        return selection.isAll() || commandType == CommandType.DELETE
+                && selection.taskIndexes().size() > 1;
     }
 
     /**
-     * Deletes the task selected by the command.
+     * Handles an answer to the currently pending mass operation.
+     *
+     * @return whether the confirmed operation changed the task list.
      */
-    private void deleteTask(String command, CommandType commandType) throws BolaException {
-        int taskIndex = parser.parseTaskIndex(command, commandType, tasks.size());
-        Task removedTask = tasks.delete(taskIndex);
-        ui.showTaskDeleted(removedTask, tasks.size());
+    private boolean handleConfirmation(String answer) {
+        if (answer.equalsIgnoreCase("no")) {
+            pendingOperation = null;
+            ui.showOperationCancelled();
+            return false;
+        }
+        if (!answer.equalsIgnoreCase("yes")) {
+            ui.showConfirmationAnswerError();
+            return false;
+        }
+
+        PendingOperation confirmedOperation = pendingOperation;
+        pendingOperation = null;
+        executeTaskMutation(confirmedOperation.commandType(), confirmedOperation.selection());
+        return true;
+    }
+
+    /**
+     * Applies a validated selection and shows the matching single- or mass-task response.
+     */
+    private void executeTaskMutation(CommandType commandType, TaskSelection selection) {
+        List<Integer> taskIndexes = selection.taskIndexes();
+        if (taskIndexes.size() == 1) {
+            executeSingleTaskMutation(commandType, taskIndexes.getFirst());
+            return;
+        }
+
+        switch (commandType) {
+            case MARK -> ui.showTasksMarked(tasks.mark(taskIndexes), taskIndexes, tasks.size());
+            case UNMARK -> ui.showTasksUnmarked(tasks.unmark(taskIndexes), taskIndexes, tasks.size());
+            case DELETE -> ui.showTasksDeleted(tasks.delete(taskIndexes), taskIndexes, tasks.size());
+            default -> throw new AssertionError("Only task mutation commands can change selections");
+        }
+    }
+
+    /**
+     * Applies one selected task using the existing response format.
+     */
+    private void executeSingleTaskMutation(CommandType commandType, int taskIndex) {
+        switch (commandType) {
+            case MARK -> ui.showTaskMarked(tasks.mark(taskIndex));
+            case UNMARK -> ui.showTaskUnmarked(tasks.unmark(taskIndex));
+            case DELETE -> ui.showTaskDeleted(tasks.delete(taskIndex), tasks.size());
+            default -> throw new AssertionError("Only task mutation commands can change selections");
+        }
     }
 
     /**
@@ -208,6 +269,12 @@ public class Bola {
     private void addTask(Task task) {
         tasks.add(task);
         ui.showTaskAdded(task, tasks.size());
+    }
+
+    /**
+     * Holds a validated operation while Bola waits for confirmation.
+     */
+    private record PendingOperation(CommandType commandType, TaskSelection selection) {
     }
 
     /**
