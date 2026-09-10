@@ -20,5 +20,9 @@ jobs:
           distribution: 'zulu'
           java-version: '25'
           java-package: jdk+fx
+      - name: Build and check with Gradle on Linux
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum ./gradlew check
       - name: Build and check with Gradle
+        if: runner.os != 'Linux'
         run: ./gradlew check
