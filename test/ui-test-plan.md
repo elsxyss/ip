@@ -156,3 +156,287 @@ and task counts for adding, marking, unmarking, and deleting a task.
         Bola: All settled? Steady lah. See you again! 👋
    ================================================================
    ```
+
+## TC-005: Perform explicit mass operations
+
+**Aim:** Verify mixed selectors, deduplication, original numbering, confirmation,
+and atomic cancellation for explicit mass operations.
+
+**Inputs:**
+
+1. `todo task 1`
+2. `todo task 2`
+3. `todo task 3`
+4. `todo task 4`
+5. `mark 1-3 2-4 2`
+6. `unmark 4, 2`
+7. `delete 2, 4`
+8. `list`
+9. `no`
+10. `delete 2 4`
+11. `yes`
+12. `list`
+13. `bye`
+
+**Expected outputs:**
+
+1. For `todo task 1`:
+
+   ```text
+        Bola: Can! I've added this task:
+            [T][ ] task 1
+        Now got 1 task in your list.
+   ```
+
+2. For `todo task 2`:
+
+   ```text
+        Bola: Can! I've added this task:
+            [T][ ] task 2
+        Now got 2 tasks in your list.
+   ```
+
+3. For `todo task 3`:
+
+   ```text
+        Bola: Can! I've added this task:
+            [T][ ] task 3
+        Now got 3 tasks in your list.
+   ```
+
+4. For `todo task 4`:
+
+   ```text
+        Bola: Can! I've added this task:
+            [T][ ] task 4
+        Now got 4 tasks in your list.
+   ```
+
+5. For `mark 1-3 2-4 2`:
+
+   ```text
+        Bola: Nice, 4 tasks settled liao! ✅
+            1. [T][X] task 1
+            2. [T][X] task 2
+            3. [T][X] task 3
+            4. [T][X] task 4
+        Now got 4 tasks in your list.
+   ```
+
+6. For `unmark 4, 2`:
+
+   ```text
+        Bola: Okay, these 2 tasks not settled yet.
+            2. [T][ ] task 2
+            4. [T][ ] task 4
+        Now got 4 tasks in your list.
+   ```
+
+7. For `delete 2, 4`:
+
+   ```text
+        Bola: U sure u want to delete these 2 tasks? (Yes/No)
+   ```
+
+8. For `list` while confirmation is pending:
+
+   ```text
+        Bola: Aiyo, please answer Yes or No, can?
+   ```
+
+9. For `no`:
+
+   ```text
+        Bola: Okay, cancelled. No tasks changed.
+   ```
+
+10. For `delete 2 4`:
+
+    ```text
+         Bola: U sure u want to delete these 2 tasks? (Yes/No)
+    ```
+
+11. For `yes`:
+
+    ```text
+         Bola: Okay, removed these 2 tasks already:
+             2. [T][ ] task 2
+             4. [T][ ] task 4
+         Now got 2 tasks in your list.
+    ```
+
+12. For `list`:
+
+    ```text
+         Bola: Your tasks all here:
+             1. [T][X] task 1
+             2. [T][X] task 3
+    ```
+
+13. For `bye`:
+
+    ```text
+         Bola: All settled? Steady lah. See you again! 👋
+    ================================================================
+    ```
+
+## TC-006: Validate all-selection and help behavior
+
+**Aim:** Verify confirmation for `all`, empty-list validation, and the general help output.
+
+**Inputs:**
+
+1. `todo first`
+2. `todo second`
+3. `mark all`
+4. `YES`
+5. `delete all`
+6. `yes`
+7. `unmark all`
+8. `help`
+9. `bye`
+
+**Expected outputs:**
+
+1. For `todo first`:
+
+   ```text
+        Bola: Can! I've added this task:
+            [T][ ] first
+        Now got 1 task in your list.
+   ```
+
+2. For `todo second`:
+
+   ```text
+        Bola: Can! I've added this task:
+            [T][ ] second
+        Now got 2 tasks in your list.
+   ```
+
+3. For `mark all`:
+
+   ```text
+        Bola: U sure u want to mark all 2 tasks? (Yes/No)
+   ```
+
+4. For `YES`:
+
+   ```text
+        Bola: Nice, 2 tasks settled liao! ✅
+            1. [T][X] first
+            2. [T][X] second
+        Now got 2 tasks in your list.
+   ```
+
+5. For `delete all`:
+
+   ```text
+        Bola: U sure u want to delete all 2 tasks? (Yes/No)
+   ```
+
+6. For `yes`:
+
+   ```text
+        Bola: Okay, removed these 2 tasks already:
+            1. [T][X] first
+            2. [T][X] second
+        Bo lah! No more tasks in your list. 🎉
+   ```
+
+7. For `unmark all`:
+
+   ```text
+        Bola: Aiyo, there are no tasks to unmark leh.
+   ```
+
+8. For `help`:
+
+   ```text
+        Bola: Can! Here are the commands:
+            todo <description>
+            deadline <description> /by <date>
+            event <description> /from <date> /to <date>
+            list
+            find <keyword>
+            upcoming <days>
+            mark <selection>
+            unmark <selection>
+            delete <selection>
+            help
+            bye
+        Selection can use task numbers, inclusive ranges, or all.
+        Example: delete 1, 3-5 8
+        Dates use yyyy-MM-dd, or d/M/yyyy HHmm when including a time.
+   ```
+
+9. For `bye`:
+
+   ```text
+        Bola: All settled? Steady lah. See you again! 👋
+   ================================================================
+   ```
+
+## TC-007: Reject an invalid mass selection atomically
+
+**Aim:** Verify out-of-range, reversed, malformed, and mixed-`all` selections fail
+without changing any task.
+
+**Data precondition:** Create `data/bola.txt` with these records:
+
+```text
+T | 0 | first
+T | 0 | second
+T | 0 | third
+```
+
+**Inputs:**
+
+1. `mark 1-4`
+2. `delete 3-1`
+3. `unmark 1,,2`
+4. `delete all 2`
+5. `list`
+6. `bye`
+
+**Expected outputs:**
+
+1. For `mark 1-4`:
+
+   ```text
+        Bola: Aiyo, task number 4 doesn't exist leh.
+   ```
+
+2. For `delete 3-1`:
+
+   ```text
+        Bola: Aiyo, range 3-1 cannot leh; the start number must not be greater than the end number.
+   ```
+
+3. For `unmark 1,,2`:
+
+   ```text
+        Bola: Aiyo, please give me valid task numbers or ranges to unmark, can?
+   ```
+
+4. For `delete all 2`:
+
+   ```text
+        Bola: Aiyo, all must be used by itself for delete, can?
+   ```
+
+5. For `list`:
+
+   ```text
+        Bola: Your tasks all here:
+            1. [T][ ] first
+            2. [T][ ] second
+            3. [T][ ] third
+   ```
+
+6. For `bye`:
+
+   ```text
+        Bola: All settled? Steady lah. See you again! 👋
+   ================================================================
+   ```

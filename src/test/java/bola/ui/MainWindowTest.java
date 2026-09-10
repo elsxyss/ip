@@ -115,6 +115,33 @@ public class MainWindowTest {
         });
     }
 
+    @Test
+    void mainWindow_massDeleteConfirmation_usesSharedCommandState() throws Exception {
+        FxTestSupport.run(() -> {
+            FXMLLoader loader = new FXMLLoader(MainWindow.class.getResource("/view/MainWindow.fxml"));
+            AnchorPane root = loader.load();
+            MainWindow controller = loader.getController();
+            controller.setBola(new Bola(temporaryDirectory.resolve("mass-bola.txt").toString()));
+            new Scene(root);
+
+            TextField input = (TextField) loader.getNamespace().get("userInput");
+            VBox dialogs = (VBox) loader.getNamespace().get("dialogContainer");
+            for (String command : List.of("todo first", "todo second", "delete 1 2")) {
+                input.setText(command);
+                input.fireEvent(new ActionEvent());
+            }
+            assertEquals("Bola: U sure u want to delete these 2 tasks? (Yes/No)",
+                    messageAt(dialogs, 6));
+
+            input.setText("yes");
+            input.fireEvent(new ActionEvent());
+            assertTrue(messageAt(dialogs, 8).contains("No more tasks in your list"));
+            assertEquals("", input.getText());
+            controller.stop();
+            return null;
+        });
+    }
+
     private String messageAt(VBox dialogs, int index) {
         DialogBox dialog = (DialogBox) dialogs.getChildren().get(index);
         return dialog.getChildren().stream().filter(Label.class::isInstance)

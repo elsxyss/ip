@@ -44,6 +44,26 @@ The user-provided kopitiam-buddy avatars are stored in `src/main/resources/image
 Use `./gradlew run --args='--cli'` or `java -jar bola.jar --cli` for console mode.
 Both interfaces use the same commands and storage file.
 
+## Mass operations
+
+`mark`, `unmark`, and `delete` accept one or more task numbers, inclusive ranges,
+or `all`. Separate items with spaces, commas, or both:
+
+```text
+mark 1, 3-5 8
+unmark 2 4-6
+delete 1, 3
+delete all
+```
+
+Task numbers refer to the list before the operation starts. Repeated and overlapping
+selections are processed once, while any invalid number or range rejects the entire
+command without changing tasks.
+
+Deleting multiple tasks requires a `Yes` or `No` confirmation. Every operation using
+`all` also requires confirmation. While Bola is waiting, other commands are treated as
+invalid confirmation answers. Enter `help` to see the complete command summary.
+
 Run `./gradlew check jacocoTestReport` for JUnit tests, Checkstyle, and the 50% line-coverage gate.
 
 ## Building and running the JAR file

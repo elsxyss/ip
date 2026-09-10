@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import bola.command.CommandType;
 import bola.task.Deadline;
 import bola.task.Task;
 import bola.task.Todo;
@@ -171,6 +172,48 @@ public class UiTest {
                 () -> assertTrue(deletedOutput.contains("Now got 2 tasks in your list.")),
                 () -> assertTrue(emptyOutput.contains(
                         "Bo lah! No more tasks in your list. 🎉")));
+    }
+
+    /**
+     * Checks help, confirmation, cancellation, and exact mass-operation responses.
+     */
+    @Test
+    void massOperations_allResponses_preserveExactFormatting() {
+        Ui ui = new Ui();
+        Task firstTask = new Todo("first");
+        Task thirdTask = new Todo("third");
+        firstTask.markAsDone();
+        thirdTask.markAsDone();
+
+        assertAll(
+                () -> assertEquals(
+                        "Bola: U sure u want to delete these 2 tasks? (Yes/No)",
+                        ui.captureResponse(() -> ui.showMassOperationConfirmation(
+                                CommandType.DELETE, 2, false))),
+                () -> assertEquals(
+                        "Bola: U sure u want to mark all 1 task? (Yes/No)",
+                        ui.captureResponse(() -> ui.showMassOperationConfirmation(
+                                CommandType.MARK, 1, true))),
+                () -> assertEquals("Bola: Okay, cancelled. No tasks changed.",
+                        ui.captureResponse(ui::showOperationCancelled)),
+                () -> assertEquals("Bola: Aiyo, please answer Yes or No, can?",
+                        ui.captureResponse(ui::showConfirmationAnswerError)),
+                () -> assertEquals(
+                        "Bola: Nice, 2 tasks settled liao! ✅\n"
+                                + "    1. [T][X] first\n"
+                                + "    3. [T][X] third\n"
+                                + "Now got 3 tasks in your list.",
+                        ui.captureResponse(() -> ui.showTasksMarked(
+                                List.of(firstTask, thirdTask), List.of(0, 2), 3))),
+                () -> assertEquals(
+                        "Bola: Okay, removed these 2 tasks already:\n"
+                                + "    1. [T][X] first\n"
+                                + "    3. [T][X] third\n"
+                                + "Bo lah! No more tasks in your list. 🎉",
+                        ui.captureResponse(() -> ui.showTasksDeleted(
+                                List.of(firstTask, thirdTask), List.of(0, 2), 0))),
+                () -> assertTrue(ui.captureResponse(ui::showHelp)
+                        .contains("Selection can use task numbers, inclusive ranges, or all.")));
     }
 
     /**

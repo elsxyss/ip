@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -33,6 +35,7 @@ public class ParserTest {
     void parseCommandType_validAndSimilarInputs_returnsCommandOrThrows() throws BolaException {
         assertAll(
                 () -> assertEquals(CommandType.BYE, parser.parseCommandType("bye")),
+                () -> assertEquals(CommandType.HELP, parser.parseCommandType("help")),
                 () -> assertEquals(CommandType.LIST, parser.parseCommandType("list")),
                 () -> assertEquals(CommandType.FIND, parser.parseCommandType("find book")),
                 () -> assertEquals(CommandType.UPCOMING,
@@ -48,6 +51,8 @@ public class ParserTest {
                 () -> assertParsingFails(() -> parser.parseCommandType("listing"),
                         "I don't understand that command leh."),
                 () -> assertParsingFails(() -> parser.parseCommandType("list now"),
+                        "I don't understand that command leh."),
+                () -> assertParsingFails(() -> parser.parseCommandType("help delete"),
                         "I don't understand that command leh."),
                 () -> assertParsingFails(() -> parser.parseCommandType("finder"),
                         "I don't understand that command leh."),
@@ -113,6 +118,68 @@ public class ParserTest {
                         () -> parser.parseTaskIndex("mark 1", CommandType.MARK, -1)),
                 () -> assertThrows(AssertionError.class,
                         () -> parser.parseTaskIndex("delete 1", CommandType.MARK, 3)));
+    }
+
+    /**
+     * Checks mixed separators, inclusive ranges, original order, and duplicate removal.
+     */
+    @Test
+    void parseTaskSelection_validMixedSelection_returnsNormalisedIndexes() throws BolaException {
+        assertAll(
+                () -> assertEquals(new TaskSelection(List.of(0, 2, 3, 4, 7), false),
+                        parser.parseTaskSelection("delete 1, 3-5 8", CommandType.DELETE, 8)),
+                () -> assertEquals(new TaskSelection(List.of(0, 1, 2, 3), false),
+                        parser.parseTaskSelection("mark 1-3 2-4 2", CommandType.MARK, 4)),
+                () -> assertEquals(new TaskSelection(List.of(1), false),
+                        parser.parseTaskSelection("unmark 2 2 2-2", CommandType.UNMARK, 3)),
+                () -> assertEquals(new TaskSelection(List.of(0, 1, 2), true),
+                        parser.parseTaskSelection("delete all", CommandType.DELETE, 3)));
+    }
+
+    /**
+     * Checks atomic selection validation and operation-specific error messages.
+     */
+    @Test
+    void parseTaskSelection_invalidSelection_throwsExpectedError() {
+        assertAll(
+                () -> assertParsingFails(() -> parser.parseTaskSelection(
+                        "mark", CommandType.MARK, 3),
+                        "which task number you want me to mark?"),
+                () -> assertParsingFails(() -> parser.parseTaskSelection(
+                        "delete two", CommandType.DELETE, 3),
+                        "please give me a valid task number to delete, can?"),
+                () -> assertParsingFails(() -> parser.parseTaskSelection(
+                        "delete 1,,2", CommandType.DELETE, 3),
+                        "please give me valid task numbers or ranges to delete, can?"),
+                () -> assertParsingFails(() -> parser.parseTaskSelection(
+                        "unmark 1 - 3", CommandType.UNMARK, 3),
+                        "please give me valid task numbers or ranges to unmark, can?"),
+                () -> assertParsingFails(() -> parser.parseTaskSelection(
+                        "delete 3-1", CommandType.DELETE, 3),
+                        "range 3-1 cannot leh; the start number must not be greater than the end number."),
+                () -> assertParsingFails(() -> parser.parseTaskSelection(
+                        "mark 1-4", CommandType.MARK, 3),
+                        "task number 4 doesn't exist leh."),
+                () -> assertParsingFails(() -> parser.parseTaskSelection(
+                        "delete all 2", CommandType.DELETE, 3),
+                        "all must be used by itself for delete, can?"),
+                () -> assertParsingFails(() -> parser.parseTaskSelection(
+                        "delete all", CommandType.DELETE, 0),
+                        "there are no tasks to delete leh."));
+    }
+
+    /**
+     * Checks that selection parsing documents assumptions established by command dispatch.
+     */
+    @Test
+    void parseTaskSelection_invalidInternalContext_throwsAssertionError() {
+        assertAll(
+                () -> assertThrows(AssertionError.class,
+                        () -> parser.parseTaskSelection("list 1", CommandType.LIST, 3)),
+                () -> assertThrows(AssertionError.class,
+                        () -> parser.parseTaskSelection("mark 1", CommandType.MARK, -1)),
+                () -> assertThrows(AssertionError.class,
+                        () -> parser.parseTaskSelection("delete 1", CommandType.MARK, 3)));
     }
 
     /**

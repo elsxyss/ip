@@ -71,6 +71,21 @@ public class TaskList {
     }
 
     /**
+     * Deletes and returns the tasks at the supplied zero-based indexes.
+     *
+     * @param indexes distinct indexes in ascending order.
+     * @return deleted tasks in original list order.
+     */
+    public List<Task> delete(List<Integer> indexes) {
+        assertValidIndexes(indexes);
+        List<Task> deletedTasks = indexes.stream().map(tasks::get).toList();
+        for (int i = indexes.size() - 1; i >= 0; i--) {
+            tasks.remove((int) indexes.get(i));
+        }
+        return deletedTasks;
+    }
+
+    /**
      * Marks and returns the task at the given zero-based index.
      *
      * @param index zero-based task index.
@@ -85,6 +100,17 @@ public class TaskList {
     }
 
     /**
+     * Marks and returns the tasks at the supplied zero-based indexes.
+     *
+     * @param indexes distinct indexes in ascending order.
+     * @return marked tasks in original list order.
+     */
+    public List<Task> mark(List<Integer> indexes) {
+        assertValidIndexes(indexes);
+        return indexes.stream().map(this::mark).toList();
+    }
+
+    /**
      * Unmarks and returns the task at the given zero-based index.
      *
      * @param index zero-based task index.
@@ -96,6 +122,30 @@ public class TaskList {
         Task task = tasks.get(index);
         task.markAsNotDone();
         return task;
+    }
+
+    /**
+     * Unmarks and returns the tasks at the supplied zero-based indexes.
+     *
+     * @param indexes distinct indexes in ascending order.
+     * @return unmarked tasks in original list order.
+     */
+    public List<Task> unmark(List<Integer> indexes) {
+        assertValidIndexes(indexes);
+        return indexes.stream().map(this::unmark).toList();
+    }
+
+    /**
+     * Checks the preconditions of a parsed task selection.
+     */
+    private void assertValidIndexes(List<Integer> indexes) {
+        assert indexes != null && !indexes.isEmpty() : "A task selection must not be empty";
+        int previousIndex = -1;
+        for (int index : indexes) {
+            assert index > previousIndex && index < tasks.size()
+                    : "Task indexes must be distinct, ascending, and valid";
+            previousIndex = index;
+        }
     }
 
     /**
