@@ -58,6 +58,7 @@ public enum CommandType {
      * Returns whether the input invokes this command with a permitted argument format.
      */
     private boolean matches(String input) {
-        return input.equals(keyword) || acceptsArguments && input.startsWith(keyword + " ");
+        return input.equals(keyword)
+                || (acceptsArguments && input.startsWith(keyword + " "));
     }
 }

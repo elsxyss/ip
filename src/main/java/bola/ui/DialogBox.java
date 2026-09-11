@@ -17,6 +17,8 @@ import javafx.scene.layout.HBox;
 public class DialogBox extends HBox {
     /** Ignores nearly invisible export artifacts when locating the avatar artwork. */
     private static final int MIN_VISIBLE_ALPHA = 8;
+    /** Number of bits before the alpha component in an ARGB pixel value. */
+    private static final int ALPHA_BIT_SHIFT = 24;
 
     @FXML
     private Label text;
@@ -49,7 +51,8 @@ public class DialogBox extends HBox {
         int bottom = -1;
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                if ((image.getPixelReader().getArgb(x, y) >>> 24) > MIN_VISIBLE_ALPHA) {
+                int alpha = image.getPixelReader().getArgb(x, y) >>> ALPHA_BIT_SHIFT;
+                if (alpha > MIN_VISIBLE_ALPHA) {
                     left = Math.min(left, x);
                     top = Math.min(top, y);
                     right = Math.max(right, x);

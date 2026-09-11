@@ -18,6 +18,9 @@ import javafx.util.Duration;
 public class MainWindow {
     static final String CLOSING_NOTICE = "[Closing in 5 seconds...]";
 
+    private static final int COUNTDOWN_NOTICE_DELAY_SECONDS = 3;
+    private static final int WINDOW_CLOSE_DELAY_SECONDS = 8;
+
     @FXML
     private ScrollPane scrollPane;
     @FXML
@@ -66,22 +69,44 @@ public class MainWindow {
         if (input.isBlank() || bola.isExit()) {
             return;
         }
+
         String response = bola.getResponse(input);
+        showExchange(input, response);
+        finishInputHandling();
+    }
+
+    /**
+     * Adds the user's command and Bola's response to the conversation.
+     */
+    private void showExchange(String input, String response) {
         dialogContainer.getChildren().addAll(
                 DialogBox.getUserDialog(input, userImage),
                 DialogBox.getBolaDialog(response, bolaImage));
+    }
+
+    /**
+     * Resets the controls and starts the closing sequence when the session has ended.
+     */
+    private void finishInputHandling() {
         userInput.clear();
         userInput.setDisable(bola.isExit());
         sendButton.setDisable(bola.isExit());
         if (bola.isExit()) {
-            closingTimeline = createClosingTimeline(
-                    () -> dialogContainer.getChildren().add(
-                            DialogBox.getBolaDialog(CLOSING_NOTICE, bolaImage)),
-                    Platform::exit);
-            closingTimeline.play();
-        } else {
-            userInput.requestFocus();
+            startClosingSequence();
+            return;
         }
+        userInput.requestFocus();
+    }
+
+    /**
+     * Starts the non-blocking countdown that closes the application.
+     */
+    private void startClosingSequence() {
+        closingTimeline = createClosingTimeline(
+                () -> dialogContainer.getChildren().add(
+                        DialogBox.getBolaDialog(CLOSING_NOTICE, bolaImage)),
+                Platform::exit);
+        closingTimeline.play();
     }
 
     /**
@@ -89,8 +114,10 @@ public class MainWindow {
      */
     static Timeline createClosingTimeline(Runnable showCountdown, Runnable closeWindow) {
         return new Timeline(
-                new KeyFrame(Duration.seconds(3), event -> showCountdown.run()),
-                new KeyFrame(Duration.seconds(8), event -> closeWindow.run()));
+                new KeyFrame(Duration.seconds(COUNTDOWN_NOTICE_DELAY_SECONDS),
+                        event -> showCountdown.run()),
+                new KeyFrame(Duration.seconds(WINDOW_CLOSE_DELAY_SECONDS),
+                        event -> closeWindow.run()));
     }
 
     /**

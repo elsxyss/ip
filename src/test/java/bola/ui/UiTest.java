@@ -108,10 +108,6 @@ public class UiTest {
                 () -> ui.showMatchingTasks(List.of(deadline), "report"));
         String noMatches = captureOutput(
                 () -> ui.showMatchingTasks(List.of(), "exercise"));
-        String upcomingTasks = captureOutput(
-                () -> ui.showUpcomingTasks(List.of(deadline), allTasks, 7));
-        String noUpcomingTask = captureOutput(
-                () -> ui.showUpcomingTasks(List.of(), allTasks, 1));
 
         assertAll(
                 () -> assertTrue(populatedList.contains("Bola: Your tasks all here:")),
@@ -121,7 +117,23 @@ public class UiTest {
                 () -> assertTrue(matchingTasks.contains(
                         "Bola: Can, found these matching tasks:")),
                 () -> assertTrue(noMatches.contains(
-                        "Bola: Bo lah! No tasks matching \"exercise\".")),
+                        "Bola: Bo lah! No tasks matching \"exercise\".")));
+    }
+
+    /**
+     * Checks populated and empty output for upcoming tasks.
+     */
+    @Test
+    void upcomingTasks_populatedAndEmptyResults_showContextualResponses() {
+        Ui ui = new Ui();
+        Task deadline = new Deadline("submit report", "2026-09-10");
+        List<Task> allTasks = List.of(new Todo("buy kopi"), deadline);
+        String upcomingTasks = captureOutput(
+                () -> ui.showUpcomingTasks(List.of(deadline), allTasks, 7));
+        String noUpcomingTask = captureOutput(
+                () -> ui.showUpcomingTasks(List.of(), allTasks, 1));
+
+        assertAll(
                 () -> assertTrue(upcomingTasks.contains(
                         "Bola: Next 7 days got these tasks:")),
                 () -> assertTrue(noUpcomingTask.contains(
@@ -178,12 +190,8 @@ public class UiTest {
      * Checks help, confirmation, cancellation, and exact mass-operation responses.
      */
     @Test
-    void massOperations_allResponses_preserveExactFormatting() {
+    void massOperationPrompts_allResponses_preserveExactFormatting() {
         Ui ui = new Ui();
-        Task firstTask = new Todo("first");
-        Task thirdTask = new Todo("third");
-        firstTask.markAsDone();
-        thirdTask.markAsDone();
 
         assertAll(
                 () -> assertEquals(
@@ -198,6 +206,22 @@ public class UiTest {
                         ui.captureResponse(ui::showOperationCancelled)),
                 () -> assertEquals("Bola: Aiyo, please answer Yes or No, can?",
                         ui.captureResponse(ui::showConfirmationAnswerError)),
+                () -> assertTrue(ui.captureResponse(ui::showHelp)
+                        .contains("Selection can use task numbers, inclusive ranges, or all.")));
+    }
+
+    /**
+     * Checks exact responses for completed mass operations.
+     */
+    @Test
+    void massOperationResults_allResponses_preserveExactFormatting() {
+        Ui ui = new Ui();
+        Task firstTask = new Todo("first");
+        Task thirdTask = new Todo("third");
+        firstTask.markAsDone();
+        thirdTask.markAsDone();
+
+        assertAll(
                 () -> assertEquals(
                         "Bola: Nice, 2 tasks settled liao! ✅\n"
                                 + "    1. [T][X] first\n"
@@ -211,9 +235,7 @@ public class UiTest {
                                 + "    3. [T][X] third\n"
                                 + "Bo lah! No more tasks in your list. 🎉",
                         ui.captureResponse(() -> ui.showTasksDeleted(
-                                List.of(firstTask, thirdTask), List.of(0, 2), 0))),
-                () -> assertTrue(ui.captureResponse(ui::showHelp)
-                        .contains("Selection can use task numbers, inclusive ranges, or all.")));
+                                List.of(firstTask, thirdTask), List.of(0, 2), 0))));
     }
 
     /**

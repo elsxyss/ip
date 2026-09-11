@@ -54,14 +54,14 @@ The console must not show the GUI-only closing countdown.
 1. For `list`:
 
    ```text
-   Bola: Bo lah! Your task list is empty. 😌
+        Bola: Bo lah! Your task list is empty. 😌
    ```
 
 2. For `bye`:
 
    ```text
-   Bola: All settled? Steady lah. See you again! 👋
-   ================================================
+        Bola: All settled? Steady lah. See you again! 👋
+   ================================================================
    ```
 
 ## TC-003: Find tasks and view the upcoming schedule
@@ -72,7 +72,7 @@ The console must not show the GUI-only closing countdown.
 
 ```text
 T | 0 | read book
-D | 0 | return book | 2026-09-10
+D | 0 | return book | 2026-09-15
 ```
 
 **Inputs:**
@@ -87,7 +87,7 @@ D | 0 | return book | 2026-09-10
 
    ```text
         Bola: Next 7 days got these tasks:
-            2. [D][ ] return book (By: Sep 10 2026)
+            2. [D][ ] return book (By: Sep 15 2026)
    ```
 
 2. For `find book`:
@@ -95,7 +95,7 @@ D | 0 | return book | 2026-09-10
    ```text
         Bola: Can, found these matching tasks:
             1. [T][ ] read book
-            2. [D][ ] return book (By: Sep 10 2026)
+            2. [D][ ] return book (By: Sep 15 2026)
    ```
 
 3. For `bye`:

@@ -41,42 +41,6 @@ public class Parser {
     }
 
     /**
-     * Extracts and validates the task number in a command that targets an existing task.
-     *
-     * @param input complete user input.
-     * @param commandType command type, such as {@link CommandType#MARK}.
-     * @param taskCount number of tasks currently stored.
-     * @return corresponding zero-based list index.
-     * @throws BolaException if the task number is missing, non-numeric, or out of range.
-     */
-    public int parseTaskIndex(String input, CommandType commandType, int taskCount)
-            throws BolaException {
-        assert commandType == CommandType.MARK || commandType == CommandType.UNMARK
-                || commandType == CommandType.DELETE
-                : "Only task mutation commands have a task index";
-        assert taskCount >= 0 : "Task count cannot be negative";
-
-        String command = commandType.getKeyword();
-        assert input.equals(command) || input.startsWith(command + " ")
-                : "Input must match the supplied command type";
-
-        String taskNumber = input.substring(command.length()).strip();
-        if (taskNumber.isEmpty()) {
-            throw new BolaException("which task number you want me to " + command + "?");
-        }
-
-        try {
-            int taskIndex = Integer.parseInt(taskNumber) - 1;
-            if (taskIndex < 0 || taskIndex >= taskCount) {
-                throw new BolaException("task number " + taskNumber + " doesn't exist leh.");
-            }
-            return taskIndex;
-        } catch (NumberFormatException exception) {
-            throw new BolaException("please give me a valid task number to " + command + ", can?");
-        }
-    }
-
-    /**
      * Extracts and validates all task numbers in a task mutation command.
      *
      * <p>Numbers are returned as distinct zero-based indexes in their original list order.</p>

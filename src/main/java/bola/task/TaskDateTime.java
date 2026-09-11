@@ -36,19 +36,25 @@ public final class TaskDateTime {
      * @throws DateTimeParseException if the value is not a real date in a supported format.
      */
     public static LocalDateTime parse(String value) {
-        try {
+        if (!value.contains(" ")) {
             return LocalDate.parse(value, ISO_DATE).atStartOfDay();
-        } catch (DateTimeParseException dateException) {
-            for (DateTimeFormatter formatter : DATE_TIME_INPUT_FORMATTERS) {
-                try {
-                    return LocalDateTime.parse(value, formatter);
-                } catch (DateTimeParseException dateTimeException) {
-                    // Try the next supported format.
-                }
-            }
-            throw new DateTimeParseException(
-                    "Date must use yyyy-MM-dd or d/M/yyyy HHmm format", value, 0);
         }
+        return parseDateTime(value);
+    }
+
+    /**
+     * Parses a date and time using each supported date-time format.
+     */
+    private static LocalDateTime parseDateTime(String value) {
+        for (DateTimeFormatter formatter : DATE_TIME_INPUT_FORMATTERS) {
+            try {
+                return LocalDateTime.parse(value, formatter);
+            } catch (DateTimeParseException exception) {
+                // Try the next supported format.
+            }
+        }
+        throw new DateTimeParseException(
+                "Date must use yyyy-MM-dd or d/M/yyyy HHmm format", value, 0);
     }
 
     /**

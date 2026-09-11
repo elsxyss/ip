@@ -181,7 +181,9 @@ public class TaskList {
         return tasks.stream()
                 .filter(task -> {
                     LocalDate taskDate = getTaskDateTime(task).toLocalDate();
-                    return !taskDate.isBefore(today) && !taskDate.isAfter(lastDate);
+                    boolean isOnOrAfterToday = !taskDate.isBefore(today);
+                    boolean isOnOrBeforeLastDate = !taskDate.isAfter(lastDate);
+                    return isOnOrAfterToday && isOnOrBeforeLastDate;
                 })
                 .sorted(Comparator.comparing(TaskList::getTaskDateTime))
                 .toList();

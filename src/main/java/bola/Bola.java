@@ -123,49 +123,56 @@ public class Bola {
      */
     private boolean executeCommand(String command, CommandType commandType) throws BolaException {
         return switch (commandType) {
-            case BYE -> {
-                ui.showGoodbye();
-                isExit = true;
-                yield false;
-            }
-            case HELP -> {
-                ui.showHelp();
-                yield false;
-            }
-            case LIST -> {
-                ui.showTaskList(tasks.getTasks());
-                yield false;
-            }
-            case FIND -> {
-                showMatchingTasks(command);
-                yield false;
-            }
-            case UPCOMING -> {
-                showUpcomingTasks(command, commandType);
-                yield false;
-            }
-            case MARK -> {
-                yield handleTaskMutation(command, commandType);
-            }
-            case UNMARK -> {
-                yield handleTaskMutation(command, commandType);
-            }
-            case DELETE -> {
-                yield handleTaskMutation(command, commandType);
-            }
-            case TODO -> {
-                addTask(parser.parseTodo(command));
-                yield true;
-            }
-            case DEADLINE -> {
-                addTask(parser.parseDeadline(command));
-                yield true;
-            }
-            case EVENT -> {
-                addTask(parser.parseEvent(command));
-                yield true;
-            }
+            case BYE -> exit();
+            case HELP, LIST, FIND, UPCOMING -> executeReadOnlyCommand(command, commandType);
+            case MARK, UNMARK, DELETE -> handleTaskMutation(command, commandType);
+            case TODO, DEADLINE, EVENT -> createAndAddTask(command, commandType);
+            default -> throw new AssertionError("Every command type must be handled explicitly");
         };
+    }
+
+    /**
+     * Ends the current session after showing the farewell message.
+     *
+     * @return false because exiting does not change the task list.
+     */
+    private boolean exit() {
+        ui.showGoodbye();
+        isExit = true;
+        return false;
+    }
+
+    /**
+     * Executes a command that displays information without changing any task.
+     *
+     * @return false because read-only commands do not change the task list.
+     */
+    private boolean executeReadOnlyCommand(String command, CommandType commandType)
+            throws BolaException {
+        switch (commandType) {
+            case HELP -> ui.showHelp();
+            case LIST -> ui.showTaskList(tasks.getTasks());
+            case FIND -> showMatchingTasks(command);
+            case UPCOMING -> showUpcomingTasks(command, commandType);
+            default -> throw new AssertionError("Only read-only commands can be executed here");
+        }
+        return false;
+    }
+
+    /**
+     * Parses and adds a new task of the requested type.
+     *
+     * @return true because adding a task changes the task list.
+     */
+    private boolean createAndAddTask(String command, CommandType commandType) throws BolaException {
+        Task task = switch (commandType) {
+            case TODO -> parser.parseTodo(command);
+            case DEADLINE -> parser.parseDeadline(command);
+            case EVENT -> parser.parseEvent(command);
+            default -> throw new AssertionError("Only task-creation commands can add tasks");
+        };
+        addTask(task);
+        return true;
     }
 
     /**
@@ -207,8 +214,9 @@ public class Bola {
      * Returns whether a valid task mutation requires a yes-or-no response.
      */
     private boolean requiresConfirmation(CommandType commandType, TaskSelection selection) {
-        return selection.isAll() || commandType == CommandType.DELETE
+        boolean isMassDelete = commandType == CommandType.DELETE
                 && selection.taskIndexes().size() > 1;
+        return selection.isAll() || isMassDelete;
     }
 
     /**

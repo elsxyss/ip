@@ -13,6 +13,9 @@ import javafx.stage.Stage;
  * Loads the FXML chat window and connects it to Bola.
  */
 public class Main extends Application {
+    private static final double MINIMUM_WINDOW_WIDTH = 400;
+    private static final double MINIMUM_WINDOW_HEIGHT = 220;
+
     private final Bola bola = new Bola("data/bola.txt");
     private MainWindow controller;
 
@@ -26,8 +29,8 @@ public class Main extends Application {
         stage.setTitle("Bola");
         stage.setScene(new Scene(root));
         stage.setResizable(true);
-        stage.setMinWidth(400);
-        stage.setMinHeight(220);
+        stage.setMinWidth(MINIMUM_WINDOW_WIDTH);
+        stage.setMinHeight(MINIMUM_WINDOW_HEIGHT);
         stage.show();
         controller.focusInput();
     }

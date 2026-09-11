@@ -77,50 +77,6 @@ public class ParserTest {
     }
 
     /**
-     * Checks conversion from one-based task numbers to zero-based list indexes.
-     */
-    @Test
-    void parseTaskIndex_boundaryAndInvalidNumbers_returnsIndexOrThrows() throws BolaException {
-        assertAll(
-                () -> assertEquals(0, parser.parseTaskIndex("mark 1", CommandType.MARK, 3)),
-                () -> assertEquals(2, parser.parseTaskIndex("mark 3", CommandType.MARK, 3)),
-                () -> assertEquals(1,
-                        parser.parseTaskIndex("delete   2  ", CommandType.DELETE, 3)),
-                () -> assertParsingFails(() -> parser.parseTaskIndex(
-                        "mark", CommandType.MARK, 3),
-                        "which task number you want me to mark?"),
-                () -> assertParsingFails(() -> parser.parseTaskIndex(
-                        "mark 0", CommandType.MARK, 3),
-                        "task number 0 doesn't exist leh."),
-                () -> assertParsingFails(() -> parser.parseTaskIndex(
-                        "mark 4", CommandType.MARK, 3),
-                        "task number 4 doesn't exist leh."),
-                () -> assertParsingFails(() -> parser.parseTaskIndex(
-                        "mark -1", CommandType.MARK, 3),
-                        "task number -1 doesn't exist leh."),
-                () -> assertParsingFails(() -> parser.parseTaskIndex(
-                        "delete two", CommandType.DELETE, 3),
-                        "please give me a valid task number to delete, can?"),
-                () -> assertParsingFails(() -> parser.parseTaskIndex(
-                        "delete 1 2", CommandType.DELETE, 3),
-                        "please give me a valid task number to delete, can?"));
-    }
-
-    /**
-     * Checks that index parsing documents assumptions established by command dispatch.
-     */
-    @Test
-    void parseTaskIndex_invalidInternalContext_throwsAssertionError() {
-        assertAll(
-                () -> assertThrows(AssertionError.class,
-                        () -> parser.parseTaskIndex("list 1", CommandType.LIST, 3)),
-                () -> assertThrows(AssertionError.class,
-                        () -> parser.parseTaskIndex("mark 1", CommandType.MARK, -1)),
-                () -> assertThrows(AssertionError.class,
-                        () -> parser.parseTaskIndex("delete 1", CommandType.MARK, 3)));
-    }
-
-    /**
      * Checks mixed separators, inclusive ranges, original order, and duplicate removal.
      */
     @Test

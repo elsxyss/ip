@@ -84,11 +84,26 @@ public class DialogBoxTest {
         Label text = (Label) dialog.getChildren().get(isUser ? 0 : 1);
         ImageView picture = (ImageView) dialog.getChildren().get(isUser ? 1 : 0);
         assertTrue(picture.getViewport().getMinY() > 0, "The real avatars have transparent top padding");
-        // Bounds of the visible artwork in the bundled PNGs, excluding faint export artifacts.
-        Rectangle2D artwork = isUser ? new Rectangle2D(120, 197, 773, 625)
-                : new Rectangle2D(145, 176, 826, 635);
-        assertEquals(artwork, picture.getViewport());
+        assertEquals(getExpectedArtworkBounds(isUser), picture.getViewport());
         assertEquals(message, text.getText());
+
+        assertBubbleStyle(text, isUser);
+        assertBubbleLayout(dialog, text, picture);
+        assertMessageSizing(message, text, picture);
+    }
+
+    /**
+     * Returns the visible artwork bounds in the bundled avatar images.
+     */
+    private Rectangle2D getExpectedArtworkBounds(boolean isUser) {
+        return isUser ? new Rectangle2D(120, 197, 773, 625)
+                : new Rectangle2D(145, 176, 826, 635);
+    }
+
+    /**
+     * Checks the colors, border, and speaker-specific corners of a chat bubble.
+     */
+    private void assertBubbleStyle(Label text, boolean isUser) {
         assertEquals(Color.WHITE, text.getBackground().getFills().getFirst().getFill());
         assertEquals(Color.BLACK, text.getBorder().getStrokes().getFirst().getTopStroke());
         assertEquals(Color.BLACK, text.getTextFill());
@@ -98,11 +113,23 @@ public class DialogBoxTest {
         assertEquals(isUser ? 0 : 16, corners.getBottomRightHorizontalRadius());
         assertEquals(isUser ? 16 : 0, corners.getBottomLeftHorizontalRadius());
         assertEquals(corners, text.getBackground().getFills().getFirst().getRadii());
+    }
+
+    /**
+     * Checks that a bubble and avatar remain within their dialog row.
+     */
+    private void assertBubbleLayout(DialogBox dialog, Label text, ImageView picture) {
         assertEquals(picture.getBoundsInParent().getMinY(), text.getBoundsInParent().getMinY());
         assertTrue(text.getBoundsInParent().getMinX() >= 0);
         assertTrue(text.getBoundsInParent().getMaxX() <= dialog.getWidth());
         assertTrue(text.getWidth() + picture.getBoundsInParent().getWidth()
                 + dialog.getSpacing() <= dialog.getWidth());
+    }
+
+    /**
+     * Checks that short and long messages use the appropriate bubble height.
+     */
+    private void assertMessageSizing(String message, Label text, ImageView picture) {
         if (message.length() < 20) {
             assertTrue(text.getHeight() < picture.getBoundsInParent().getHeight());
         } else {

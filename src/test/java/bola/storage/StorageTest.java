@@ -1,5 +1,8 @@
 package bola.storage;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -95,7 +98,7 @@ public class StorageTest {
      * @throws Exception if temporary test files cannot be accessed.
      */
     @Test
-    void testMalformedRecords() throws Exception {
+    void load_invalidCommonFields_throwsDescriptiveException() throws Exception {
         Path dataFile = Files.createTempDirectory("bola-invalid-data-test").resolve("tasks.txt");
         assertLoadFails(dataFile, "X | 0 | unknown type",
                 "Line 1 of the data file has an unknown task type: 'X'.");
@@ -111,6 +114,16 @@ public class StorageTest {
                 "Line 1 of the data file is missing its description.");
         assertLoadFails(dataFile, "T | 0 | task | extra field",
                 "Line 1 of the data file has the wrong number of fields.");
+    }
+
+    /**
+     * Checks subtype fields and failures after an earlier valid record.
+     *
+     * @throws Exception if temporary test files cannot be accessed.
+     */
+    @Test
+    void load_invalidSubtypeFields_throwsDescriptiveException() throws Exception {
+        Path dataFile = Files.createTempDirectory("bola-invalid-subtype-test").resolve("tasks.txt");
         assertLoadFails(dataFile, "D | 0 | deadline | ",
                 "Line 1 of the data file is missing its deadline.");
         assertLoadFails(dataFile, "E | 0 | event | start | ",
@@ -123,13 +136,10 @@ public class StorageTest {
                 "Line 1 of the data file has an invalid date format.");
 
         Files.write(dataFile, List.of("T | 0 | valid", "X | 0 | invalid"));
-        try {
-            new Storage(dataFile).load();
-            assert false : "Loading malformed data should fail";
-        } catch (IOException exception) {
-            assert exception.getMessage().equals(
-                    "Line 2 of the data file has an unknown task type: 'X'.");
-        }
+        IOException exception = assertThrows(IOException.class,
+                () -> new Storage(dataFile).load());
+        assertEquals("Line 2 of the data file has an unknown task type: 'X'.",
+                exception.getMessage());
     }
 
     /**
@@ -142,19 +152,8 @@ public class StorageTest {
         Path directory = Files.createTempDirectory("bola-invalid-path-test");
         Storage storage = new Storage(directory);
 
-        try {
-            storage.load();
-            assert false : "Loading from a directory should fail";
-        } catch (IOException exception) {
-            assert true;
-        }
-
-        try {
-            storage.save(List.of(new Todo("task")));
-            assert false : "Saving over a directory should fail";
-        } catch (IOException exception) {
-            assert true;
-        }
+        assertThrows(IOException.class, storage::load);
+        assertThrows(IOException.class, () -> storage.save(List.of(new Todo("task"))));
     }
 
     /**
@@ -168,11 +167,8 @@ public class StorageTest {
     private static void assertLoadFails(Path dataFile, String malformedRecord,
             String expectedMessage) throws Exception {
         Files.writeString(dataFile, malformedRecord);
-        try {
-            new Storage(dataFile).load();
-            assert false : "Loading malformed data should fail: " + malformedRecord;
-        } catch (IOException exception) {
-            assert exception.getMessage().equals(expectedMessage);
-        }
+        IOException exception = assertThrows(IOException.class,
+                () -> new Storage(dataFile).load());
+        assertEquals(expectedMessage, exception.getMessage());
     }
 }
