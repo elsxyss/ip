@@ -199,4 +199,32 @@ public class TaskListTest {
                 () -> assertThrows(NullPointerException.class, () -> new TaskList(null)),
                 () -> assertThrows(NullPointerException.class, () -> tasks.add(null)));
     }
+
+    /**
+     * Checks duplicate detection across task types, dates, and completion states.
+     */
+    @Test
+    void containsDuplicateOf_variedTasks_comparesIdentityFieldsOnly() {
+        Todo completedTodo = new Todo("read");
+        completedTodo.markAsDone();
+        TaskList tasks = new TaskList(List.of(
+                completedTodo,
+                new Deadline("submit", "2026-09-20"),
+                new Event("meeting", "2026-09-21 1400", "2026-09-21 1500")));
+
+        assertAll(
+                () -> assertEquals(true, tasks.containsDuplicateOf(new Todo("read"))),
+                () -> assertEquals(false, tasks.containsDuplicateOf(new Deadline(
+                        "read", "2026-09-20"))),
+                () -> assertEquals(true, tasks.containsDuplicateOf(new Deadline(
+                        "submit", "2026-09-20"))),
+                () -> assertEquals(false, tasks.containsDuplicateOf(new Deadline(
+                        "submit", "2026-09-21"))),
+                () -> assertEquals(true, tasks.containsDuplicateOf(new Event(
+                        "meeting", "2026-09-21 1400", "2026-09-21 1500"))),
+                () -> assertEquals(false, tasks.containsDuplicateOf(new Event(
+                        "meeting", "2026-09-21 1400", "2026-09-21 1600"))),
+                () -> assertThrows(NullPointerException.class,
+                        () -> tasks.containsDuplicateOf(null)));
+    }
 }

@@ -213,6 +213,9 @@ public class ParserTest {
                 () -> assertParsingFails(() -> parser.parseDeadline("deadline submit /by"),
                         "when is this due? Add a date after /by, can?"),
                 () -> assertParsingFails(() -> parser.parseDeadline(
+                        "deadline submit /by 2026-09-01 /by 2026-09-02"),
+                        "please specify /by only once, can?"),
+                () -> assertParsingFails(() -> parser.parseDeadline(
                         "deadline submit /by 2026-02-29"), invalidDateMessage()));
     }
 
@@ -240,6 +243,18 @@ public class ParserTest {
                 () -> assertParsingFails(() -> parser.parseEvent(
                         "event demo /from /to 2026-09-02"),
                         "I need both the start and end times. Use /from and /to, can?"),
+                () -> assertParsingFails(() -> parser.parseEvent(
+                        "event demo /from 2026-09-01 /to 2026-09-01"),
+                        "the event must end after it starts, can?"),
+                () -> assertParsingFails(() -> parser.parseEvent(
+                        "event demo /from 2026-09-02 /to 2026-09-01"),
+                        "the event must end after it starts, can?"),
+                () -> assertParsingFails(() -> parser.parseEvent(
+                        "event demo /from 2026-09-01 /from 2026-09-02 /to 2026-09-03"),
+                        "please specify /from and /to only once each, can?"),
+                () -> assertParsingFails(() -> parser.parseEvent(
+                        "event demo /from 2026-09-01 /to 2026-09-02 /to 2026-09-03"),
+                        "please specify /from and /to only once each, can?"),
                 () -> assertParsingFails(() -> parser.parseEvent(
                         "event demo /from today /to 2026-09-02"), invalidDateMessage()));
     }
