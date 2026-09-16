@@ -58,8 +58,21 @@ public class MainWindowTest {
             assertEquals(600, fixture.root().getPrefHeight());
             assertTrue(fixture.scroll().isFitToWidth());
             assertEquals(ScrollPane.ScrollBarPolicy.NEVER, fixture.scroll().getHbarPolicy());
+            assertEquals(8, fixture.dialogs().getPadding().getTop(), 0.01);
+            VBox identityBar = (VBox) fixture.root().lookup(".identity-bar");
+            Label identityName = (Label) fixture.root().lookup(".identity-name");
+            Label identityTagline = (Label) fixture.root().lookup(".identity-tagline");
+            assertEquals(80, identityBar.getHeight(), 0.01);
+            assertEquals("BOLA'S KOPITIAM", identityName.getText());
+            assertEquals("System", identityName.getFont().getFamily());
+            assertEquals(22, identityName.getFont().getSize(), 0.01);
+            assertEquals("Your friendly task kaki", identityTagline.getText());
+            assertEquals("System", identityTagline.getFont().getFamily());
+            assertEquals(14, identityTagline.getFont().getSize(), 0.01);
+            assertEquals("What needs settling?", fixture.input().getPromptText());
+            assertEquals("Settle", fixture.send().getText());
             assertEquals(1, fixture.dialogs().getChildren().size());
-            assertEquals("Bola: Eh hello! I'm Bola.\nGot anything to settle today?",
+            assertEquals("Bola: Eh hello! I'm Bola, your task kaki.\nWhat needs settling today?",
                     messageAt(fixture.dialogs(), 0));
             ImageView bolaPicture = (ImageView) ((DialogBox) fixture.dialogs()
                     .getChildren().getFirst())
@@ -254,6 +267,7 @@ public class MainWindowTest {
             Stage stage = new Stage();
             try {
                 application.start(stage);
+                assertEquals("Bola's Kopitiam", stage.getTitle());
                 assertTrue(stage.isResizable());
                 assertEquals(400, stage.getMinWidth());
                 assertEquals(220, stage.getMinHeight());
@@ -293,9 +307,9 @@ public class MainWindowTest {
         assertEquals(size[0] - 8, send.getLayoutX() + send.getWidth(), 0.01);
         assertTrue(input.getBoundsInParent().getMaxX() < send.getLayoutX());
         assertEquals(1, scroll.getLayoutX(), 0.01);
-        assertEquals(1, scroll.getLayoutY(), 0.01);
+        assertEquals(81, scroll.getLayoutY(), 0.01);
         assertEquals(size[0] - 2, scroll.getWidth(), 0.01);
-        assertEquals(size[1] - 54, scroll.getHeight(), 0.01);
+        assertEquals(size[1] - 134, scroll.getHeight(), 0.01);
         assertTrue(scroll.getBoundsInParent().getMaxY() <= inputBar.getLayoutY() + 0.01,
                 "Scroll bottom " + scroll.getBoundsInParent().getMaxY()
                         + " must not pass toolbar top " + inputBar.getLayoutY());

@@ -26,7 +26,8 @@ public class BolaTest {
     void getResponse_taskLifecycle_returnsPlainTextAndPersistsChanges() {
         String file = directory.resolve("bola.txt").toString();
         Bola bola = new Bola(file);
-        assertEquals("Bola: Eh hello! I'm Bola.\nGot anything to settle today?", bola.getWelcome());
+        assertEquals("Bola: Eh hello! I'm Bola, your task kaki.\nWhat needs settling today?",
+                bola.getWelcome());
         assertEquals("Bola: Bo lah! Your task list is empty. 😌", bola.getResponse("list"));
         assertTrue(bola.getResponse("  todo read book  ").contains("[To-do][ ] read book"));
         assertTrue(bola.getResponse("mark 1").contains("[To-do][X] read book"));

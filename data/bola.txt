@@ -1,5 +1,5 @@
 T | 0 | read book
 D | 1 | return book | 2026-09-10
 E | 0 | tutorial | 2026-09-01 1400 | 2026-09-01 1600
-T | 0 | eat samyang noodles
+T | 1 | eat samyang noodles
 D | 0 | wash bowl | 2026-09-20

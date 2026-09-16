@@ -74,8 +74,8 @@ public class Ui {
      * Shows the greeting and storage warning without the console banner.
      */
     public void showGreeting(boolean isStorageAvailable, String loadingFailureReason) {
-        showLines(RESPONSE_INDENT + RESPONSE_ADDRESS + "Eh hello! I'm Bola.",
-                RESPONSE_INDENT + "Got anything to settle today?");
+        showLines(RESPONSE_INDENT + RESPONSE_ADDRESS + "Eh hello! I'm Bola, your task kaki.",
+                RESPONSE_INDENT + "What needs settling today?");
         if (!isStorageAvailable) {
             markResponseAs(ResponseType.WARNING);
             showLines(RESPONSE_INDENT + STORAGE_ERROR_ADDRESS

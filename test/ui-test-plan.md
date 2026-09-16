@@ -15,14 +15,14 @@
 
 ## TC-001: Exit the application
 
-**Aim:** Verify the simplified greeting and that `bye` still ends the console session immediately.
+**Aim:** Verify the task-kaki greeting and that `bye` still ends the console session immediately.
 
 **Greeting check:** Before sending `bye`, verify these two consecutive greeting lines
 (five leading spaces on each line):
 
 ```text
-     Bola: Eh hello! I'm Bola.
-     Got anything to settle today?
+     Bola: Eh hello! I'm Bola, your task kaki.
+     What needs settling today?
 ```
 
 The console must not show the GUI-only closing countdown.
