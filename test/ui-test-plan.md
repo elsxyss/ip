@@ -7,7 +7,8 @@
 - Java version: 25
 - Avatar alignment is covered by `test/gui-test-plan.md` and `DialogBoxTest` using the actual PNGs.
   Window resizing and the responsive chat background are covered by `test/gui-test-plan.md`
-  and `MainWindowTest`.
+  and `MainWindowTest`. Structured task badges and checkboxes in GUI responses are also covered
+  there; they intentionally do not change the console output expected in this plan.
   For changes limited to GUI layout, run TC-001 as the console launch/exit smoke test.
 - Isolation: Run each test case in a new temporary directory containing a copy of `build/libs/bola.jar`.
 - Default data precondition: No `data/bola.txt` file.

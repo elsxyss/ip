@@ -117,6 +117,30 @@ public class DialogBoxTest {
     }
 
     @Test
+    void deletedTask_withFooter_keepsCountAndDisablesCheckbox() throws Exception {
+        FxTestSupport.run(() -> {
+            UiResponse response = new UiResponse(
+                    "Bola: Okay, removed already:\n"
+                            + "    2. [Deadline][ ] submit report (by: Sep 10 2026)\n"
+                            + "Now got 1 task in your list.",
+                    ResponseType.NORMAL,
+                    List.of(new TaskView(2, "Deadline",
+                            "submit report (by: Sep 10 2026)", false, false)));
+            DialogBox dialog = DialogBox.getBolaDialog(response, loadAvatar(false),
+                    (taskNumber, isDone) -> true);
+            VBox root = new VBox(dialog);
+            new Scene(root, 380, 600);
+            root.applyCss();
+            root.layout();
+
+            CheckBox taskControl = (CheckBox) dialog.lookup(".task-checkbox");
+            Label footer = (Label) dialog.lookup(".task-footer");
+            assertTrue(taskControl.isDisabled());
+            assertEquals("Now got 1 task in your list.", footer.getText());
+        });
+    }
+
+    @Test
     void userDialog_transparentAvatar_keepsOriginalBounds() throws Exception {
         FxTestSupport.run(() -> {
             DialogBox dialog = DialogBox.getUserDialog("list", new WritableImage(100, 100));

@@ -69,3 +69,8 @@
 .task-checkbox:selected {
     -fx-opacity: 0.72;
 }
+
+.task-footer {
+    -fx-text-fill: #40382b;
+    -fx-font-size: 12px;
+}

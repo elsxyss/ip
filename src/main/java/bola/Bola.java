@@ -198,7 +198,7 @@ public class Bola {
      */
     private void showMatchingTasks(String command) throws BolaException {
         String keyword = parser.parseFindKeyword(command);
-        ui.showMatchingTasks(tasks.findTasks(keyword), keyword);
+        ui.showMatchingTasks(tasks.findTasks(keyword), tasks.getTasks(), keyword);
     }
 
     /**
@@ -282,9 +282,10 @@ public class Bola {
      */
     private void executeSingleTaskMutation(CommandType commandType, int taskIndex) {
         switch (commandType) {
-            case MARK -> ui.showTaskMarked(tasks.mark(taskIndex));
-            case UNMARK -> ui.showTaskUnmarked(tasks.unmark(taskIndex));
-            case DELETE -> ui.showTaskDeleted(tasks.delete(taskIndex), tasks.size());
+            case MARK -> ui.showTaskMarked(tasks.mark(taskIndex), taskIndex + 1);
+            case UNMARK -> ui.showTaskUnmarked(tasks.unmark(taskIndex), taskIndex + 1);
+            case DELETE -> ui.showTaskDeleted(
+                    tasks.delete(taskIndex), taskIndex + 1, tasks.size());
             default -> throw new AssertionError("Only task mutation commands can change selections");
         }
     }

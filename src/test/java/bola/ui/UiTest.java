@@ -2,6 +2,7 @@ package bola.ui;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -105,9 +106,9 @@ public class UiTest {
         String populatedList = captureOutput(() -> ui.showTaskList(allTasks));
         String emptyList = captureOutput(() -> ui.showTaskList(List.of()));
         String matchingTasks = captureOutput(
-                () -> ui.showMatchingTasks(List.of(deadline), "report"));
+                () -> ui.showMatchingTasks(List.of(deadline), allTasks, "report"));
         String noMatches = captureOutput(
-                () -> ui.showMatchingTasks(List.of(), "exercise"));
+                () -> ui.showMatchingTasks(List.of(), allTasks, "exercise"));
 
         assertAll(
                 () -> assertTrue(populatedList.contains("Bola: Your tasks all here:")),
@@ -164,12 +165,12 @@ public class UiTest {
         Task task = new Todo("buy kopi");
         task.markAsDone();
 
-        String markedOutput = captureOutput(() -> ui.showTaskMarked(task));
-        String unmarkedOutput = captureOutput(() -> ui.showTaskUnmarked(task));
+        String markedOutput = captureOutput(() -> ui.showTaskMarked(task, 1));
+        String unmarkedOutput = captureOutput(() -> ui.showTaskUnmarked(task, 1));
         String oneTaskOutput = captureOutput(() -> ui.showTaskAdded(task, 1));
         String severalTasksOutput = captureOutput(() -> ui.showTaskAdded(task, 3));
-        String deletedOutput = captureOutput(() -> ui.showTaskDeleted(task, 2));
-        String emptyOutput = captureOutput(() -> ui.showTaskDeleted(task, 0));
+        String deletedOutput = captureOutput(() -> ui.showTaskDeleted(task, 1, 2));
+        String emptyOutput = captureOutput(() -> ui.showTaskDeleted(task, 1, 0));
 
         assertAll(
                 () -> assertTrue(markedOutput.contains(
@@ -236,6 +237,32 @@ public class UiTest {
                                 + "Bo lah! No more tasks in your list. 🎉",
                         ui.captureResponse(() -> ui.showTasksDeleted(
                                 List.of(firstTask, thirdTask), List.of(0, 2), 0))));
+    }
+
+    /**
+     * Checks task-bearing GUI responses expose badges, correct task numbers, and safe controls.
+     */
+    @Test
+    void taskResponses_guiCapture_includeStructuredTaskRows() {
+        Ui ui = new Ui();
+        Task todo = new Todo("buy kopi");
+        Task deadline = new Deadline("submit report", "2026-09-10");
+        List<Task> allTasks = List.of(todo, deadline);
+
+        UiResponse matchingResponse = ui.captureUiResponse(
+                () -> ui.showMatchingTasks(List.of(deadline), allTasks, "report"));
+        UiResponse addedResponse = ui.captureUiResponse(() -> ui.showTaskAdded(deadline, 2));
+        UiResponse deletedResponse = ui.captureUiResponse(
+                () -> ui.showTaskDeleted(deadline, 2, 1));
+
+        assertAll(
+                () -> assertEquals(List.of(
+                        new TaskView(2, "Deadline", "submit report (By: Sep 10 2026)", false)),
+                        matchingResponse.taskViews()),
+                () -> assertEquals(2, addedResponse.taskViews().getFirst().number()),
+                () -> assertTrue(addedResponse.taskViews().getFirst().isInteractive()),
+                () -> assertFalse(deletedResponse.taskViews().getFirst().isInteractive()),
+                () -> assertTrue(deletedResponse.text().endsWith("Now got 1 task in your list.")));
     }
 
     /**

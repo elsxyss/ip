@@ -15,6 +15,8 @@ to a fresh temporary directory, and run `java -jar bola.jar` there to protect re
    `What needs settling?`. The input and Settle button must sit in a solid cream toolbar,
    use rounded corners, and remain legible over the background.
 2. Submit `todo read book` with Enter. Check the right user dialog and left task-added response.
+   The added task must use the same `To-do` badge and real checkbox as a list row, and the task-count
+   line must remain visible below it.
    User messages must have muted sage bubbles and Bola replies must have warm cream bubbles,
    each with a subtle matching border and dark, readable text. Round all corners except the
    bottom-right corner for the user and the
@@ -34,8 +36,13 @@ to a fresh temporary directory, and run `java -jar bola.jar` there to protect re
    that it becomes unselected, the unmarked confirmation appears, and that change is saved too.
    After submitting another typed command, controls in older list responses must be disabled so
    stale task numbers cannot modify a different task.
-4. Submit `mark 1`, `unmark 1`, `find book`, and an invalid command.
-   Check that normal confirmations appear as cream Bola replies. Validation errors must use a
+4. Add a dated task, then submit `mark 1`, `unmark 1`, `find book`, `upcoming 7`, and `delete 1`.
+   Check that every task in these responses uses the same descriptive badge and checkbox as the
+   list. Search and upcoming checkboxes must retain the task's original list number. Added, marked,
+   unmarked, search, and upcoming tasks must remain interactive; a deleted task's checkbox must be
+   disabled because it no longer exists. Task-count lines must remain visible below task rows.
+   Submit an invalid command and check that normal confirmations appear as cream Bola replies.
+   Validation errors must use a
    pale red bubble, dark red text, and a stronger red left border. Storage warnings must use the
    corresponding amber warning treatment rather than the error treatment.
 5. Submit a long task description and enough `list` commands to fill the window.

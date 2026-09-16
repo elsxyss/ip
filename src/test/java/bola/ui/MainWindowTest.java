@@ -97,7 +97,13 @@ public class MainWindowTest {
             input.fireEvent(new ActionEvent());
             assertEquals(3, fixture.dialogs().getChildren().size());
             assertEquals("todo read book", messageAt(fixture.dialogs(), 1));
-            assertTrue(messageAt(fixture.dialogs(), 2).contains("[To-do][ ] read book"));
+            assertEquals("Bola: Can! I've added this task:", messageAt(fixture.dialogs(), 2));
+            CheckBox addedTaskControl = taskControlsAt(fixture.dialogs(), 2).getFirst();
+            assertEquals("1. read book", addedTaskControl.getText());
+            assertFalse(addedTaskControl.isSelected());
+            Label addedTaskFooter = (Label) ((DialogBox) fixture.dialogs().getChildren().get(2))
+                    .lookup(".task-footer");
+            assertEquals("Now got 1 task in your list.", addedTaskFooter.getText());
             assertEquals("", input.getText());
             assertTrue(Files.readString(fixture.storage()).contains("read book"));
             ImageView userPicture = (ImageView) ((DialogBox) fixture.dialogs().getChildren().get(1))
@@ -214,7 +220,11 @@ public class MainWindowTest {
 
             fixture.input().setText("yes");
             fixture.input().fireEvent(new ActionEvent());
-            assertTrue(messageAt(fixture.dialogs(), 8).contains("No more tasks in your list"));
+            DialogBox deletionDialog = (DialogBox) fixture.dialogs().getChildren().get(8);
+            List<CheckBox> deletedTaskControls = taskControlsAt(fixture.dialogs(), 8);
+            Label deletionFooter = (Label) deletionDialog.lookup(".task-footer");
+            assertEquals("Bo lah! No more tasks in your list. 🎉", deletionFooter.getText());
+            assertTrue(deletedTaskControls.stream().allMatch(CheckBox::isDisabled));
             assertEquals("", fixture.input().getText());
             fixture.controller().stop();
             return null;

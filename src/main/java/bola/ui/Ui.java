@@ -138,15 +138,17 @@ public class Ui {
      * Shows tasks whose descriptions match a search keyword.
      *
      * @param matchingTasks tasks that matched the keyword.
+     * @param allTasks complete task list, used to preserve the displayed task numbers.
      * @param keyword keyword used to find the tasks.
      */
-    public void showMatchingTasks(List<Task> matchingTasks, String keyword) {
+    public void showMatchingTasks(List<Task> matchingTasks, List<Task> allTasks, String keyword) {
         if (matchingTasks.isEmpty()) {
             showLine(RESPONSE_INDENT + RESPONSE_ADDRESS
                     + "Bo lah! No tasks matching \"" + keyword + "\".");
             return;
         }
 
+        captureTaskViews(matchingTasks, findTaskIndexes(matchingTasks, allTasks), true);
         showLine(RESPONSE_INDENT + RESPONSE_ADDRESS
                 + "Can, found these matching tasks:");
         for (int i = 0; i < matchingTasks.size(); i++) {
@@ -173,22 +175,21 @@ public class Ui {
             return;
         }
 
+        List<Integer> taskIndexes = findTaskIndexes(upcomingTasks, allTasks);
+        captureTaskViews(upcomingTasks, taskIndexes, true);
         showLine(RESPONSE_INDENT + RESPONSE_ADDRESS
                 + "Next " + days + " " + dayWord + " got these tasks:");
-        for (Task task : upcomingTasks) {
-            int originalTaskNumber = allTasks.indexOf(task) + 1;
-            assert originalTaskNumber > 0
-                    : "Every upcoming task must belong to the complete task list";
-            showLine(RESPONSE_INDENT + "    " + originalTaskNumber + ". " + task);
-        }
+        showNumberedTasks(upcomingTasks, taskIndexes);
     }
 
     /**
      * Shows confirmation that a task was marked as done.
      *
      * @param task task that was marked.
+     * @param taskNumber one-based number of the task.
      */
-    public void showTaskMarked(Task task) {
+    public void showTaskMarked(Task task, int taskNumber) {
+        captureTaskView(task, taskNumber, true);
         showLines(RESPONSE_INDENT + RESPONSE_ADDRESS
                 + "Nice, one task settled liao! ✅", RESPONSE_INDENT + "    " + task);
     }
@@ -197,8 +198,10 @@ public class Ui {
      * Shows confirmation that a task was marked as not done.
      *
      * @param task task that was unmarked.
+     * @param taskNumber one-based number of the task.
      */
-    public void showTaskUnmarked(Task task) {
+    public void showTaskUnmarked(Task task, int taskNumber) {
+        captureTaskView(task, taskNumber, true);
         showLines(RESPONSE_INDENT + RESPONSE_ADDRESS
                 + "Okay, this one not settled yet.", RESPONSE_INDENT + "    " + task);
     }
@@ -211,6 +214,7 @@ public class Ui {
      * @param taskCount number of tasks currently stored.
      */
     public void showTasksMarked(List<Task> markedTasks, List<Integer> taskIndexes, int taskCount) {
+        captureTaskViews(markedTasks, taskIndexes, true);
         showLine(RESPONSE_INDENT + RESPONSE_ADDRESS + "Nice, " + markedTasks.size()
                 + " tasks settled liao! ✅");
         showNumberedTasks(markedTasks, taskIndexes);
@@ -226,6 +230,7 @@ public class Ui {
      */
     public void showTasksUnmarked(List<Task> unmarkedTasks, List<Integer> taskIndexes,
             int taskCount) {
+        captureTaskViews(unmarkedTasks, taskIndexes, true);
         showLine(RESPONSE_INDENT + RESPONSE_ADDRESS + "Okay, these " + unmarkedTasks.size()
                 + " tasks not settled yet.");
         showNumberedTasks(unmarkedTasks, taskIndexes);
@@ -239,6 +244,7 @@ public class Ui {
      * @param taskCount number of tasks currently stored.
      */
     public void showTaskAdded(Task task, int taskCount) {
+        captureTaskView(task, taskCount, true);
         showLines(RESPONSE_INDENT + RESPONSE_ADDRESS
                 + "Can! I've added this task:", RESPONSE_INDENT + "    " + task);
         showTaskCount(taskCount);
@@ -248,9 +254,11 @@ public class Ui {
      * Shows a removed task and the updated task count.
      *
      * @param task task that was removed.
+     * @param taskNumber one-based number of the task before it was removed.
      * @param taskCount number of tasks remaining.
      */
-    public void showTaskDeleted(Task task, int taskCount) {
+    public void showTaskDeleted(Task task, int taskNumber, int taskCount) {
+        captureTaskView(task, taskNumber, false);
         showLines(RESPONSE_INDENT + RESPONSE_ADDRESS + "Okay, removed already:",
                 RESPONSE_INDENT + "    " + task);
         if (taskCount == 0) {
@@ -269,6 +277,7 @@ public class Ui {
      */
     public void showTasksDeleted(List<Task> deletedTasks, List<Integer> taskIndexes,
             int taskCount) {
+        captureTaskViews(deletedTasks, taskIndexes, false);
         showLine(RESPONSE_INDENT + RESPONSE_ADDRESS + "Okay, removed these "
                 + deletedTasks.size() + " tasks already:");
         showNumberedTasks(deletedTasks, taskIndexes);
@@ -403,10 +412,58 @@ public class Ui {
 
         taskViews = new ArrayList<>();
         for (int i = 0; i < tasks.size(); i++) {
-            Task task = tasks.get(i);
-            taskViews.add(new TaskView(i + 1, task.getTypeName(),
-                    task.getDisplayDetails(), task.isDone()));
+            addTaskView(tasks.get(i), i + 1, true);
         }
+    }
+
+    /**
+     * Captures task information with original task numbers for the GUI.
+     */
+    private void captureTaskViews(List<Task> tasks, List<Integer> taskIndexes,
+            boolean isInteractive) {
+        assert tasks.size() == taskIndexes.size()
+                : "Every captured task must have an original task index";
+        if (response == null) {
+            return;
+        }
+
+        taskViews = new ArrayList<>();
+        for (int i = 0; i < tasks.size(); i++) {
+            addTaskView(tasks.get(i), taskIndexes.get(i) + 1, isInteractive);
+        }
+    }
+
+    /**
+     * Captures one task using its one-based task number for the GUI.
+     */
+    private void captureTaskView(Task task, int taskNumber, boolean isInteractive) {
+        if (response == null) {
+            return;
+        }
+
+        taskViews = new ArrayList<>();
+        addTaskView(task, taskNumber, isInteractive);
+    }
+
+    /**
+     * Adds one immutable task snapshot to the response being captured.
+     */
+    private void addTaskView(Task task, int taskNumber, boolean isInteractive) {
+        taskViews.add(new TaskView(taskNumber, task.getTypeName(),
+                task.getDisplayDetails(), task.isDone(), isInteractive));
+    }
+
+    /**
+     * Finds the original zero-based indexes of selected task objects.
+     */
+    private List<Integer> findTaskIndexes(List<Task> selectedTasks, List<Task> allTasks) {
+        List<Integer> taskIndexes = new ArrayList<>();
+        for (Task task : selectedTasks) {
+            int taskIndex = allTasks.indexOf(task);
+            assert taskIndex >= 0 : "Every selected task must belong to the complete task list";
+            taskIndexes.add(taskIndex);
+        }
+        return taskIndexes;
     }
 
     /**

@@ -140,7 +140,8 @@ public class DialogBox extends HBox {
             return;
         }
 
-        text.setText(response.text().lines().findFirst().orElse(""));
+        List<String> responseLines = response.text().lines().toList();
+        text.setText(responseLines.getFirst());
         text.setContentDisplay(ContentDisplay.BOTTOM);
         text.setGraphicTextGap(8);
         VBox taskList = new VBox(7);
@@ -148,7 +149,22 @@ public class DialogBox extends HBox {
         for (TaskView taskView : response.taskViews()) {
             taskList.getChildren().add(createTaskRow(taskView, taskToggleHandler));
         }
+        responseLines.stream()
+                .skip(response.taskViews().size() + 1L)
+                .map(this::createTaskFooter)
+                .forEach(taskList.getChildren()::add);
         text.setGraphic(taskList);
+    }
+
+    /**
+     * Creates a wrapped line for supporting text shown after structured task rows.
+     */
+    private Label createTaskFooter(String footerText) {
+        Label footer = new Label(footerText);
+        footer.getStyleClass().add("task-footer");
+        footer.setWrapText(true);
+        footer.setMaxWidth(MAXIMUM_TASK_CONTROL_WIDTH);
+        return footer;
     }
 
     /**
@@ -166,7 +182,7 @@ public class DialogBox extends HBox {
         completion.setMaxWidth(MAXIMUM_TASK_CONTROL_WIDTH);
         HBox.setHgrow(completion, Priority.ALWAYS);
         taskControls.add(completion);
-        if (taskToggleHandler == null) {
+        if (taskToggleHandler == null || !taskView.isInteractive()) {
             completion.setDisable(true);
         } else {
             completion.setOnAction(event -> {
