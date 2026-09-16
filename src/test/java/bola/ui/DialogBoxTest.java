@@ -1,6 +1,7 @@
 package bola.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -92,6 +93,26 @@ public class DialogBoxTest {
             double firstCheckboxPosition = checkBoxes.getFirst().getLayoutX();
             assertTrue(checkBoxes.stream()
                     .allMatch(checkBox -> checkBox.getLayoutX() == firstCheckboxPosition));
+        });
+    }
+
+    @Test
+    void taskList_rejectedCheckboxChange_restoresPreviousState() throws Exception {
+        FxTestSupport.run(() -> {
+            UiResponse response = new UiResponse("Bola: Your tasks all here:",
+                    ResponseType.NORMAL,
+                    List.of(new TaskView(1, "To-do", "read book", false)));
+            DialogBox dialog = DialogBox.getBolaDialog(response, loadAvatar(false),
+                    (taskNumber, isDone) -> false);
+            VBox root = new VBox(dialog);
+            new Scene(root, 380, 600);
+            root.applyCss();
+            root.layout();
+            CheckBox taskControl = (CheckBox) dialog.lookup(".task-checkbox");
+
+            taskControl.fire();
+
+            assertFalse(taskControl.isSelected());
         });
     }
 
