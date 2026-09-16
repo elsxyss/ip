@@ -260,6 +260,10 @@ public class Parser {
         if (bySeparatorIndex < 0) {
             throw new BolaException("when is this due? Use /by to tell me, can?");
         }
+        if (taskDetails.indexOf(BY_SEPARATOR,
+                bySeparatorIndex + BY_SEPARATOR.length()) >= 0) {
+            throw new BolaException("please specify /by only once, can?");
+        }
 
         String description = taskDetails.substring(0, bySeparatorIndex).strip();
         String byDateText = taskDetails.substring(
@@ -294,6 +298,12 @@ public class Parser {
         if (fromSeparatorIndex < 0 || toSeparatorIndex < 0) {
             throw new BolaException("when is this event happening? Use /from and /to, can?");
         }
+        if (taskDetails.indexOf(FROM_SEPARATOR,
+                fromSeparatorIndex + FROM_SEPARATOR.length()) >= 0
+                || taskDetails.indexOf(TO_SEPARATOR,
+                toSeparatorIndex + TO_SEPARATOR.length()) >= 0) {
+            throw new BolaException("please specify /from and /to only once each, can?");
+        }
 
         String description = taskDetails.substring(0, fromSeparatorIndex).strip();
         String startDateText = taskDetails.substring(
@@ -310,6 +320,9 @@ public class Parser {
 
         LocalDateTime startDate = parseTaskDateTime(startDateText);
         LocalDateTime endDate = parseTaskDateTime(endDateText);
+        if (!startDate.isBefore(endDate)) {
+            throw new BolaException("the event must end after it starts, can?");
+        }
         return new Event(description, startDate, endDate);
     }
 

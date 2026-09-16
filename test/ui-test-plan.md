@@ -440,3 +440,73 @@ T | 0 | third
         Bola: All settled? Steady lah. See you again! 👋
    ================================================================
    ```
+
+## TC-008: Reject duplicate and inconsistent task data
+
+**Aim:** Verify duplicate tasks, repeated parameters, and event ranges that do not move
+forward in time are rejected without changing the task list.
+
+**Inputs:**
+
+1. `todo read book`
+2. `todo read book`
+3. `deadline submit /by 2026-09-20 /by 2026-09-21`
+4. `event meeting /from 2026-09-20 /to 2026-09-20`
+5. `event meeting /from 2026-09-21 /to 2026-09-20`
+6. `event meeting /from 2026-09-20 /from 2026-09-21 /to 2026-09-22`
+7. `list`
+8. `bye`
+
+**Expected outputs:**
+
+1. For the first `todo read book`:
+
+   ```text
+        Bola: Can! I've added this task:
+            [To-do][ ] read book
+        Now got 1 task in your list.
+   ```
+
+2. For the second `todo read book`:
+
+   ```text
+        Bola: Aiyo, this task is already in your list leh.
+   ```
+
+3. For the `deadline` with two `/by` parameters:
+
+   ```text
+        Bola: Aiyo, please specify /by only once, can?
+   ```
+
+4. For the event whose start and end are equal:
+
+   ```text
+        Bola: Aiyo, the event must end after it starts, can?
+   ```
+
+5. For the event whose end is before its start:
+
+   ```text
+        Bola: Aiyo, the event must end after it starts, can?
+   ```
+
+6. For the event with two `/from` parameters:
+
+   ```text
+        Bola: Aiyo, please specify /from and /to only once each, can?
+   ```
+
+7. For `list`:
+
+   ```text
+        Bola: Your tasks all here:
+            1. [To-do][ ] read book
+   ```
+
+8. For `bye`:
+
+   ```text
+        Bola: All settled? Steady lah. See you again! 👋
+   ================================================================
+   ```

@@ -65,6 +65,20 @@ public class Task {
     }
 
     /**
+     * Returns whether another task has the same type and task details.
+     *
+     * <p>Completion status is intentionally ignored because marking a task does not make an
+     * otherwise identical task unique.</p>
+     *
+     * @param other task to compare with this task.
+     * @return true if both tasks represent the same work.
+     */
+    public boolean hasSameDetails(Task other) {
+        return other != null && getClass().equals(other.getClass())
+                && description.equals(other.description);
+    }
+
+    /**
      * Marks this task as completed.
      */
     public void markAsDone() {

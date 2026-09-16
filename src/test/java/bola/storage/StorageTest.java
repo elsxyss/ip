@@ -134,11 +134,33 @@ public class StorageTest {
                 "Line 1 of the data file has an invalid date format.");
         assertLoadFails(dataFile, "E | 0 | event | 2019-01-01 | tomorrow",
                 "Line 1 of the data file has an invalid date format.");
+        assertLoadFails(dataFile, "E | 0 | event | 2019-01-02 | 2019-01-01",
+                "Line 1 of the data file has an end time that is not after its start time.");
+        assertLoadFails(dataFile, "E | 0 | event | 2019-01-01 | 2019-01-01",
+                "Line 1 of the data file has an end time that is not after its start time.");
 
         Files.write(dataFile, List.of("T | 0 | valid", "X | 0 | invalid"));
         IOException exception = assertThrows(IOException.class,
                 () -> new Storage(dataFile).load());
         assertEquals("Line 2 of the data file has an unknown task type: 'X'.",
+                exception.getMessage());
+    }
+
+    /**
+     * Checks that duplicate records are reported instead of silently loaded.
+     *
+     * @throws Exception if temporary test files cannot be accessed.
+     */
+    @Test
+    void load_duplicateTask_throwsDescriptiveException() throws Exception {
+        Path dataFile = Files.createTempDirectory("bola-duplicate-data-test")
+                .resolve("tasks.txt");
+        Files.write(dataFile, List.of("T | 0 | duplicate", "T | 1 | duplicate"));
+
+        IOException exception = assertThrows(IOException.class,
+                () -> new Storage(dataFile).load());
+
+        assertEquals("Line 2 of the data file duplicates an earlier task.",
                 exception.getMessage());
     }
 

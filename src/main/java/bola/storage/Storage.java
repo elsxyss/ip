@@ -78,7 +78,11 @@ public class Storage {
                 taskData = taskData.substring(BYTE_ORDER_MARK.length());
             }
             if (!taskData.isBlank()) {
-                tasks.add(parseTask(taskData, i + 1));
+                Task task = parseTask(taskData, i + 1);
+                if (tasks.stream().anyMatch(savedTask -> savedTask.hasSameDetails(task))) {
+                    throw invalidData(i + 1, "duplicates an earlier task.");
+                }
+                tasks.add(task);
             }
         }
         return tasks;
@@ -194,8 +198,12 @@ public class Storage {
         requireFieldCount(fields, EVENT_FIELD_COUNT, EVENT_FIELD_COUNT, lineNumber);
         requireNonBlank(fields.get(START_OR_DEADLINE_INDEX), "start time", lineNumber);
         requireNonBlank(fields.get(END_TIME_INDEX), "end time", lineNumber);
-        return new Event(fields.get(DESCRIPTION_INDEX),
+        Event event = new Event(fields.get(DESCRIPTION_INDEX),
                 fields.get(START_OR_DEADLINE_INDEX), fields.get(END_TIME_INDEX));
+        if (!event.getStartDate().isBefore(event.getEndDate())) {
+            throw invalidData(lineNumber, "has an end time that is not after its start time.");
+        }
+        return event;
     }
 
     /**

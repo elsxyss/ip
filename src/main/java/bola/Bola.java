@@ -292,7 +292,10 @@ public class Bola {
     /**
      * Adds a task and shows its confirmation.
      */
-    private void addTask(Task task) {
+    private void addTask(Task task) throws BolaException {
+        if (tasks.containsDuplicateOf(task)) {
+            throw new BolaException("this task is already in your list leh.");
+        }
         tasks.add(task);
         ui.showTaskAdded(task, tasks.size());
     }

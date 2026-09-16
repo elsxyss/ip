@@ -47,7 +47,8 @@ public class BolaTest {
         String today = LocalDate.now().toString();
         assertTrue(bola.getResponse("deadline submit /by " + today)
                 .contains("[Deadline][ ] submit"));
-        assertTrue(bola.getResponse("event meeting /from " + today + " /to " + today)
+        String tomorrow = LocalDate.now().plusDays(1).toString();
+        assertTrue(bola.getResponse("event meeting /from " + today + " /to " + tomorrow)
                 .contains("[Event][ ] meeting"));
         assertTrue(bola.getResponse("upcoming 7").contains("[Deadline][ ] submit"));
         assertTrue(bola.getResponse("unknown").startsWith("Bola: Aiyo,"));
@@ -171,6 +172,20 @@ public class BolaTest {
         assertTrue(bola.getResponse("todo read book").contains("I couldn't save your tasks"));
         assertTrue(bola.getResponse("list").contains("read book"));
         assertFalse(bola.getResponse("todo buy milk").contains("I couldn't save"));
+    }
+
+    @Test
+    void getResponse_duplicateTask_rejectsDuplicateWithoutSavingIt() throws IOException {
+        Path file = directory.resolve("bola.txt");
+        Bola bola = new Bola(file.toString());
+        bola.getResponse("todo read book");
+        String savedTask = Files.readString(file);
+
+        assertEquals("Bola: Aiyo, this task is already in your list leh.",
+                bola.getResponse("todo read book"));
+        assertEquals(savedTask, Files.readString(file));
+        assertFalse(bola.getResponse("deadline read book /by 2026-09-20")
+                .startsWith("Bola: Aiyo,"));
     }
 
     /**
