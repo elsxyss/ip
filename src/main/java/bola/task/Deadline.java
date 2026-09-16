@@ -51,13 +51,22 @@ public class Deadline extends Task {
     }
 
     /**
-     * Returns the deadline in Bola's display format.
+     * Returns the human-readable deadline type name.
      *
-     * @return the task prefixed with its type marker and followed by its deadline.
+     * @return deadline type name.
      */
     @Override
-    public String toString() {
-        return "[D]" + super.toString()
-                + " (By: " + TaskDateTime.formatForDisplay(byDate) + ")";
+    public String getTypeName() {
+        return "Deadline";
+    }
+
+    /**
+     * Returns the description followed by the deadline.
+     *
+     * @return user-facing deadline details.
+     */
+    @Override
+    public String getDisplayDetails() {
+        return description + " (By: " + TaskDateTime.formatForDisplay(byDate) + ")";
     }
 }

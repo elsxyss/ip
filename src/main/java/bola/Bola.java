@@ -13,6 +13,7 @@ import bola.storage.Storage;
 import bola.task.Task;
 import bola.task.TaskList;
 import bola.ui.Ui;
+import bola.ui.UiResponse;
 
 /**
  * Coordinates Bola's user interface, task operations, and persistent storage.
@@ -76,14 +77,31 @@ public class Bola {
      * @return Bola's response.
      */
     public String getResponse(String input) {
-        return ui.captureResponse(() -> executeCommand(input.strip()));
+        return getGuiResponse(input).text();
+    }
+
+    /**
+     * Executes a chat command and returns a response with its GUI presentation type.
+     *
+     * @param input command entered in the GUI.
+     * @return typed response for display in the graphical interface.
+     */
+    public UiResponse getGuiResponse(String input) {
+        return ui.captureUiResponse(() -> executeCommand(input.strip()));
     }
 
     /**
      * Returns the GUI greeting, including any storage loading warning.
      */
     public String getWelcome() {
-        return ui.captureResponse(() -> ui.showGreeting(isStorageAvailable, loadingFailureReason));
+        return getGuiWelcome().text();
+    }
+
+    /**
+     * Returns the GUI greeting together with its presentation type.
+     */
+    public UiResponse getGuiWelcome() {
+        return ui.captureUiResponse(() -> ui.showGreeting(isStorageAvailable, loadingFailureReason));
     }
 
     public boolean isExit() {

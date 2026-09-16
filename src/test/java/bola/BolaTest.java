@@ -12,6 +12,9 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import bola.ui.ResponseType;
+import bola.ui.UiResponse;
+
 /**
  * Tests the GUI response boundary and its shared command and persistence logic.
  */
@@ -25,11 +28,11 @@ public class BolaTest {
         Bola bola = new Bola(file);
         assertEquals("Bola: Eh hello! I'm Bola.\nGot anything to settle today?", bola.getWelcome());
         assertEquals("Bola: Bo lah! Your task list is empty. 😌", bola.getResponse("list"));
-        assertTrue(bola.getResponse("  todo read book  ").contains("[T][ ] read book"));
-        assertTrue(bola.getResponse("mark 1").contains("[T][X] read book"));
-        assertTrue(new Bola(file).getResponse("list").contains("[T][X] read book"));
-        assertTrue(bola.getResponse("unmark 1").contains("[T][ ] read book"));
-        assertTrue(bola.getResponse("find book").contains("[T][ ] read book"));
+        assertTrue(bola.getResponse("  todo read book  ").contains("[To-do][ ] read book"));
+        assertTrue(bola.getResponse("mark 1").contains("[To-do][X] read book"));
+        assertTrue(new Bola(file).getResponse("list").contains("[To-do][X] read book"));
+        assertTrue(bola.getResponse("unmark 1").contains("[To-do][ ] read book"));
+        assertTrue(bola.getResponse("find book").contains("[To-do][ ] read book"));
         assertTrue(bola.getResponse("delete 1").contains("No more tasks"));
         assertEquals("Bola: Bo lah! Your task list is empty. 😌", new Bola(file).getResponse("list"));
         assertFalse(bola.isExit());
@@ -41,14 +44,31 @@ public class BolaTest {
     void getResponse_datedTasksAndInvalidCommands_returnsResultsAndErrors() {
         Bola bola = new Bola(directory.resolve("bola.txt").toString());
         String today = LocalDate.now().toString();
-        assertTrue(bola.getResponse("deadline submit /by " + today).contains("[D][ ] submit"));
+        assertTrue(bola.getResponse("deadline submit /by " + today)
+                .contains("[Deadline][ ] submit"));
         assertTrue(bola.getResponse("event meeting /from " + today + " /to " + today)
-                .contains("[E][ ] meeting"));
-        assertTrue(bola.getResponse("upcoming 7").contains("[D][ ] submit"));
+                .contains("[Event][ ] meeting"));
+        assertTrue(bola.getResponse("upcoming 7").contains("[Deadline][ ] submit"));
         assertTrue(bola.getResponse("unknown").startsWith("Bola: Aiyo,"));
         assertTrue(bola.getResponse("mark 99").startsWith("Bola: Aiyo,"));
         assertTrue(bola.getResponse("todo").startsWith("Bola: Aiyo,"));
-        assertTrue(bola.getResponse("list").contains("2. [E][ ] meeting"));
+        assertTrue(bola.getResponse("list").contains("2. [Event][ ] meeting"));
+    }
+
+    @Test
+    void getGuiResponse_normalErrorAndWarning_returnsPresentationType() throws IOException {
+        Path file = directory.resolve("bola.txt");
+        Bola bola = new Bola(file.toString());
+        assertEquals(ResponseType.NORMAL, bola.getGuiWelcome().type());
+        assertEquals(ResponseType.NORMAL, bola.getGuiResponse("list").type());
+
+        UiResponse error = bola.getGuiResponse("unknown");
+        assertEquals(ResponseType.ERROR, error.type());
+        assertTrue(error.text().startsWith("Bola: Aiyo,"));
+
+        Files.writeString(file, "invalid saved data");
+        Bola bolaWithStorageWarning = new Bola(file.toString());
+        assertEquals(ResponseType.WARNING, bolaWithStorageWarning.getGuiWelcome().type());
     }
 
     @Test
@@ -58,18 +78,18 @@ public class BolaTest {
         addTodos(bola, 4);
 
         assertEquals("Bola: Nice, 4 tasks settled liao! ✅\n"
-                        + "    1. [T][X] task 1\n"
-                        + "    2. [T][X] task 2\n"
-                        + "    3. [T][X] task 3\n"
-                        + "    4. [T][X] task 4\n"
+                        + "    1. [To-do][X] task 1\n"
+                        + "    2. [To-do][X] task 2\n"
+                        + "    3. [To-do][X] task 3\n"
+                        + "    4. [To-do][X] task 4\n"
                         + "Now got 4 tasks in your list.",
                 bola.getResponse("mark 1-3 2-4 2"));
         assertEquals("Bola: Okay, these 2 tasks not settled yet.\n"
-                        + "    2. [T][ ] task 2\n"
-                        + "    4. [T][ ] task 4\n"
+                        + "    2. [To-do][ ] task 2\n"
+                        + "    4. [To-do][ ] task 4\n"
                         + "Now got 4 tasks in your list.",
                 bola.getResponse("unmark 4, 2"));
-        assertTrue(new Bola(file).getResponse("list").contains("2. [T][ ] task 2"));
+        assertTrue(new Bola(file).getResponse("list").contains("2. [To-do][ ] task 2"));
     }
 
     @Test
@@ -84,18 +104,18 @@ public class BolaTest {
         assertEquals(savedBeforeConfirmation, Files.readString(file));
         assertEquals("Bola: Aiyo, please answer Yes or No, can?", bola.getResponse("list"));
         assertEquals("Bola: Okay, cancelled. No tasks changed.", bola.getResponse(" NO "));
-        assertTrue(bola.getResponse("list").contains("4. [T][ ] task 4"));
+        assertTrue(bola.getResponse("list").contains("4. [To-do][ ] task 4"));
 
         assertEquals("Bola: U sure u want to delete these 2 tasks? (Yes/No)",
                 bola.getResponse("delete 2 4"));
         assertEquals("Bola: Okay, removed these 2 tasks already:\n"
-                        + "    2. [T][ ] task 2\n"
-                        + "    4. [T][ ] task 4\n"
+                        + "    2. [To-do][ ] task 2\n"
+                        + "    4. [To-do][ ] task 4\n"
                         + "Now got 2 tasks in your list.",
                 bola.getResponse("YeS"));
         assertEquals("Bola: Your tasks all here:\n"
-                        + "    1. [T][ ] task 1\n"
-                        + "    2. [T][ ] task 3",
+                        + "    1. [To-do][ ] task 1\n"
+                        + "    2. [To-do][ ] task 3",
                 new Bola(file.toString()).getResponse("list"));
     }
 
@@ -106,10 +126,10 @@ public class BolaTest {
 
         assertEquals("Bola: Aiyo, task number 4 doesn't exist leh.",
                 bola.getResponse("mark 1-4"));
-        assertTrue(bola.getResponse("list").contains("1. [T][ ] task 1"));
+        assertTrue(bola.getResponse("list").contains("1. [To-do][ ] task 1"));
         assertEquals("Bola: U sure u want to mark all 3 tasks? (Yes/No)",
                 bola.getResponse("mark all"));
-        assertTrue(bola.getResponse("yes").contains("3. [T][X] task 3"));
+        assertTrue(bola.getResponse("yes").contains("3. [To-do][X] task 3"));
         assertEquals("Bola: U sure u want to delete all 3 tasks? (Yes/No)",
                 bola.getResponse("delete all"));
         assertTrue(bola.getResponse("YES").contains("No more tasks in your list"));

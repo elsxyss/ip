@@ -72,7 +72,7 @@ The console must not show the GUI-only closing countdown.
 
 ```text
 T | 0 | read book
-D | 0 | return book | 2026-09-15
+D | 0 | return book | 2026-09-20
 ```
 
 **Inputs:**
@@ -87,15 +87,15 @@ D | 0 | return book | 2026-09-15
 
    ```text
         Bola: Next 7 days got these tasks:
-            2. [D][ ] return book (By: Sep 15 2026)
+            2. [Deadline][ ] return book (By: Sep 20 2026)
    ```
 
 2. For `find book`:
 
    ```text
         Bola: Can, found these matching tasks:
-            1. [T][ ] read book
-            2. [D][ ] return book (By: Sep 15 2026)
+            1. [To-do][ ] read book
+            2. [Deadline][ ] return book (By: Sep 20 2026)
    ```
 
 3. For `bye`:
@@ -124,7 +124,7 @@ and task counts for adding, marking, unmarking, and deleting a task.
 
    ```text
         Bola: Can! I've added this task:
-            [T][ ] buy kopi
+            [To-do][ ] buy kopi
         Now got 1 task in your list.
    ```
 
@@ -132,21 +132,21 @@ and task counts for adding, marking, unmarking, and deleting a task.
 
    ```text
         Bola: Nice, one task settled liao! ✅
-            [T][X] buy kopi
+            [To-do][X] buy kopi
    ```
 
 3. For `unmark 1`:
 
    ```text
         Bola: Okay, this one not settled yet.
-            [T][ ] buy kopi
+            [To-do][ ] buy kopi
    ```
 
 4. For `delete 1`:
 
    ```text
         Bola: Okay, removed already:
-            [T][ ] buy kopi
+            [To-do][ ] buy kopi
         Bo lah! No more tasks in your list. 🎉
    ```
 
@@ -184,7 +184,7 @@ and atomic cancellation for explicit mass operations.
 
    ```text
         Bola: Can! I've added this task:
-            [T][ ] task 1
+            [To-do][ ] task 1
         Now got 1 task in your list.
    ```
 
@@ -192,7 +192,7 @@ and atomic cancellation for explicit mass operations.
 
    ```text
         Bola: Can! I've added this task:
-            [T][ ] task 2
+            [To-do][ ] task 2
         Now got 2 tasks in your list.
    ```
 
@@ -200,7 +200,7 @@ and atomic cancellation for explicit mass operations.
 
    ```text
         Bola: Can! I've added this task:
-            [T][ ] task 3
+            [To-do][ ] task 3
         Now got 3 tasks in your list.
    ```
 
@@ -208,7 +208,7 @@ and atomic cancellation for explicit mass operations.
 
    ```text
         Bola: Can! I've added this task:
-            [T][ ] task 4
+            [To-do][ ] task 4
         Now got 4 tasks in your list.
    ```
 
@@ -216,10 +216,10 @@ and atomic cancellation for explicit mass operations.
 
    ```text
         Bola: Nice, 4 tasks settled liao! ✅
-            1. [T][X] task 1
-            2. [T][X] task 2
-            3. [T][X] task 3
-            4. [T][X] task 4
+            1. [To-do][X] task 1
+            2. [To-do][X] task 2
+            3. [To-do][X] task 3
+            4. [To-do][X] task 4
         Now got 4 tasks in your list.
    ```
 
@@ -227,8 +227,8 @@ and atomic cancellation for explicit mass operations.
 
    ```text
         Bola: Okay, these 2 tasks not settled yet.
-            2. [T][ ] task 2
-            4. [T][ ] task 4
+            2. [To-do][ ] task 2
+            4. [To-do][ ] task 4
         Now got 4 tasks in your list.
    ```
 
@@ -260,8 +260,8 @@ and atomic cancellation for explicit mass operations.
 
     ```text
          Bola: Okay, removed these 2 tasks already:
-             2. [T][ ] task 2
-             4. [T][ ] task 4
+             2. [To-do][ ] task 2
+             4. [To-do][ ] task 4
          Now got 2 tasks in your list.
     ```
 
@@ -269,8 +269,8 @@ and atomic cancellation for explicit mass operations.
 
     ```text
          Bola: Your tasks all here:
-             1. [T][X] task 1
-             2. [T][X] task 3
+             1. [To-do][X] task 1
+             2. [To-do][X] task 3
     ```
 
 13. For `bye`:
@@ -302,7 +302,7 @@ and atomic cancellation for explicit mass operations.
 
    ```text
         Bola: Can! I've added this task:
-            [T][ ] first
+            [To-do][ ] first
         Now got 1 task in your list.
    ```
 
@@ -310,7 +310,7 @@ and atomic cancellation for explicit mass operations.
 
    ```text
         Bola: Can! I've added this task:
-            [T][ ] second
+            [To-do][ ] second
         Now got 2 tasks in your list.
    ```
 
@@ -324,8 +324,8 @@ and atomic cancellation for explicit mass operations.
 
    ```text
         Bola: Nice, 2 tasks settled liao! ✅
-            1. [T][X] first
-            2. [T][X] second
+            1. [To-do][X] first
+            2. [To-do][X] second
         Now got 2 tasks in your list.
    ```
 
@@ -339,8 +339,8 @@ and atomic cancellation for explicit mass operations.
 
    ```text
         Bola: Okay, removed these 2 tasks already:
-            1. [T][X] first
-            2. [T][X] second
+            1. [To-do][X] first
+            2. [To-do][X] second
         Bo lah! No more tasks in your list. 🎉
    ```
 
@@ -429,9 +429,9 @@ T | 0 | third
 
    ```text
         Bola: Your tasks all here:
-            1. [T][ ] first
-            2. [T][ ] second
-            3. [T][ ] third
+            1. [To-do][ ] first
+            2. [To-do][ ] second
+            3. [To-do][ ] third
    ```
 
 6. For `bye`:

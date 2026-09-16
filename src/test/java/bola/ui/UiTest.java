@@ -60,7 +60,7 @@ public class UiTest {
                         ui.captureResponse(() -> ui.showGreeting(false, "Permission denied."))),
                 () -> assertEquals(
                         "Bola: Can! I've added this task:\n"
-                                + "    [T][ ] buy kopi\n"
+                                + "    [To-do][ ] buy kopi\n"
                                 + "Now got 1 task in your list.",
                         ui.captureResponse(() -> ui.showTaskAdded(new Todo("buy kopi"), 1))),
                 () -> assertEquals("Bola: All settled? Steady lah. See you again! 👋",
@@ -111,7 +111,7 @@ public class UiTest {
 
         assertAll(
                 () -> assertTrue(populatedList.contains("Bola: Your tasks all here:")),
-                () -> assertTrue(populatedList.contains("1. [T][ ] buy kopi")),
+                () -> assertTrue(populatedList.contains("1. [To-do][ ] buy kopi")),
                 () -> assertTrue(emptyList.contains(
                         "Bola: Bo lah! Your task list is empty. 😌")),
                 () -> assertTrue(matchingTasks.contains(
@@ -224,15 +224,15 @@ public class UiTest {
         assertAll(
                 () -> assertEquals(
                         "Bola: Nice, 2 tasks settled liao! ✅\n"
-                                + "    1. [T][X] first\n"
-                                + "    3. [T][X] third\n"
+                                + "    1. [To-do][X] first\n"
+                                + "    3. [To-do][X] third\n"
                                 + "Now got 3 tasks in your list.",
                         ui.captureResponse(() -> ui.showTasksMarked(
                                 List.of(firstTask, thirdTask), List.of(0, 2), 3))),
                 () -> assertEquals(
                         "Bola: Okay, removed these 2 tasks already:\n"
-                                + "    1. [T][X] first\n"
-                                + "    3. [T][X] third\n"
+                                + "    1. [To-do][X] first\n"
+                                + "    3. [To-do][X] third\n"
                                 + "Bo lah! No more tasks in your list. 🎉",
                         ui.captureResponse(() -> ui.showTasksDeleted(
                                 List.of(firstTask, thirdTask), List.of(0, 2), 0))));
