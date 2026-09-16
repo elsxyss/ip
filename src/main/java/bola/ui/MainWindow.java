@@ -50,7 +50,7 @@ public class MainWindow {
      */
     public void setBola(Bola bola) {
         this.bola = bola;
-        dialogContainer.getChildren().add(DialogBox.getBolaDialog(bola.getWelcome(), bolaImage));
+        dialogContainer.getChildren().add(DialogBox.getBolaDialog(bola.getGuiWelcome(), bolaImage));
     }
 
     /**
@@ -70,7 +70,8 @@ public class MainWindow {
             return;
         }
 
-        String response = bola.getResponse(input);
+        disableTaskControls();
+        UiResponse response = bola.getGuiResponse(input);
         showExchange(input, response);
         finishInputHandling();
     }
@@ -78,10 +79,37 @@ public class MainWindow {
     /**
      * Adds the user's command and Bola's response to the conversation.
      */
-    private void showExchange(String input, String response) {
+    private void showExchange(String input, UiResponse response) {
         dialogContainer.getChildren().addAll(
                 DialogBox.getUserDialog(input, userImage),
-                DialogBox.getBolaDialog(response, bolaImage));
+                createBolaDialog(response));
+    }
+
+    /**
+     * Returns a Bola dialog with interactive task controls connected to the shared command logic.
+     */
+    private DialogBox createBolaDialog(UiResponse response) {
+        return DialogBox.getBolaDialog(response, bolaImage, this::handleTaskToggle);
+    }
+
+    /**
+     * Applies a checkbox change using the same mark or unmark command used by the CLI.
+     */
+    private boolean handleTaskToggle(int taskNumber, boolean isDone) {
+        String command = (isDone ? "mark " : "unmark ") + taskNumber;
+        UiResponse response = bola.getGuiResponse(command);
+        dialogContainer.getChildren().add(createBolaDialog(response));
+        return response.type() != ResponseType.ERROR;
+    }
+
+    /**
+     * Prevents controls in an old list response from acting on stale task numbers.
+     */
+    private void disableTaskControls() {
+        dialogContainer.getChildren().stream()
+                .filter(DialogBox.class::isInstance)
+                .map(DialogBox.class::cast)
+                .forEach(DialogBox::disableTaskControls);
     }
 
     /**

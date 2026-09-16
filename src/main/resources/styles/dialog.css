@@ -1,13 +1,71 @@
 .chat-bubble {
-    -fx-background-color: white;
-    -fx-text-fill: black;
-    -fx-border-color: black;
+    -fx-background-color: #dcebe2;
+    -fx-text-fill: #26352d;
+    -fx-border-color: #a8c7b2;
     -fx-border-width: 1;
     -fx-background-radius: 16 16 0 16;
     -fx-border-radius: 16 16 0 16;
+    -fx-font-family: "System";
+    -fx-font-size: 13px;
+    -fx-line-spacing: 2px;
+}
+
+.user-dialog {
+    -fx-padding: 10 10 5 10;
+}
+
+.bola-dialog {
+    -fx-padding: 5 10 10 10;
 }
 
 .bola-dialog .chat-bubble {
+    -fx-background-color: #fff8e8;
+    -fx-text-fill: #40382b;
+    -fx-border-color: #d8c9a7;
     -fx-background-radius: 16 16 16 0;
     -fx-border-radius: 16 16 16 0;
+}
+
+.error-dialog .chat-bubble {
+    -fx-background-color: #fde8e7;
+    -fx-text-fill: #7f1d1d;
+    -fx-border-color: #d65c5c;
+    -fx-border-width: 1 1 1 4;
+}
+
+.warning-dialog .chat-bubble {
+    -fx-background-color: #fff3cd;
+    -fx-text-fill: #664d03;
+    -fx-border-color: #d8ad35;
+    -fx-border-width: 1 1 1 4;
+}
+
+.task-list {
+    -fx-padding: 2 0 0 0;
+}
+
+.task-row {
+    -fx-alignment: top-left;
+}
+
+.task-type {
+    -fx-background-color: #e7dcc2;
+    -fx-background-radius: 8;
+    -fx-text-fill: #594c35;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+    -fx-min-width: 64px;
+    -fx-pref-width: 64px;
+    -fx-max-width: 64px;
+    -fx-padding: 3 6 3 6;
+}
+
+.task-checkbox {
+    -fx-text-fill: #40382b;
+    -fx-font-size: 12px;
+}
+
+.task-checkbox:selected {
+    -fx-opacity: 0.72;
 }

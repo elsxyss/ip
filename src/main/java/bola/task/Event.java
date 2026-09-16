@@ -66,13 +66,23 @@ public class Event extends Task {
     }
 
     /**
-     * Returns the event in Bola's display format.
+     * Returns the human-readable event type name.
      *
-     * @return the task prefixed with its type marker and followed by its time range.
+     * @return event type name.
      */
     @Override
-    public String toString() {
-        return "[E]" + super.toString() + " ("
+    public String getTypeName() {
+        return "Event";
+    }
+
+    /**
+     * Returns the description followed by the event's time range.
+     *
+     * @return user-facing event details.
+     */
+    @Override
+    public String getDisplayDetails() {
+        return description + " ("
                 + TaskDateTime.formatForDisplay(startDate) + " – "
                 + TaskDateTime.formatForDisplay(endDate) + ")";
     }

@@ -5,7 +5,55 @@
     -fx-background-repeat: no-repeat;
 }
 
-#scrollPane > .viewport,
+#scrollPane > .viewport {
+    -fx-background-color: rgba(255, 255, 255, 0.18);
+}
+
 #dialogContainer {
     -fx-background-color: transparent;
+}
+
+.input-bar {
+    -fx-background-color: #f7f3e9;
+    -fx-border-color: #d8c9a7 transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 8px;
+}
+
+#userInput {
+    -fx-background-color: white;
+    -fx-background-radius: 10px;
+    -fx-border-color: #b8aa8c;
+    -fx-border-radius: 10px;
+    -fx-font-size: 14px;
+    -fx-min-height: 36px;
+    -fx-pref-height: 36px;
+    -fx-prompt-text-fill: #777268;
+}
+
+#userInput:focused {
+    -fx-border-color: #668c75;
+    -fx-border-width: 2px;
+}
+
+#sendButton {
+    -fx-background-color: #416b52;
+    -fx-background-radius: 10px;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-min-height: 36px;
+    -fx-pref-height: 36px;
+}
+
+#sendButton:hover {
+    -fx-background-color: #345a43;
+}
+
+#sendButton:pressed {
+    -fx-background-color: #294936;
+}
+
+#sendButton:disabled {
+    -fx-opacity: 0.55;
 }

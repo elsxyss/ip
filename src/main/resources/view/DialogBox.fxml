@@ -9,15 +9,15 @@
          stylesheets="@../styles/dialog.css"
          xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
     <padding>
-        <Insets top="8.0" right="8.0" bottom="8.0" left="8.0" />
+        <Insets top="5.0" right="10.0" bottom="5.0" left="10.0" />
     </padding>
     <children>
         <Label fx:id="text" wrapText="true" minWidth="0.0" minHeight="-Infinity"
                HBox.hgrow="ALWAYS" styleClass="chat-bubble">
             <padding>
-                <Insets top="10.0" right="10.0" bottom="10.0" left="10.0" />
+                <Insets top="9.0" right="11.0" bottom="9.0" left="11.0" />
             </padding>
         </Label>
-        <ImageView fx:id="displayPicture" fitWidth="100.0" fitHeight="100.0" preserveRatio="true" />
+        <ImageView fx:id="displayPicture" fitWidth="80.0" fitHeight="80.0" preserveRatio="true" />
     </children>
 </fx:root>

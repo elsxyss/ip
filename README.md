@@ -23,12 +23,20 @@ Run `./gradlew run` with Java 25. On macOS, use the JavaFX-bundled JDK:
 The GUI follows [SE-EDU's tutorial Part 4](https://se-education.org/guides/tutorials/javaFxPart4.html):
 FXML views define the chat window and dialogs, while Java controllers handle input and automatic scrolling.
 Type existing Bola commands and press Enter or click Send. Blank input is ignored.
+The `list` command uses descriptive To-do, Deadline, and Event badges in the GUI.
+Each task has a checkbox that marks or unmarks it through the same persisted command logic;
+the typed `mark` and `unmark` commands remain available in both interfaces.
 The window can resize in both directions, following
 [tutorial Part 5](https://se-education.org/guides/tutorials/javaFxPart5.html).
-The chat area and input follow the window dimensions, while Send stays at the bottom right.
+The chat area and input follow the window dimensions, while Send stays at the bottom right
+inside a solid input toolbar. User messages use compact sage bubbles, Bola replies use warm
+cream bubbles, and errors and storage warnings use distinct attention colors.
 The minimum window size is 400 by 220 pixels.
 The kopitiam chat background scales with the chat area, preserving its proportions and
-cropping centrally to fill the available space. It stays fixed behind scrolling messages.
+cropping centrally to fill the available space. It stays fixed behind scrolling messages,
+with a subtle translucent wash that keeps text readable. Message bubbles retain stable
+maximum widths when the window expands; Bola receives a wider cap for task lists, while user
+commands remain compact. Both avatars use the same compact display size.
 After `bye`, input is disabled and the farewell appears immediately. After three seconds,
 `[Closing in 5 seconds...]` appears as a separate message. After five more seconds
 (eight seconds after `bye`), the GUI closes automatically.
@@ -36,7 +44,8 @@ After `bye`, input is disabled and the farewell appears immediately. After three
 The layouts are in `src/main/resources/view/MainWindow.fxml` and `DialogBox.fxml`.
 Open these files in Scene Builder to edit the layout. Their controllers are
 `bola.ui.MainWindow` and `bola.ui.DialogBox`; `bola.Main` loads the window and connects the chatbot.
-`src/main/resources/styles/dialog.css` defines the white, black-bordered bubbles and their speaker-specific corners.
+`src/main/resources/styles/dialog.css` defines the speaker and response-type colors, typography,
+spacing, and speaker-specific corners.
 
 The user-provided kopitiam-buddy avatars are stored in `src/main/resources/images`:
 `DaBola.png` is the cheerful kopi cup for Bola, and `DaUser.png` is the smiling kaya toast for the user.

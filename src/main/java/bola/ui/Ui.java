@@ -1,5 +1,6 @@
 package bola.ui;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -23,6 +24,8 @@ public class Ui {
 
     private final Scanner scanner;
     private StringBuilder response;
+    private ResponseType responseType;
+    private List<TaskView> taskViews;
 
     /**
      * Creates a user interface that reads commands from standard input.
@@ -74,6 +77,7 @@ public class Ui {
         showLines(RESPONSE_INDENT + RESPONSE_ADDRESS + "Eh hello! I'm Bola.",
                 RESPONSE_INDENT + "Got anything to settle today?");
         if (!isStorageAvailable) {
+            markResponseAs(ResponseType.WARNING);
             showLines(RESPONSE_INDENT + STORAGE_ERROR_ADDRESS
                     + "I couldn't load your saved tasks. " + loadingFailureReason,
                     RESPONSE_INDENT
@@ -123,6 +127,7 @@ public class Ui {
             return;
         }
 
+        captureTaskViews(tasks);
         showLine(RESPONSE_INDENT + RESPONSE_ADDRESS + "Your tasks all here:");
         for (int i = 0; i < tasks.size(); i++) {
             showLine(RESPONSE_INDENT + "    " + (i + 1) + ". " + tasks.get(i));
@@ -301,6 +306,7 @@ public class Ui {
      * Shows that a pending operation still requires a yes-or-no answer.
      */
     public void showConfirmationAnswerError() {
+        markResponseAs(ResponseType.ERROR);
         showLine(RESPONSE_INDENT + ERROR_ADDRESS + "please answer Yes or No, can?");
     }
 
@@ -310,6 +316,7 @@ public class Ui {
      * @param message explanation of the invalid command.
      */
     public void showError(String message) {
+        markResponseAs(ResponseType.ERROR);
         showLine(RESPONSE_INDENT + ERROR_ADDRESS + message);
     }
 
@@ -317,6 +324,7 @@ public class Ui {
      * Shows a failure to save tasks and explains its effect on the session.
      */
     public void showSavingError() {
+        markResponseAs(ResponseType.WARNING);
         showLines(RESPONSE_INDENT + STORAGE_ERROR_ADDRESS
                 + "I couldn't save your tasks.", RESPONSE_INDENT
                 + "Any more changes in this session won't be saved, okay?");
@@ -362,12 +370,51 @@ public class Ui {
      * @return plain text with console indentation and dividers removed.
      */
     public String captureResponse(Runnable operation) {
+        return captureUiResponse(operation).text();
+    }
+
+    /**
+     * Collects a typed response so the graphical interface can distinguish errors and warnings.
+     *
+     * @param operation response-producing operation.
+     * @return response text together with its presentation type.
+     */
+    public UiResponse captureUiResponse(Runnable operation) {
         response = new StringBuilder();
+        responseType = ResponseType.NORMAL;
+        taskViews = List.of();
         try {
             operation.run();
-            return response.toString().stripTrailing();
+            return new UiResponse(response.toString().stripTrailing(), responseType, taskViews);
         } finally {
             response = null;
+            responseType = null;
+            taskViews = null;
+        }
+    }
+
+    /**
+     * Captures immutable task information when a list is being prepared for the GUI.
+     */
+    private void captureTaskViews(List<Task> tasks) {
+        if (response == null) {
+            return;
+        }
+
+        taskViews = new ArrayList<>();
+        for (int i = 0; i < tasks.size(); i++) {
+            Task task = tasks.get(i);
+            taskViews.add(new TaskView(i + 1, task.getTypeName(),
+                    task.getDisplayDetails(), task.isDone()));
+        }
+    }
+
+    /**
+     * Records a nonstandard presentation type when a response is being captured for the GUI.
+     */
+    private void markResponseAs(ResponseType type) {
+        if (response != null) {
+            responseType = type;
         }
     }
 

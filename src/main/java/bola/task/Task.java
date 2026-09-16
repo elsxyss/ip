@@ -38,6 +38,33 @@ public class Task {
     }
 
     /**
+     * Returns whether this task has been completed.
+     *
+     * @return true if the task is complete.
+     */
+    public boolean isDone() {
+        return isDone;
+    }
+
+    /**
+     * Returns the human-readable name of this task type.
+     *
+     * @return task type name.
+     */
+    public String getTypeName() {
+        return "Task";
+    }
+
+    /**
+     * Returns the task description and any type-specific scheduling details.
+     *
+     * @return user-facing task details.
+     */
+    public String getDisplayDetails() {
+        return description;
+    }
+
+    /**
      * Marks this task as completed.
      */
     public void markAsDone() {
@@ -86,6 +113,6 @@ public class Task {
      */
     @Override
     public String toString() {
-        return "[" + getStatusIcon() + "] " + description;
+        return "[" + getTypeName() + "][" + getStatusIcon() + "] " + getDisplayDetails();
     }
 }

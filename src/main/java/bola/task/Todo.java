@@ -14,12 +14,12 @@ public class Todo extends Task {
     }
 
     /**
-     * Returns the to-do task in Bola's display format.
+     * Returns the human-readable to-do type name.
      *
-     * @return the task prefixed with its type marker.
+     * @return to-do type name.
      */
     @Override
-    public String toString() {
-        return "[T]" + super.toString();
+    public String getTypeName() {
+        return "To-do";
     }
 }

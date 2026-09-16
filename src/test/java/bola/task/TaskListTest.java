@@ -52,6 +52,27 @@ public class TaskListTest {
     }
 
     /**
+     * Checks that task types use descriptive names in user-facing output.
+     */
+    @Test
+    void taskDisplay_mixedTypes_usesDescriptiveTypeNamesAndDetails() {
+        Todo todo = new Todo("read book");
+        Deadline deadline = new Deadline("submit report", "2026-09-20");
+        Event event = new Event("consultation", "2026-09-21 1400", "2026-09-21 1500");
+        deadline.markAsDone();
+
+        assertAll(
+                () -> assertEquals("[To-do][ ] read book", todo.toString()),
+                () -> assertEquals("[Deadline][X] submit report (By: Sep 20 2026)",
+                        deadline.toString()),
+                () -> assertEquals("[Event][ ] consultation (Sep 21 2026 2:00 PM – "
+                                + "Sep 21 2026 3:00 PM)", event.toString()),
+                () -> assertEquals("To-do", todo.getTypeName()),
+                () -> assertEquals("read book", todo.getDisplayDetails()),
+                () -> assertEquals(true, deadline.isDone()));
+    }
+
+    /**
      * Checks that task mutations document their validated-index precondition.
      */
     @Test
