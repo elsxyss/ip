@@ -22,14 +22,16 @@ Run `./gradlew run` with Java 25. On macOS, use the JavaFX-bundled JDK:
 
 The GUI follows [SE-EDU's tutorial Part 4](https://se-education.org/guides/tutorials/javaFxPart4.html):
 FXML views define the chat window and dialogs, while Java controllers handle input and automatic scrolling.
-Type existing Bola commands and press Enter or click Send. Blank input is ignored.
+Type existing Bola commands and press Enter or click Settle. Blank input is ignored.
 The `list` command uses descriptive To-do, Deadline, and Event badges in the GUI.
 Each task has a checkbox that marks or unmarks it through the same persisted command logic;
 the typed `mark` and `unmark` commands remain available in both interfaces.
 The window can resize in both directions, following
 [tutorial Part 5](https://se-education.org/guides/tutorials/javaFxPart5.html).
-The chat area and input follow the window dimensions, while Send stays at the bottom right
-inside a solid input toolbar. User messages use compact sage bubbles, Bola replies use warm
+The chat area and input follow the window dimensions, while Settle stays at the bottom right
+inside a solid input toolbar. A cream-and-green identity bar presents Bola's Kopitiam and its
+"Your friendly task kaki" tagline. The window title, greeting, command prompt, and button use
+the same kopitiam-helper personality. User messages use compact sage bubbles, Bola replies use warm
 cream bubbles, and errors and storage warnings use distinct attention colors.
 The minimum window size is 400 by 220 pixels.
 The kopitiam chat background scales with the chat area, preserving its proportions and

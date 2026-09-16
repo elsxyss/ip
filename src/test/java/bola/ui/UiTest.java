@@ -31,8 +31,8 @@ public class UiTest {
 
         assertAll(
                 () -> assertEquals(
-                        "     Bola: Eh hello! I'm Bola." + separator
-                                + "     Got anything to settle today?" + separator,
+                        "     Bola: Eh hello! I'm Bola, your task kaki." + separator
+                                + "     What needs settling today?" + separator,
                         captureOutput(() -> ui.showGreeting(true, ""))),
                 () -> assertEquals(
                         "     Bola: Alamak, I couldn't save your tasks." + separator
@@ -53,8 +53,8 @@ public class UiTest {
 
         assertAll(
                 () -> assertEquals(
-                        "Bola: Eh hello! I'm Bola.\n"
-                                + "Got anything to settle today?\n"
+                        "Bola: Eh hello! I'm Bola, your task kaki.\n"
+                                + "What needs settling today?\n"
                                 + "Bola: Alamak, I couldn't load your saved tasks. Permission denied.\n"
                                 + "Don't worry—I won't overwrite your data file during this session.",
                         ui.captureResponse(() -> ui.showGreeting(false, "Permission denied."))),
@@ -81,9 +81,9 @@ public class UiTest {
 
         assertAll(
                 () -> assertTrue(availableOutput.contains(
-                        "Bola: Eh hello! I'm Bola." + System.lineSeparator()
-                                + "     Got anything to settle today?")),
-                () -> assertTrue(availableOutput.contains("Got anything to settle today?")),
+                        "Bola: Eh hello! I'm Bola, your task kaki." + System.lineSeparator()
+                                + "     What needs settling today?")),
+                () -> assertTrue(availableOutput.contains("What needs settling today?")),
                 () -> assertTrue(unavailableOutput.contains(
                         "Bola: Alamak, I couldn't load your saved tasks. Permission denied.")),
                 () -> assertTrue(unavailableOutput.contains(

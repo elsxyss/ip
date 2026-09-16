@@ -11,6 +11,28 @@
 
 #dialogContainer {
     -fx-background-color: transparent;
+    -fx-padding: 8 0 0 0;
+}
+
+.identity-bar {
+    -fx-background-color: linear-gradient(to right, #f7f3e9, #efe4ca);
+    -fx-border-color: transparent transparent #d17732 transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-padding: 10 16 10 16;
+    -fx-spacing: 2;
+}
+
+.identity-name {
+    -fx-font-family: "System";
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #345a43;
+}
+
+.identity-tagline {
+    -fx-font-family: "System";
+    -fx-font-size: 14px;
+    -fx-text-fill: #9a4f1b;
 }
 
 .input-bar {

@@ -26,7 +26,7 @@ public class Main extends Application {
         controller = loader.getController();
         controller.setBola(bola);
 
-        stage.setTitle("Bola");
+        stage.setTitle("Bola's Kopitiam");
         stage.setScene(new Scene(root));
         stage.setResizable(true);
         stage.setMinWidth(MINIMUM_WINDOW_WIDTH);
