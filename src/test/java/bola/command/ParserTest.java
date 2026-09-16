@@ -121,7 +121,13 @@ public class ParserTest {
                         "all must be used by itself for delete, can?"),
                 () -> assertParsingFails(() -> parser.parseTaskSelection(
                         "delete all", CommandType.DELETE, 0),
-                        "there are no tasks to delete leh."));
+                        "there are no tasks to delete leh."),
+                () -> assertParsingFails(() -> parser.parseTaskSelection(
+                        "mark 999999999999999999999", CommandType.MARK, 3),
+                        "please give me a valid task number to mark, can?"),
+                () -> assertParsingFails(() -> parser.parseTaskSelection(
+                        "delete 1-999999999999999999999", CommandType.DELETE, 3),
+                        "please give me valid task numbers or ranges to delete, can?"));
     }
 
     /**

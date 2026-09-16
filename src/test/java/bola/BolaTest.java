@@ -4,7 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -21,6 +26,37 @@ import bola.ui.UiResponse;
 public class BolaTest {
     @TempDir
     Path directory;
+
+    @Test
+    void run_multipleConsoleCommands_readsUntilByeAndPrintsDividers() {
+        InputStream originalInput = System.in;
+        PrintStream originalOutput = System.out;
+        ByteArrayOutputStream capturedBytes = new ByteArrayOutputStream();
+        String commands = "todo read book\nlist\nbye\nlist\n";
+
+        try (PrintStream capturedOutput = new PrintStream(
+                capturedBytes, true, StandardCharsets.UTF_8)) {
+            System.setIn(new ByteArrayInputStream(commands.getBytes(StandardCharsets.UTF_8)));
+            System.setOut(capturedOutput);
+            Bola bola = new Bola(directory.resolve("console-bola.txt").toString());
+
+            bola.run();
+
+            assertTrue(bola.isExit());
+        } finally {
+            System.setIn(originalInput);
+            System.setOut(originalOutput);
+        }
+
+        String output = capturedBytes.toString(StandardCharsets.UTF_8);
+        assertTrue(output.contains("Bola: Eh hello! I'm Bola, your task kaki."));
+        assertTrue(output.contains("[To-do][ ] read book"));
+        assertTrue(output.contains("Bola: Your tasks all here:"));
+        assertTrue(output.contains("Bola: All settled? Steady lah. See you again! 👋"));
+        assertEquals(3, output.lines()
+                .filter(line -> line.equals("    ____________________________________________________________"))
+                .count());
+    }
 
     @Test
     void getResponse_taskLifecycle_returnsPlainTextAndPersistsChanges() {

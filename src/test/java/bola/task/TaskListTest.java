@@ -56,12 +56,17 @@ public class TaskListTest {
      */
     @Test
     void taskDisplay_mixedTypes_usesDescriptiveTypeNamesAndDetails() {
+        Task genericTask = new Task("generic task");
         Todo todo = new Todo("read book");
         Deadline deadline = new Deadline("submit report", "2026-09-20");
         Event event = new Event("consultation", "2026-09-21 1400", "2026-09-21 1500");
         deadline.markAsDone();
 
         assertAll(
+                () -> assertEquals("[Task][ ] generic task", genericTask.toString()),
+                () -> assertEquals("T | 0 | generic task", genericTask.toDataString()),
+                () -> assertEquals("Task", genericTask.getTypeName()),
+                () -> assertEquals("generic task", genericTask.getDisplayDetails()),
                 () -> assertEquals("[To-do][ ] read book", todo.toString()),
                 () -> assertEquals("[Deadline][X] submit report (By: Sep 20 2026)",
                         deadline.toString()),
