@@ -75,7 +75,17 @@ Deleting multiple tasks requires a `Yes` or `No` confirmation. Every operation u
 `all` also requires confirmation. While Bola is waiting, other commands are treated as
 invalid confirmation answers. Enter `help` to see the complete command summary.
 
-Run `./gradlew check jacocoTestReport` for JUnit tests, Checkstyle, and the 50% line-coverage gate.
+Run `./gradlew check jacocoTestReport` for JUnit tests, Checkstyle, and the 90% line-coverage gate.
+
+## Acknowledgements
+
+- This project started from the [SE-EDU iP starter repository](https://github.com/NUS-CS2103-AY2627-S1/ip).
+- The JavaFX application structure was adapted from the
+  [SE-EDU JavaFX tutorial](https://se-education.org/guides/tutorials/javaFxPart1.html).
+- Codex was used as an AI coding collaborator for the Week 6 `A-BetterGui`, `A-Personality`,
+  `A-MoreErrorHandling`, and `A-MoreTesting` increments.
+- The kopitiam background and the Bola/user avatar artwork were generated with OpenAI's image
+  generation tool. The corresponding prompts are retained under `output/`.
 
 ## Building and running the JAR file
 
