@@ -1,5 +1,6 @@
 package bola;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -13,10 +14,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import bola.ai.AiException;
 import bola.ui.ResponseType;
 import bola.ui.UiResponse;
 
@@ -184,10 +187,43 @@ public class BolaTest {
 
         assertTrue(response.startsWith("Bola: Can! Here are the commands:"));
         assertTrue(response.contains("    delete <selection>"));
+        assertTrue(response.contains("    @ai <question>"));
         assertTrue(response.contains("Example: delete 1, 3-5 8"));
         assertFalse(Files.exists(file));
         assertEquals("Bola: Aiyo, I don't understand that command leh.",
                 bola.getResponse("help delete"));
+    }
+
+    @Test
+    void getResponse_aiHelp_handlesConfiguredMissingAndFailedServices() {
+        String file = directory.resolve("bola.txt").toString();
+        Bola configuredBola = new Bola(file,
+                Optional.of(question -> "Use deadline DESCRIPTION /by DATE."));
+        Bola missingKeyBola = new Bola(file, Optional.empty());
+        Bola failedServiceBola = new Bola(file, Optional.of(question -> {
+            throw new AiException("Service unavailable");
+        }));
+
+        assertAll(
+                () -> assertEquals("AI: Use deadline DESCRIPTION /by DATE.",
+                        configuredBola.getResponse("@ai how do I add a deadline?")),
+                () -> assertEquals("Bola: Aiyo, what would you like to ask about Bola?",
+                        configuredBola.getResponse("@ai")),
+                () -> assertEquals("AI: AI help isn't set up yet.\n"
+                                + "1. Create a Groq API key: https://console.groq.com/keys\n"
+                                + "2. Set it before starting Bola:\n"
+                                + "   macOS/Linux: export LLM_API_KEY=\"your_key\"\n"
+                                + "   Windows PowerShell: $env:LLM_API_KEY=\"your_key\"\n"
+                                + "3. Restart Bola, then try @ai again.\n"
+                                + "Keep the key private and never commit it to Git.",
+                        missingKeyBola.getResponse("@ai can you help?")),
+                () -> assertEquals(ResponseType.WARNING,
+                        missingKeyBola.getGuiResponse("@ai can you help?").type()),
+                () -> assertEquals("AI: Sorry, I couldn't reach the AI service just now.\n"
+                                + "Please try again later; Bola's other commands still work.",
+                        failedServiceBola.getResponse("@ai can you help?")),
+                () -> assertEquals("Bola: Bo lah! Your task list is empty. 😌",
+                        failedServiceBola.getResponse("list")));
     }
 
     @Test

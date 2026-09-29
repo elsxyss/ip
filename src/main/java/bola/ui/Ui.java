@@ -107,12 +107,45 @@ public class Ui {
                 RESPONSE_INDENT + "    mark <selection>",
                 RESPONSE_INDENT + "    unmark <selection>",
                 RESPONSE_INDENT + "    delete <selection>",
+                RESPONSE_INDENT + "    @ai <question>",
                 RESPONSE_INDENT + "    help",
                 RESPONSE_INDENT + "    bye",
                 RESPONSE_INDENT + "Selection can use task numbers, inclusive ranges, or all.",
                 RESPONSE_INDENT + "Example: delete 1, 3-5 8",
                 RESPONSE_INDENT
                         + "Dates use yyyy-MM-dd, or d/M/yyyy HHmm when including a time.");
+    }
+
+    /**
+     * Shows an answer returned by the AI help service.
+     *
+     * @param answer AI-generated answer.
+     */
+    public void showAiResponse(String answer) {
+        showLine(RESPONSE_INDENT + "AI: " + answer);
+    }
+
+    /**
+     * Explains how to enable AI help when no API key is configured.
+     */
+    public void showAiUnavailable() {
+        markResponseAs(ResponseType.WARNING);
+        showLines(RESPONSE_INDENT + "AI: AI help isn't set up yet.",
+                RESPONSE_INDENT + "1. Create a Groq API key: https://console.groq.com/keys",
+                RESPONSE_INDENT + "2. Set it before starting Bola:",
+                RESPONSE_INDENT + "   macOS/Linux: export LLM_API_KEY=\"your_key\"",
+                RESPONSE_INDENT + "   Windows PowerShell: $env:LLM_API_KEY=\"your_key\"",
+                RESPONSE_INDENT + "3. Restart Bola, then try @ai again.",
+                RESPONSE_INDENT + "Keep the key private and never commit it to Git.");
+    }
+
+    /**
+     * Reports a temporary remote AI service failure without affecting other commands.
+     */
+    public void showAiServiceError() {
+        markResponseAs(ResponseType.WARNING);
+        showLines(RESPONSE_INDENT + "AI: Sorry, I couldn't reach the AI service just now.",
+                RESPONSE_INDENT + "Please try again later; Bola's other commands still work.");
     }
 
     /**

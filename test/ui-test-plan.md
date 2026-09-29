@@ -365,6 +365,7 @@ and atomic cancellation for explicit mass operations.
             mark <selection>
             unmark <selection>
             delete <selection>
+            @ai <question>
             help
             bye
         Selection can use task numbers, inclusive ranges, or all.
@@ -507,6 +508,46 @@ forward in time are rejected without changing the task list.
    ```
 
 8. For `bye`:
+
+   ```text
+        Bola: All settled? Steady lah. See you again! 👋
+   ================================================================
+   ```
+
+## TC-009: Keep Bola usable without an AI API key
+
+**Aim:** Verify `@ai` explains how to configure a missing API key and that ordinary commands
+remain usable afterward.
+
+**Environment precondition:** Launch Bola with `LLM_API_KEY` unset.
+
+**Inputs:**
+
+1. `@ai how do I add a new deadline task?`
+2. `list`
+3. `bye`
+
+**Expected outputs:**
+
+1. For `@ai how do I add a new deadline task?`:
+
+   ```text
+        AI: AI help isn't set up yet.
+        1. Create a Groq API key: https://console.groq.com/keys
+        2. Set it before starting Bola:
+           macOS/Linux: export LLM_API_KEY="your_key"
+           Windows PowerShell: $env:LLM_API_KEY="your_key"
+        3. Restart Bola, then try @ai again.
+        Keep the key private and never commit it to Git.
+   ```
+
+2. For `list`:
+
+   ```text
+        Bola: Bo lah! Your task list is empty. 😌
+   ```
+
+3. For `bye`:
 
    ```text
         Bola: All settled? Steady lah. See you again! 👋

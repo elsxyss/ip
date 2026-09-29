@@ -9,6 +9,7 @@ import java.util.Optional;
 public enum CommandType {
     BYE("bye", false),
     HELP("help", false),
+    AI("@ai", true),
     LIST("list", false),
     FIND("find", true),
     UPCOMING("upcoming", true),

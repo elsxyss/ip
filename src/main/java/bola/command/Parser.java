@@ -41,6 +41,21 @@ public class Parser {
     }
 
     /**
+     * Extracts the question supplied to the AI help command.
+     *
+     * @param input complete user input.
+     * @return non-empty question for the AI assistant.
+     * @throws BolaException if no question was supplied.
+     */
+    public String parseAiQuestion(String input) throws BolaException {
+        String question = input.substring(CommandType.AI.getKeyword().length()).strip();
+        if (question.isEmpty()) {
+            throw new BolaException("what would you like to ask about Bola?");
+        }
+        return question;
+    }
+
+    /**
      * Extracts and validates all task numbers in a task mutation command.
      *
      * <p>Numbers are returned as distinct zero-based indexes in their original list order.</p>

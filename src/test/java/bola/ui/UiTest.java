@@ -286,6 +286,29 @@ public class UiTest {
     }
 
     /**
+     * Checks AI answers and availability warnings retain their distinct labels and types.
+     */
+    @Test
+    void aiResponses_successAndFailure_showAiIdentityAndWarnings() {
+        Ui ui = new Ui();
+
+        UiResponse answer = ui.captureUiResponse(
+                () -> ui.showAiResponse("Use deadline DESCRIPTION /by DATE."));
+        UiResponse unavailable = ui.captureUiResponse(ui::showAiUnavailable);
+        UiResponse failed = ui.captureUiResponse(ui::showAiServiceError);
+
+        assertAll(
+                () -> assertEquals("AI: Use deadline DESCRIPTION /by DATE.", answer.text()),
+                () -> assertEquals(ResponseType.NORMAL, answer.type()),
+                () -> assertTrue(unavailable.text().contains("LLM_API_KEY")),
+                () -> assertTrue(unavailable.text().contains("https://console.groq.com/keys")),
+                () -> assertTrue(unavailable.text().contains("never commit it to Git")),
+                () -> assertEquals(ResponseType.WARNING, unavailable.type()),
+                () -> assertTrue(failed.text().contains("other commands still work")),
+                () -> assertEquals(ResponseType.WARNING, failed.type()));
+    }
+
+    /**
      * Captures console output produced by one UI operation.
      *
      * @param operation UI operation to invoke.
