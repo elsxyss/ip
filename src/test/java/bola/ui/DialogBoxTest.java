@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -93,6 +94,50 @@ public class DialogBoxTest {
             double firstCheckboxPosition = checkBoxes.getFirst().getLayoutX();
             assertTrue(checkBoxes.stream()
                     .allMatch(checkBox -> checkBox.getLayoutX() == firstCheckboxPosition));
+        });
+    }
+
+    @Test
+    void taskList_resize_wrapsRowsAndFooterInsideBubble() throws Exception {
+        FxTestSupport.run(() -> {
+            UiResponse response = new UiResponse(
+                    "Bola: Your tasks all here:\nTask row\nNow got 1 task in your list.",
+                    ResponseType.NORMAL, List.of(new TaskView(1, "Event",
+                            "tutorial (Sep 01 2026 2:00 PM – Sep 01 2026 4:00 PM)", false)));
+            DialogBox dialog = DialogBox.getBolaDialog(response, loadAvatar(false));
+            VBox root = new VBox(dialog);
+            new Scene(root, 800, 1000);
+            root.applyCss();
+            root.layout();
+            Label bubble = (Label) dialog.lookup(".chat-bubble");
+            root.layout();
+            CheckBox completion = (CheckBox) dialog.lookup(".task-checkbox");
+            double wideHeight = completion.getHeight();
+
+            for (double width : new double[] {380, 300, 800}) {
+                root.resize(width, 1000);
+                root.layout();
+                root.requestLayout();
+                root.layout();
+                double rightEdge = bubble.localToScene(bubble.getLayoutBounds()).getMaxX()
+                        - bubble.getInsets().getRight();
+                for (String selector : List.of(".task-checkbox", ".task-footer")) {
+                    Node node = dialog.lookup(selector);
+                    assertTrue(node.localToScene(node.getLayoutBounds()).getMaxX() <= rightEdge + 1,
+                            selector + " must stay within the bubble at width " + width);
+                }
+                assertTrue(bubble.getGraphic().getLayoutBounds().getHeight()
+                        <= bubble.getHeight() - bubble.getInsets().getTop() - bubble.getInsets().getBottom());
+                if (width < 800) {
+                    assertTrue(completion.getHeight() >= wideHeight);
+                    if (width == 300) {
+                        assertTrue(completion.getHeight() > wideHeight, "Narrow rows must wrap to more lines");
+                    }
+                } else {
+                    assertEquals(wideHeight, completion.getHeight(), 1);
+                    assertEquals(360, bubble.getWidth());
+                }
+            }
         });
     }
 

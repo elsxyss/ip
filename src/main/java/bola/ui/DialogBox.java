@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -146,6 +147,11 @@ public class DialogBox extends HBox {
         text.setGraphicTextGap(8);
         VBox taskList = new VBox(7);
         taskList.getStyleClass().add("task-list");
+        // Label graphics otherwise retain their preferred width when the bubble narrows.
+        taskList.maxWidthProperty().bind(Bindings.createDoubleBinding(
+                () -> Math.max(0, text.getWidth() - text.getInsets().getLeft()
+                        - text.getInsets().getRight()),
+                text.widthProperty(), text.insetsProperty()));
         for (TaskView taskView : response.taskViews()) {
             taskList.getChildren().add(createTaskRow(taskView, taskToggleHandler));
         }
@@ -163,6 +169,7 @@ public class DialogBox extends HBox {
         Label footer = new Label(footerText);
         footer.getStyleClass().add("task-footer");
         footer.setWrapText(true);
+        footer.setMinWidth(0);
         footer.setMaxWidth(MAXIMUM_TASK_CONTROL_WIDTH);
         return footer;
     }
@@ -179,6 +186,8 @@ public class DialogBox extends HBox {
         completion.getStyleClass().add("task-checkbox");
         completion.setSelected(taskView.isDone());
         completion.setWrapText(true);
+        // Let the row shrink below its text's preferred width so wrapping follows the bubble.
+        completion.setMinWidth(0);
         completion.setMaxWidth(MAXIMUM_TASK_CONTROL_WIDTH);
         HBox.setHgrow(completion, Priority.ALWAYS);
         taskControls.add(completion);

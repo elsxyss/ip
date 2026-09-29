@@ -60,6 +60,9 @@ to a fresh temporary directory, and run `java -jar bola.jar` there to protect re
    bottom toolbar, Settle must stay at the bottom right, the identity bar must span the window,
    and the chat area must fill the remaining space.
    Messages must rewrap to the viewport width without a horizontal scrollbar or overlapping controls.
+   In particular, list an event with a long date range, shrink from a wide window to the minimum
+   width, and widen it again. Task descriptions and count footers must remain inside the cream
+   bubble's padding, with all wrapped lines visible. Badges and avatars must retain their sizes.
    The window must not shrink below 400 pixels wide or 220 pixels high.
 6. Submit whitespace only. No dialog should be added.
 7. Submit `bye`. Check the farewell appears immediately and both input and Settle are disabled.

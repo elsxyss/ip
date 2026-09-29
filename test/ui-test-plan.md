@@ -10,6 +10,7 @@
   and `MainWindowTest`. Structured task badges and checkboxes in GUI responses are also covered
   there; they intentionally do not change the console output expected in this plan.
   For changes limited to GUI layout, run TC-001 as the console launch/exit smoke test.
+  Task-response wrapping on window resize is checked by `DialogBoxTest` and GUI plan step 5.
 - Isolation: Run each test case in a new temporary directory containing a copy of `build/libs/bola.jar`.
 - Default data precondition: No `data/bola.txt` file.
 - Comparison: Compare each command response exactly after converting CRLF to LF and removing ANSI colour codes. Ignore terminal input echo and the standard inter-response divider unless an expected block includes it. The outer divider printed by `bye` is part of that command's response.
