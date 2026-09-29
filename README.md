@@ -1,142 +1,154 @@
 # Bola
 
-This is a task-management chatbot built with Java 25.
+> Your friendly task kaki.
 
-## Setting up in Intellij
+Bola is a task-management chatbot built with Java 25 and JavaFX. It combines a conversational
+interface with practical task tracking, wrapped in a Singapore kopitiam-inspired personality.
 
-Prerequisites: JDK 25, update Intellij to the most recent version.
+![Bola's Kopitiam interface](docs/Ui.png)
 
-1. Open Intellij (if you are not in the welcome screen, click `File` > `Close Project` to close the existing project first)
-1. Open the project into Intellij as follows:
-   1. Click `Open`.
-   1. Select the project directory, and click `OK`.
-   1. If there are any further prompts, accept the defaults.
-1. Configure the project to use **JDK 25** (not other versions) as explained in [here](https://www.jetbrains.com/help/idea/sdk.html#set-up-jdk).<br>
-   In the same dialog, set the **Project language level** field to the `SDK default` option.
-1. Run `src/main/java/bola/Launcher.java` to open the GUI (or `Bola.main()` for the original console).
+## Highlights
 
-## FXML JavaFX GUI
+- Create to-dos, deadlines, and events with validated dates and times.
+- Find tasks by keyword or view dated tasks coming up soon.
+- Mark, unmark, or delete one task, several tasks, ranges, or the entire list.
+- Use either the JavaFX desktop interface or the original console interface.
+- Keep tasks between sessions through automatic local storage.
+- Ask the optional AI helper natural-language questions about Bola's commands.
 
-Run `./gradlew run` with Java 25. On macOS, use the JavaFX-bundled JDK:
-`sdk use java 25.0.3.fx-zulu`.
+## Quick start
 
-The GUI follows [SE-EDU's tutorial Part 4](https://se-education.org/guides/tutorials/javaFxPart4.html):
-FXML views define the chat window and dialogs, while Java controllers handle input and automatic scrolling.
-Type existing Bola commands and press Enter or click Settle. Blank input is ignored.
-The `list` command uses descriptive To-do, Deadline, and Event badges in the GUI.
-Each task has a checkbox that marks or unmarks it through the same persisted command logic;
-the typed `mark` and `unmark` commands remain available in both interfaces.
-The window can resize in both directions, following
-[tutorial Part 5](https://se-education.org/guides/tutorials/javaFxPart5.html).
-The chat area and input follow the window dimensions, while Settle stays at the bottom right
-inside a solid input toolbar. A cream-and-green identity bar presents Bola's Kopitiam and its
-"Your friendly task kaki" tagline. The window title, greeting, command prompt, and button use
-the same kopitiam-helper personality. User messages use compact sage bubbles, Bola replies use warm
-cream bubbles, and errors and storage warnings use distinct attention colors.
-The minimum window size is 400 by 220 pixels.
-The kopitiam chat background scales with the chat area, preserving its proportions and
-cropping centrally to fill the available space. It stays fixed behind scrolling messages,
-with a subtle translucent wash that keeps text readable. Message bubbles retain stable
-maximum widths when the window expands; Bola receives a wider cap for task lists, while user
-commands remain compact. Both avatars use the same compact display size.
-After `bye`, input is disabled and the farewell appears immediately. After three seconds,
-`[Closing in 5 seconds...]` appears as a separate message. After five more seconds
-(eight seconds after `bye`), the GUI closes automatically.
+### Requirements
 
-The layouts are in `src/main/resources/view/MainWindow.fxml` and `DialogBox.fxml`.
-Open these files in Scene Builder to edit the layout. Their controllers are
-`bola.ui.MainWindow` and `bola.ui.DialogBox`; `bola.Main` loads the window and connects the chatbot.
-`src/main/resources/styles/dialog.css` defines the speaker and response-type colors, typography,
-spacing, and speaker-specific corners.
+- Java 25
+- The latest `bola.jar` from the project's GitHub releases
 
-The user-provided kopitiam-buddy avatars are stored in `src/main/resources/images`:
-`DaBola.png` is the cheerful kopi cup for Bola, and `DaUser.png` is the smiling kaya toast for the user.
+Put the JAR in the folder where you want Bola to keep its data, then run:
 
-Use `./gradlew run --args='--cli'` or `java -jar bola.jar --cli` for console mode.
-Both interfaces use the same commands and storage file.
+```shell
+java -jar bola.jar
+```
+
+The graphical interface opens by default. For the console version, run:
+
+```shell
+java -jar bola.jar --cli
+```
+
+Bola stores tasks in `data/bola.txt`, relative to the folder from which it is launched.
+
+See the [Bola User Guide](docs/README.md) for complete command formats, examples, date syntax,
+mass operations, and troubleshooting.
+
+## Commands at a glance
+
+| Command | Purpose |
+| --- | --- |
+| `todo DESCRIPTION` | Add an undated task |
+| `deadline DESCRIPTION /by DATE` | Add a task with a deadline |
+| `event DESCRIPTION /from START /to END` | Add an event |
+| `list` | Show all tasks |
+| `find KEYWORD` | Find tasks by description |
+| `upcoming DAYS` | Show dated tasks coming up soon |
+| `mark SELECTION` | Mark tasks as complete |
+| `unmark SELECTION` | Mark tasks as incomplete |
+| `delete SELECTION` | Delete tasks |
+| `@ai QUESTION` | Ask the optional AI helper about Bola |
+| `help` | Show the built-in command reference |
+| `bye` | Exit Bola |
 
 ## Optional AI help
 
-Use `@ai <question>` to ask for natural-language help about Bola's commands. For example:
+The `@ai` command provides natural-language help about Bola's features without executing commands
+or changing tasks:
 
 ```text
 @ai how do I add a new deadline task?
 @ai is there a command to add priorities to tasks?
 ```
 
-AI help uses Groq's hosted `openai/gpt-oss-120b` model. It does not use your ChatGPT account
-or an OpenAI API key. Create a key from the [Groq API Keys page](https://console.groq.com/keys),
-then expose it to Bola as an environment variable named `LLM_API_KEY` before starting the
-application:
+AI help uses Groq's hosted `openai/gpt-oss-120b` model. It requires a Groq API key; it does not
+use a ChatGPT account or an OpenAI API key. Create a key on the
+[Groq API Keys page](https://console.groq.com/keys), then set it before starting Bola.
+
+macOS or Linux:
 
 ```shell
 export LLM_API_KEY="your_api_key_here"
 java -jar bola.jar
 ```
 
-On Windows PowerShell, set it for the current terminal with:
+Windows PowerShell:
 
 ```powershell
 $env:LLM_API_KEY="your_api_key_here"
 java -jar bola.jar
 ```
 
-Never save an API key in the repository. Restart IntelliJ IDEA after adding the environment
-variable, or add `LLM_API_KEY` to the run configuration. Questions entered with `@ai` are sent
-to Groq for processing. If the key is absent or the service is unreachable, Bola explains the
-problem and all non-AI commands continue to work normally.
+Never hard-code or commit an API key. Questions sent through `@ai` are processed by Groq, so do
+not include private or sensitive information. Bola remains fully usable without a key and when
+the remote service is unavailable.
 
-## Mass operations
+## Development
 
-`mark`, `unmark`, and `delete` accept one or more task numbers, inclusive ranges,
-or `all`. Separate items with spaces, commas, or both:
+Open the project in a recent version of IntelliJ IDEA and configure the project SDK and language
+level for Java 25. Run `src/main/java/bola/Launcher.java` to start the GUI, or use Gradle:
 
-```text
-mark 1, 3-5 8
-unmark 2 4-6
-delete 1, 3
-delete all
+```shell
+./gradlew run
 ```
 
-Task numbers refer to the list before the operation starts. Repeated and overlapping
-selections are processed once, while any invalid number or range rejects the entire
-command without changing tasks.
+On macOS, the project uses the JavaFX-enabled Zulu JDK available through SDKMAN:
 
-Deleting multiple tasks requires a `Yes` or `No` confirmation. Every operation using
-`all` also requires confirmation. While Bola is waiting, other commands are treated as
-invalid confirmation answers. Enter `help` to see the complete command summary.
+```shell
+sdk use java 25.0.3.fx-zulu
+```
 
-Run `./gradlew check jacocoTestReport` for JUnit tests, Checkstyle, and the 90% line-coverage gate.
+To run the console interface during development:
 
-## Acknowledgements
+```shell
+./gradlew run --args='--cli'
+```
 
-- This project started from the [SE-EDU iP starter repository](https://github.com/NUS-CS2103-AY2627-S1/ip).
-- The optional AI help feature follows the SE-EDU guide
-  [Adding AI Features to a Java App](https://se-education.org/guides/tutorials/addingAiToJavaApp.html)
-  and uses [LangChain4j](https://docs.langchain4j.dev/).
-- The JavaFX application structure was adapted from the
-  [SE-EDU JavaFX tutorial](https://se-education.org/guides/tutorials/javaFxPart1.html).
-- Codex was used as an AI coding collaborator for the Week 6 `A-BetterGui`, `A-Personality`,
-  `A-MoreErrorHandling`, and `A-MoreTesting` increments.
-- The kopitiam background and the Bola/user avatar artwork were generated with OpenAI's image
-  generation tool. The corresponding prompts are retained under `output/`.
+The interface uses FXML views with Java controllers and CSS styling. Its structure follows the
+[SE-EDU JavaFX tutorial](https://se-education.org/guides/tutorials/javaFxPart1.html), adapted for
+Bola's resizable chat layout, task controls, response states, and kopitiam theme.
 
-## Building and running the JAR file
+Keep Java source files under `src/main/java`; Gradle and the project tooling rely on this standard
+directory structure.
 
-Run the following command from the project root to create an executable fat JAR containing the application and its runtime dependencies:
+## Testing
+
+Run the complete automated checks with Java 25:
+
+```shell
+./gradlew check jacocoTestReport
+```
+
+This runs the JUnit suite, Checkstyle, and the 90% line-coverage gate. Console and GUI regression
+plans are kept under `test/`.
+
+## Building the JAR
+
+Create the executable fat JAR with:
 
 ```shell
 ./gradlew shadowJar
 ```
 
-On Windows, use `gradlew.bat shadowJar` instead. The generated file is located at `build/libs/bola.jar`.
+On Windows, use `gradlew.bat shadowJar`. The output is `build/libs/bola.jar`. Build artifacts
+should not be committed; publish the JAR through a GitHub release instead.
 
-To run the packaged application, copy `bola.jar` into the folder where you want Bola to store its data, open a command window in that folder, and run:
+## Acknowledgements
 
-```shell
-java -jar "bola.jar"
-```
-
-The application creates its `data/bola.txt` storage file relative to the current folder when a task is first saved. The generated JAR is a build artifact and should not be committed to Git; distribute it through a GitHub release instead.
-
-**Warning:** Keep the `src\main\java` folder as the root folder for Java files (i.e., don't rename those folders or move Java files to another folder outside of this folder path), as this is the default location some tools (e.g., Gradle) expect to find Java files.
+- Bola began with the [SE-EDU iP starter repository](https://github.com/NUS-CS2103-AY2627-S1/ip)
+  and draws on the SE-EDU JavaFX and
+  [AI integration](https://se-education.org/guides/tutorials/addingAiToJavaApp.html) guides.
+- [LangChain4j](https://docs.langchain4j.dev/) provides the Java integration used by the optional
+  AI helper.
+- I used OpenAI Codex throughout Bola's development as an AI coding collaborator. It
+  helped with brainstorming, implementation, debugging, test design, code review, UI refinement,
+  and documentation. I remained responsible for the project's direction, feature choices, final
+  design decisions, and for reviewing and testing the changes included here.
+- The kopitiam background and Bola/user avatars were created with OpenAI's image-generation tools.
+  The prompts and intermediate artwork are retained under `output/` for transparency.

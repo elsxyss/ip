@@ -286,7 +286,8 @@ automatically.
   and uses [LangChain4j](https://docs.langchain4j.dev/).
 - The JavaFX application structure was adapted from the
   [SE-EDU JavaFX tutorial](https://se-education.org/guides/tutorials/javaFxPart1.html).
-- Codex was used as an AI coding collaborator for the Week 6 `A-BetterGui`, `A-Personality`,
-  `A-MoreErrorHandling`, and `A-MoreTesting` increments.
+- OpenAI Codex was used throughout much of Bola's development as an AI coding collaborator for
+  brainstorming, implementation, debugging, testing, review, UI refinement, and documentation.
+  I remained responsible for the project's direction, final decisions, and verification.
 - The kopitiam background and the Bola/user avatar artwork were generated with OpenAI's image
   generation tool. The generation prompts are retained in the repository under `output/`.
