@@ -36,6 +36,8 @@ public class ParserTest {
         assertAll(
                 () -> assertEquals(CommandType.BYE, parser.parseCommandType("bye")),
                 () -> assertEquals(CommandType.HELP, parser.parseCommandType("help")),
+                () -> assertEquals(CommandType.AI,
+                        parser.parseCommandType("@ai how do I add a deadline?")),
                 () -> assertEquals(CommandType.LIST, parser.parseCommandType("list")),
                 () -> assertEquals(CommandType.FIND, parser.parseCommandType("find book")),
                 () -> assertEquals(CommandType.UPCOMING,
@@ -60,6 +62,21 @@ public class ParserTest {
                         "I don't understand that command leh."),
                 () -> assertParsingFails(() -> parser.parseCommandType(""),
                         "I don't understand that command leh."));
+    }
+
+    /**
+     * Checks that AI help requires a question and preserves its internal spacing.
+     */
+    @Test
+    void parseAiQuestion_presentOrMissingQuestion_returnsQuestionOrThrows()
+            throws BolaException {
+        assertAll(
+                () -> assertEquals("how   do I add a deadline?",
+                        parser.parseAiQuestion("@ai   how   do I add a deadline?  ")),
+                () -> assertParsingFails(() -> parser.parseAiQuestion("@ai"),
+                        "what would you like to ask about Bola?"),
+                () -> assertParsingFails(() -> parser.parseAiQuestion("@ai   "),
+                        "what would you like to ask about Bola?"));
     }
 
     /**

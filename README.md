@@ -55,6 +55,37 @@ The user-provided kopitiam-buddy avatars are stored in `src/main/resources/image
 Use `./gradlew run --args='--cli'` or `java -jar bola.jar --cli` for console mode.
 Both interfaces use the same commands and storage file.
 
+## Optional AI help
+
+Use `@ai <question>` to ask for natural-language help about Bola's commands. For example:
+
+```text
+@ai how do I add a new deadline task?
+@ai is there a command to add priorities to tasks?
+```
+
+AI help uses Groq's hosted `openai/gpt-oss-120b` model. It does not use your ChatGPT account
+or an OpenAI API key. Create a key from the [Groq API Keys page](https://console.groq.com/keys),
+then expose it to Bola as an environment variable named `LLM_API_KEY` before starting the
+application:
+
+```shell
+export LLM_API_KEY="your_api_key_here"
+java -jar bola.jar
+```
+
+On Windows PowerShell, set it for the current terminal with:
+
+```powershell
+$env:LLM_API_KEY="your_api_key_here"
+java -jar bola.jar
+```
+
+Never save an API key in the repository. Restart IntelliJ IDEA after adding the environment
+variable, or add `LLM_API_KEY` to the run configuration. Questions entered with `@ai` are sent
+to Groq for processing. If the key is absent or the service is unreachable, Bola explains the
+problem and all non-AI commands continue to work normally.
+
 ## Mass operations
 
 `mark`, `unmark`, and `delete` accept one or more task numbers, inclusive ranges,
@@ -80,6 +111,9 @@ Run `./gradlew check jacocoTestReport` for JUnit tests, Checkstyle, and the 90% 
 ## Acknowledgements
 
 - This project started from the [SE-EDU iP starter repository](https://github.com/NUS-CS2103-AY2627-S1/ip).
+- The optional AI help feature follows the SE-EDU guide
+  [Adding AI Features to a Java App](https://se-education.org/guides/tutorials/addingAiToJavaApp.html)
+  and uses [LangChain4j](https://docs.langchain4j.dev/).
 - The JavaFX application structure was adapted from the
   [SE-EDU JavaFX tutorial](https://se-education.org/guides/tutorials/javaFxPart1.html).
 - Codex was used as an AI coding collaborator for the Week 6 `A-BetterGui`, `A-Personality`,

@@ -4,7 +4,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
+import bola.ai.AiException;
+import bola.ai.AiService;
+import bola.ai.RemoteAiService;
 import bola.command.CommandType;
 import bola.command.Parser;
 import bola.command.TaskSelection;
@@ -23,6 +27,7 @@ public class Bola {
     private final TaskList tasks;
     private final Ui ui;
     private final Parser parser;
+    private final Optional<AiService> aiService;
     private final String loadingFailureReason;
 
     private boolean isStorageAvailable;
@@ -38,9 +43,20 @@ public class Bola {
      * @param filePath path of the data file.
      */
     public Bola(String filePath) {
+        this(filePath, RemoteAiService.fromEnvironment());
+    }
+
+    /**
+     * Creates Bola with an explicitly supplied optional AI service.
+     *
+     * @param filePath path of the data file.
+     * @param aiService service used for AI help, if configured.
+     */
+    Bola(String filePath, Optional<AiService> aiService) {
         storage = new Storage(Path.of(filePath));
         ui = new Ui();
         parser = new Parser();
+        this.aiService = aiService;
 
         TaskList loadedTasks = new TaskList();
         boolean canUseStorage = true;
@@ -142,7 +158,7 @@ public class Bola {
     private boolean executeCommand(String command, CommandType commandType) throws BolaException {
         return switch (commandType) {
             case BYE -> exit();
-            case HELP, LIST, FIND, UPCOMING -> executeReadOnlyCommand(command, commandType);
+            case HELP, AI, LIST, FIND, UPCOMING -> executeReadOnlyCommand(command, commandType);
             case MARK, UNMARK, DELETE -> handleTaskMutation(command, commandType);
             case TODO, DEADLINE, EVENT -> createAndAddTask(command, commandType);
             default -> throw new AssertionError("Every command type must be handled explicitly");
@@ -169,12 +185,30 @@ public class Bola {
             throws BolaException {
         switch (commandType) {
             case HELP -> ui.showHelp();
+            case AI -> askAiForHelp(command);
             case LIST -> ui.showTaskList(tasks.getTasks());
             case FIND -> showMatchingTasks(command);
             case UPCOMING -> showUpcomingTasks(command, commandType);
             default -> throw new AssertionError("Only read-only commands can be executed here");
         }
         return false;
+    }
+
+    /**
+     * Asks the configured AI service a read-only question about Bola.
+     */
+    private void askAiForHelp(String command) throws BolaException {
+        String question = parser.parseAiQuestion(command);
+        if (aiService.isEmpty()) {
+            ui.showAiUnavailable();
+            return;
+        }
+
+        try {
+            ui.showAiResponse(aiService.get().ask(question));
+        } catch (AiException exception) {
+            ui.showAiServiceError();
+        }
     }
 
     /**

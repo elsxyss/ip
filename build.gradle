@@ -18,6 +18,8 @@ repositories {
 dependencies {
     String javaFxVersion = '17.0.7'
 
+    implementation 'dev.langchain4j:langchain4j:1.10.0'
+    implementation 'dev.langchain4j:langchain4j-open-ai:1.10.0'
     implementation("org.openjfx:javafx-base:${javaFxVersion}:win")
     implementation("org.openjfx:javafx-base:${javaFxVersion}:mac")
     implementation("org.openjfx:javafx-base:${javaFxVersion}:linux")

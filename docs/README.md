@@ -13,6 +13,7 @@ graphical interface to add, view, find, update, and save to-dos, deadlines, and 
 - [Viewing and finding tasks](#viewing-and-finding-tasks)
 - [Updating tasks](#updating-tasks)
 - [Getting help](#getting-help)
+- [Asking AI for help](#asking-ai-for-help)
 - [Saving and recovering data](#saving-and-recovering-data)
 - [Exiting Bola](#exiting-bola)
 - [Command summary](#command-summary)
@@ -193,6 +194,49 @@ Enter `help` to display all supported commands, selection syntax, and date forma
 help
 ```
 
+## Asking AI for help
+
+The optional `@ai` command answers natural-language questions about Bola's features and command
+syntax. It provides help only: it does not execute commands or change tasks.
+
+**Format:** `@ai QUESTION`
+
+```text
+@ai how do I add a new deadline task?
+@ai is there a command to add priorities to tasks?
+```
+
+The second example should explain that Bola does not support priorities. AI answers can be
+incorrect, so check the [command summary](#command-summary) before acting on important advice.
+
+### Configuring AI help
+
+AI help uses Groq's hosted `openai/gpt-oss-120b` model. It does not use your ChatGPT account
+or an OpenAI API key. Create a key from the [Groq API Keys page](https://console.groq.com/keys),
+then set it as the `LLM_API_KEY` environment variable before starting Bola.
+
+On macOS or Linux:
+
+```shell
+export LLM_API_KEY="your_api_key_here"
+java -jar bola.jar
+```
+
+On Windows PowerShell:
+
+```powershell
+$env:LLM_API_KEY="your_api_key_here"
+java -jar bola.jar
+```
+
+If you run Bola from IntelliJ IDEA, restart the IDE after setting the environment variable or
+add `LLM_API_KEY` to the application's run configuration. Never paste the key into source code,
+documentation, or a committed configuration file.
+
+Questions entered with `@ai` are sent to Groq for processing. Do not include private or sensitive
+information. If no API key is configured, or the remote service cannot be reached, Bola shows a
+warning; task management and every other command remain available.
+
 ## Saving and recovering data
 
 Bola stores changes automatically in `data/bola.txt`, relative to the folder from which you
@@ -230,12 +274,16 @@ automatically.
 | Mark tasks complete | `mark SELECTION` | `mark 1, 3-5` |
 | Mark tasks incomplete | `unmark SELECTION` | `unmark 2` |
 | Delete tasks | `delete SELECTION` | `delete all` |
+| Ask AI about Bola | `@ai QUESTION` | `@ai how do I add a deadline?` |
 | Show command help | `help` | `help` |
 | Exit | `bye` | `bye` |
 
 ## Acknowledgements
 
 - This project started from the [SE-EDU iP starter repository](https://github.com/NUS-CS2103-AY2627-S1/ip).
+- The optional AI help feature follows the SE-EDU guide
+  [Adding AI Features to a Java App](https://se-education.org/guides/tutorials/addingAiToJavaApp.html)
+  and uses [LangChain4j](https://docs.langchain4j.dev/).
 - The JavaFX application structure was adapted from the
   [SE-EDU JavaFX tutorial](https://se-education.org/guides/tutorials/javaFxPart1.html).
 - Codex was used as an AI coding collaborator for the Week 6 `A-BetterGui`, `A-Personality`,
